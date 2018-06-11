@@ -1,0 +1,30 @@
+#!/bin/sh
+
+set -eu
+
+# Generate self-signed certificate
+if [ ! -f '/var/lib/knot-resolver/ssl/self.key' ]; then
+	printf '%s\n' 'Generating self-signed certificate...'
+	mkdir -p /var/lib/knot-resolver/ssl/
+	(cd /var/lib/knot-resolver/ssl/ \
+		&& openssl ecparam -genkey -name prime256v1 -out self.key \
+		&& openssl req -new -key self.key -out self.csr -subj '/CN=knot-resolver' \
+		&& openssl req -x509 -days 3650 -key self.key -in self.csr -out self.crt \
+		&& chown root:knot-resolver self.key \
+		&& chmod 640 self.key \
+	)
+fi
+
+# Initial blacklist zone download
+if [ ! -f '/var/lib/knot-resolver/blacklist.rpz' ]; then
+	printf '%s\n' 'Downloading blacklist zone...'
+	update-blacklist-rpz
+fi
+
+# Initial GeoIP database download
+if [ ! -f '/var/lib/knot-resolver/geoip.mmdb' ]; then
+	printf '%s\n' 'Downloading GeoIP database...'
+	update-geoip-database
+fi
+
+exec supervisord -c /etc/supervisord.conf

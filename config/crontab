@@ -1,0 +1,7 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# m h dom mon dow user command
+5 0 1 * * root /usr/bin/update-geoip-database >/proc/1/fd/1 2>&1
+6 0 * * * root /usr/bin/update-blacklist-rpz >/proc/1/fd/1 2>&1 && supervisorctl restart kresd
+#

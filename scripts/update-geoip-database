@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -eu
+
+GEOIP_DB_URL='https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz'
+GEOIP_DB='/var/lib/knot-resolver/geoip.mmdb'
+
+curl -fsSL "${GEOIP_DB_URL}" | gzip -d > "${GEOIP_DB}"
