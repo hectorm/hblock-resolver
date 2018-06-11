@@ -102,6 +102,6 @@ VOLUME /var/lib/knot-resolver/
 EXPOSE 53/tcp 53/udp 8053/tcp
 
 HEALTHCHECK --start-period=60s --interval=60s --timeout=3s --retries=3 \
-	CMD ["/bin/sh", "-c", '[ "$(curl -fs http://localhost:8053/health)" = OK ]']
+	CMD [ "$(curl -fs http://localhost:8053/health)" = OK ]
 
 CMD ["/usr/bin/docker-foreground-cmd"]
