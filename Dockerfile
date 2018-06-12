@@ -61,7 +61,7 @@ ENV RUN_PKGS=' \
 
 RUN apt-get update \
 	# Install dependencies
-	&& apt-get install -y ${BUILD_PKGS} ${RUN_PKGS} \
+	&& apt-get install -y --no-install-recommends ${BUILD_PKGS} ${RUN_PKGS} \
 	&& luarocks install cqueues \
 	&& luarocks install http \
 	&& luarocks install luasec \
