@@ -79,7 +79,8 @@ RUN apt-get update \
 		-j$(nproc) check install \
 	&& rm -f /etc/knot-resolver/root.hints /etc/knot-resolver/icann-ca.pem \
 	&& mkdir -p /var/lib/knot-resolver/ \
-	&& adduser --system --group --home /var/cache/knot-resolver/ knot-resolver \
+	&& groupadd -r -g 500 knot-resolver \
+	&& useradd -r -u 500 -g 500 -md /var/cache/knot-resolver/ knot-resolver \
 	&& chown -R root:knot-resolver /etc/knot-resolver/ /var/lib/knot-resolver/ \
 	# Install hBlock
 	&& git clone --recursive --branch "${HBLOCK_BRANCH}" "${HBLOCK_REMOTE}" /tmp/hblock/ \
