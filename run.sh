@@ -33,8 +33,8 @@ exec docker run --detach \
 	--memory 256mb \
 	--restart on-failure:3 \
 	--log-opt max-size=32m \
-	--publish '153:53/tcp' \
-	--publish '153:53/udp' \
+	--publish '53:53/tcp' \
+	--publish '53:53/udp' \
 	--publish '127.0.0.1:8053:8053/tcp' --publish '[::1]:8053:8053/tcp' \
 	--mount type=volume,src='hblock-resolver-data',dst='/var/lib/knot-resolver/' \
 	"${DOCKER_IMAGE}" "$@"
