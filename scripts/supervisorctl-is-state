@@ -1,0 +1,3 @@
+#!/bin/sh
+
+[ "$(supervisorctl status "${1:?}" | awk '{print $2}')" = "${2:?}" ]

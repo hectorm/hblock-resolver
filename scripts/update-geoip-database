@@ -6,3 +6,8 @@ GEOIP_DB_URL='https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.
 GEOIP_DB='/var/lib/knot-resolver/geoip.mmdb'
 
 curl -fsSL "${GEOIP_DB_URL}" | gzip -d > "${GEOIP_DB}"
+
+# Restart Knot Resolver if it is running
+if supervisorctl-is-state kresd RUNNING; then
+	supervisorctl restart kresd
+fi

@@ -20,3 +20,8 @@ sed -n \
 	-e '/^#.*<blocklist>/,/^#.*<\/blocklist>/!d;/^\s*#.*$/d' \
 	-e 's/^\(.\{1,\}\)\s\{1,\}\(.\{1,\}\)\s*/\2 CNAME ./p' \
 	"${HOSTS}" >> "${BLACKLIST}"
+
+# Restart Knot Resolver if it is running
+if supervisorctl-is-state kresd RUNNING; then
+	supervisorctl restart kresd
+fi
