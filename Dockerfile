@@ -39,6 +39,8 @@ ENV RUN_PKGS=' \
 	curl \
 	dns-root-data \
 	gzip \
+	knot-dnsutils \
+	knot-host \
 	libedit2 \
 	libfstrm0 \
 	libgcc1 \
