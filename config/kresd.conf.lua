@@ -1,8 +1,18 @@
 -- Refer to manual: https://knot-resolver.readthedocs.io/en/latest/daemon.html#configuration
 
--- Listen on all interfaces
-net.listen({'0.0.0.0', '::'}, 53)
-net.listen({'0.0.0.0', '::'}, 853, {tls=true})
+nicname = env.KRESD_NIC
+if nicname == nil or nicname == '' then
+	io.stdout:write('Listening on all interfaces\n')
+	addresses = {'0.0.0.0', '::'}
+elseif net[nicname] ~= nil then
+	io.stdout:write('Listening on ' .. nicname .. ' interface\n')
+	addresses = net[nicname]
+else
+	io.stderr:write('Cannot find ' .. nicname .. ' interface\n')
+	os.exit(1)
+end
+net.listen(addresses, 53)
+net.listen(addresses, 853, {tls=true})
 
 -- Drop root privileges
 user('knot-resolver', 'knot-resolver')
