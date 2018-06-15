@@ -6,7 +6,7 @@ MKFILE_DIR := $(shell dirname -- '$(MKFILE_ABSPATH)')
 
 .PHONY: all \
 	build build-image \
-	clean clean-image clean-dist
+	clean clean-image clean-container clean-volume clean-dist
 
 all: build
 
@@ -24,10 +24,17 @@ dist/:
 dist/hblock-resolver.tgz: dist/ build-image
 	docker save hblock-resolver | gzip > dist/hblock-resolver.tgz
 
-clean: clean-image clean-dist
+clean: clean-image clean-volume clean-dist
 
-clean-image:
+clean-image: clean-container
 	-docker rmi hblock-resolver
+
+clean-container:
+	-docker stop hblock-resolver
+	-docker rm hblock-resolver
+
+clean-volume:
+	-docker volume rm hblock-resolver-data
 
 clean-dist:
 	rm -f dist/hblock-resolver.tgz
