@@ -9,6 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV BUILD_PKGS=' \
 	autoconf \
 	automake \
+	dpkg-dev \
 	g++ \
 	gcc \
 	git \
@@ -60,15 +61,21 @@ ENV RUN_PKGS=' \
 	luajit \
 	supervisor \
 '
+ENV LUAROCKS_PKGS=' \
+	cqueues \
+	http \
+	luasec \
+	luasocket \
+	mmdblua \
+'
 
 RUN apt-get update \
 	# Install dependencies
 	&& apt-get install -y --no-install-recommends ${BUILD_PKGS} ${RUN_PKGS} \
-	&& luarocks install cqueues \
-	&& luarocks install http \
-	&& luarocks install luasec \
-	&& luarocks install luasocket \
-	&& luarocks install mmdblua \
+	&& HOST_MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" \
+	&& printf '%s\n' ${LUAROCKS_PKGS} | xargs -n1 -iPKG luarocks install PKG \
+		OPENSSL_LIBDIR="/usr/lib/${HOST_MULTIARCH}" \
+		CRYPTO_LIBDIR="/usr/lib/${HOST_MULTIARCH}" \
 	# Install Knot Resolver
 	&& git clone --recursive --branch "${KNOT_RESOLVER_BRANCH}" "${KNOT_RESOLVER_REMOTE}" /tmp/knot-resolver/ \
 	&& make -C /tmp/knot-resolver/ \

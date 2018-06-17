@@ -15,19 +15,20 @@ build: dist/hblock-resolver.tgz
 build-image:
 	docker build \
 		--rm \
-		--tag hblock-resolver \
+		--tag hblock-resolver:latest \
+		--file Dockerfile \
 		'$(MKFILE_DIR)'
 
 dist/:
 	mkdir -p dist
 
 dist/hblock-resolver.tgz: dist/ build-image
-	docker save hblock-resolver | gzip > dist/hblock-resolver.tgz
+	docker save hblock-resolver:latest | gzip > dist/hblock-resolver.tgz
 
 clean: clean-image clean-volume clean-dist
 
 clean-image: clean-container
-	-docker rmi hblock-resolver
+	-docker rmi hblock-resolver:latest
 
 clean-container:
 	-docker stop hblock-resolver

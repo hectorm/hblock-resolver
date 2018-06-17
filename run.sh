@@ -3,7 +3,7 @@
 set -eu
 export LC_ALL=C
 
-DOCKER_IMAGE=hblock-resolver
+DOCKER_IMAGE=hblock-resolver:latest
 DOCKER_CONTAINER=hblock-resolver
 
 imageExists() { [ -n "$(docker images -q "$1")" ]; }
