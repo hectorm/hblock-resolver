@@ -1,2 +1,2 @@
 /dist/
-/.Dockerfile.*
+/.qemu-dockerfile-*
