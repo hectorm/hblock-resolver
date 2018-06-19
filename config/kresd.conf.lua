@@ -19,11 +19,11 @@ user('knot-resolver', 'knot-resolver')
 
 -- Load useful modules
 modules = {
-	'hints > iterate', -- Load hints after iterator
-	'policy', -- Block queries to local zones/bad sites
+	'policy', -- Load policy module
+	'hints', -- Load hints module
 	'stats', -- Track internal statistics
 	'predict', -- Prefetch expiring/frequent records
-	-- Load HTTP module with defaults
+	-- Load HTTP module
 	http = {
 		host = '::',
 		port = 8053,
@@ -39,8 +39,18 @@ modules = {
 -- Smaller cache size
 cache.size = 10 * MB
 
+-- Add rules for special-use and locally-served domains
+-- https://www.iana.org/assignments/special-use-domain-names/
+-- https://www.iana.org/assignments/locally-served-dns-zones/
+for _, rule in ipairs(policy.special_names) do
+	policy.add(rule.cb)
+end
+
 -- Add blacklist zone
-policy.add(policy.rpz(policy.DENY, '/var/lib/knot-resolver/blacklist.rpz'))
+policy.add(policy.rpz(
+	policy.DENY_MSG('Blacklisted domain'),
+	'/var/lib/knot-resolver/blacklist.rpz'
+))
 
 -- DNS over TLS forwarding
 tls_ca_bundle = '/etc/ssl/certs/ca-certificates.crt'
