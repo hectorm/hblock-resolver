@@ -3,23 +3,20 @@
 set -eu
 
 BLACKLIST='/var/lib/knot-resolver/blacklist.rpz'
-HOSTS=$(mktemp -u)
-
-# Generate temporal hosts file
-hblock --quiet --output "${HOSTS}"
-rmhosts() { rm -f "${HOSTS}"; }
-trap rmhosts EXIT
 
 # Generate blacklist zone
-cat > "${BLACKLIST}" <<-'EOF'
-	$TTL 2h
-	@ IN SOA localhost. root.localhost. (1 6h 1h 1w 2h)
-	  IN NS  localhost.
-EOF
-sed -n \
-	-e '/^#.*<blocklist>/,/^#.*<\/blocklist>/!d;/^\s*#.*$/d' \
-	-e 's/^\(.\{1,\}\)\s\{1,\}\(.\{1,\}\)\s*/\2 CNAME ./p' \
-	"${HOSTS}" >> "${BLACKLIST}"
+hblock \
+		--quiet \
+		--output "${BLACKLIST}" \
+		--header "$(cat <<-'EOF'
+			$TTL 2h
+			@ IN SOA localhost. root.localhost. (1 6h 1h 1w 2h)
+			  IN NS  localhost.
+		EOF
+		)" \
+		--footer '' \
+		--template '\1 CNAME .' \
+		--comment ';'
 
 # Restart Knot Resolver if it is running
 if supervisorctl-is-state kresd RUNNING; then
