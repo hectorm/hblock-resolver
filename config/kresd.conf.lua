@@ -12,7 +12,7 @@ else
 	os.exit(1)
 end
 net.listen(addresses, 53)
-net.listen(addresses, 853, {tls=true})
+net.listen(addresses, 853, {tls = true})
 
 -- Drop root privileges
 user('knot-resolver', 'knot-resolver')
@@ -29,12 +29,12 @@ modules = {
 		port = 8053,
 		key = '/var/lib/knot-resolver/ssl/self.key',
 		cert = '/var/lib/knot-resolver/ssl/self.crt',
-		geoip = '/var/lib/knot-resolver/geoip.mmdb',
-		endpoints = {
-			['/health'] = {'text/plain', function () return 'OK' end}
-		}
+		geoip = '/var/lib/knot-resolver/geoip.mmdb'
 	}
 }
+
+-- Add health check HTTP endpoint
+http.endpoints['/health'] = {'text/plain', function () return 'OK' end}
 
 -- Smaller cache size
 cache.size = 10 * MB
