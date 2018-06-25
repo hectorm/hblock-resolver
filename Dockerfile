@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 
 # Environment
-ENV HBLOCK_BRANCH=v1.6.0
+ENV HBLOCK_BRANCH=v1.6.2
 ENV HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 ENV KNOT_RESOLVER_BRANCH=master
 ENV KNOT_RESOLVER_REMOTE=https://github.com/cz-nic/knot-resolver.git
