@@ -5,6 +5,7 @@ export LC_ALL=C
 
 DOCKER_IMAGE=hblock-resolver:latest
 DOCKER_CONTAINER=hblock-resolver
+DOCKER_VOLUME="${DOCKER_CONTAINER}"-data
 
 imageExists() { [ -n "$(docker images -q "$1")" ]; }
 containerExists() { docker ps -aqf name="$1" --format '{{.Names}}' | grep -qw "$1"; }
@@ -28,7 +29,7 @@ fi
 printf -- '%s\n' "Creating \"${DOCKER_CONTAINER}\" container..."
 exec docker run --detach \
 	--name "${DOCKER_CONTAINER}" \
-	--hostname 'hblock-resolver' \
+	--hostname "${DOCKER_CONTAINER}" \
 	--cpus 0.5 \
 	--memory 256mb \
 	--restart on-failure:3 \
@@ -36,5 +37,5 @@ exec docker run --detach \
 	--publish '53:53/tcp' \
 	--publish '53:53/udp' \
 	--publish '127.0.0.1:8053:8053/tcp' --publish '[::1]:8053:8053/tcp' \
-	--mount type=volume,src='hblock-resolver-data',dst='/var/lib/knot-resolver/' \
+	--mount type=volume,src="${DOCKER_VOLUME}",dst='/var/lib/knot-resolver/' \
 	"${DOCKER_IMAGE}" "$@"

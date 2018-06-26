@@ -1,10 +1,10 @@
 FROM ubuntu:18.04
 
 # Environment
-ENV HBLOCK_BRANCH=v1.6.2
-ENV HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
-ENV KNOT_RESOLVER_BRANCH=master
-ENV KNOT_RESOLVER_REMOTE=https://github.com/cz-nic/knot-resolver.git
+ARG HBLOCK_BRANCH=master
+ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
+ARG KNOT_RESOLVER_BRANCH=master
+ARG KNOT_RESOLVER_REMOTE=https://github.com/cz-nic/knot-resolver.git
 ENV DEBIAN_FRONTEND=noninteractive
 ENV BUILD_PKGS=' \
 	autoconf \
