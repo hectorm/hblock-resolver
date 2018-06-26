@@ -8,12 +8,13 @@ HBLOCK_BRANCH := v1.6.2
 
 DIST_DIR := $(MKFILE_DIR)/dist
 
+DOCKER_ARCH := arm32v7
 DOCKER_IMAGE := hblock-resolver
-DOCKER_IMAGE_TARBALL := $(DIST_DIR)/$(DOCKER_IMAGE).tgz
+DOCKER_IMAGE_TARBALL := $(DIST_DIR)/$(DOCKER_IMAGE).$(DOCKER_ARCH).tgz
 DOCKER_CONTAINER := $(DOCKER_IMAGE)
 DOCKERFILE := $(MKFILE_DIR)/Dockerfile
 
-QEMU_DOCKERFILE := $(MKFILE_DIR)/.qemu-dockerfile-arm32v7
+QEMU_DOCKERFILE := $(MKFILE_DIR)/.qemu-dockerfile-$(DOCKER_ARCH)
 define QEMU_DOCKERFILE_HEADER
 FROM ubuntu:18.04 AS qemu-user-static
 RUN apt-get update && apt-get install -y --no-install-recommends qemu-user-static
@@ -35,8 +36,8 @@ build-image:
 	printf -- '%s\n' "$$QEMU_DOCKERFILE_HEADER" > '$(QEMU_DOCKERFILE)'
 	awk -- 'f;/^FROM .+$$/{f=1}' '$(DOCKERFILE)' >> '$(QEMU_DOCKERFILE)'
 	docker build \
-		--tag '$(DOCKER_IMAGE):latest' \
-		--tag '$(DOCKER_IMAGE):$(HBLOCK_BRANCH)' \
+		--tag '$(DOCKER_IMAGE):$(DOCKER_ARCH)' \
+		--tag '$(DOCKER_IMAGE):$(HBLOCK_BRANCH)-$(DOCKER_ARCH)' \
 		--build-arg HBLOCK_BRANCH='$(HBLOCK_BRANCH)' \
 		--file '$(QEMU_DOCKERFILE)' \
 		-- '$(MKFILE_DIR)'
