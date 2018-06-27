@@ -19,11 +19,11 @@ user('knot-resolver', 'knot-resolver')
 
 -- Load useful modules
 modules = {
-	'policy', -- Load policy module
-	'hints', -- Load hints module
-	'stats', -- Track internal statistics
-	'predict', -- Prefetch expiring/frequent records
-	-- Load HTTP module
+	'rebinding < iterate',
+	'policy',
+	'hints',
+	'stats',
+	'predict',
 	http = {
 		host = '::',
 		port = 8053,
