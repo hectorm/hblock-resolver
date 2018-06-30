@@ -39,6 +39,7 @@ build-image:
 		--tag '$(DOCKER_IMAGE):$(DOCKER_ARCH)' \
 		--tag '$(DOCKER_IMAGE):$(HBLOCK_BRANCH)-$(DOCKER_ARCH)' \
 		--build-arg HBLOCK_BRANCH='$(HBLOCK_BRANCH)' \
+		--build-arg KNOT_RESOLVER_SKIP_INSTALL_CHECK=true \
 		--file '$(QEMU_DOCKERFILE)' \
 		-- '$(MKFILE_DIR)'
 	rm -f -- '$(QEMU_DOCKERFILE)'

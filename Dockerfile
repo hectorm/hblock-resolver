@@ -4,11 +4,13 @@ FROM ubuntu:18.04
 ARG HBLOCK_BRANCH=master
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 ARG KNOT_RESOLVER_BRANCH=master
-ARG KNOT_RESOLVER_REMOTE=https://github.com/cz-nic/knot-resolver.git
+ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
+ARG KNOT_RESOLVER_SKIP_INSTALL_CHECK=false
 ENV DEBIAN_FRONTEND=noninteractive
 ENV BUILD_PKGS=' \
 	autoconf \
 	automake \
+	cmake \
 	dpkg-dev \
 	g++ \
 	gcc \
@@ -32,6 +34,12 @@ ENV BUILD_PKGS=' \
 	make \
 	pkg-config \
 	protobuf-c-compiler \
+	python3-augeas \
+	python3-dnspython \
+	python3-jinja2 \
+	python3-pytest \
+	python3-pytest-xdist \
+	python3-yaml \
 	xxd \
 '
 ENV RUN_PKGS=' \
@@ -78,23 +86,30 @@ RUN apt-get update \
 		CRYPTO_LIBDIR="/usr/lib/${HOST_MULTIARCH}" \
 	# Install Knot Resolver
 	&& git clone --recursive --branch "${KNOT_RESOLVER_BRANCH}" "${KNOT_RESOLVER_REMOTE}" /tmp/knot-resolver/ \
-	&& make -C /tmp/knot-resolver/ \
-		CFLAGS='-O2 -fstack-protector' \
-		PREFIX=/usr/ \
-		MODULEDIR=/usr/lib/knot-resolver/ \
-		ETCDIR=/etc/knot-resolver/ \
-		ROOTHINTS=/usr/share/dns/root.hints \
-		KEYFILE_DEFAULT=/usr/share/dns/root.key \
-		-j$(nproc) check install \
-	&& rm -f /etc/knot-resolver/root.hints /etc/knot-resolver/icann-ca.pem \
-	&& mkdir -p /var/lib/knot-resolver/ \
+	&& (cd /tmp/knot-resolver/ \
+		&& make \
+			CFLAGS='-O2 -fstack-protector' \
+			PREFIX=/usr \
+			MODULEDIR=/usr/lib/knot-resolver \
+			ETCDIR=/etc/knot-resolver \
+			ROOTHINTS=/usr/share/dns/root.hints \
+			-j$(nproc) check install \
+		&& rm /etc/knot-resolver/root.hints \
+		&& if [ "${KNOT_RESOLVER_SKIP_INSTALL_CHECK}" != true ]; then \
+			make PREFIX=/usr installcheck \
+			&& make PREFIX=/usr check-integration; \
+		fi \
+		&& /usr/sbin/kresd --version \
+	) \
 	&& groupadd -r -g 500 knot-resolver \
 	&& useradd -r -u 500 -g 500 -md /var/cache/knot-resolver/ knot-resolver \
+	&& mkdir -p /var/lib/knot-resolver/ \
 	&& chown -R root:knot-resolver /etc/knot-resolver/ /var/lib/knot-resolver/ \
 	# Install hBlock
 	&& git clone --recursive --branch "${HBLOCK_BRANCH}" "${HBLOCK_REMOTE}" /tmp/hblock/ \
 	&& mv /tmp/hblock/hblock /usr/bin/hblock \
 	&& chmod 755 /usr/bin/hblock \
+	&& /usr/bin/hblock --version \
 	# Cleanup
 	&& apt-get purge -y ${BUILD_PKGS} \
 	&& apt-get autoremove -y \
