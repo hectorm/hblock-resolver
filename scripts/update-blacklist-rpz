@@ -2,12 +2,40 @@
 
 set -eu
 
-BLACKLIST='/var/lib/knot-resolver/blacklist.rpz'
+HBLOCK_DIR='/var/lib/knot-resolver/hblock/'
+SOURCES_FILE="${HBLOCK_DIR}/sources.txt"
+WHITELIST_FILE="${HBLOCK_DIR}/whitelist.txt"
+BLACKLIST_FILE="${HBLOCK_DIR}/blacklist.txt"
+OUTPUT_FILE="${HBLOCK_DIR}/hblock.rpz"
+OUTPUT_FILE_TMP=$(mktemp)
+MUST_RESTART_KRESD=false
+
+cleanup() { rm -f "${OUTPUT_FILE_TMP}"; }
+trap cleanup EXIT
+
+if [ ! -d "${HBLOCK_DIR}" ]; then
+	mkdir -p "${HBLOCK_DIR}"
+fi
+
+if [ -f "${SOURCES_FILE}" ]; then
+	SOURCES="$(cat "${SOURCES_FILE}")"
+fi
+
+if [ -f "${WHITELIST_FILE}" ]; then
+	WHITELIST="$(cat "${WHITELIST_FILE}")"
+fi
+
+if [ -f "${BLACKLIST_FILE}" ]; then
+	BLACKLIST="$(cat "${BLACKLIST_FILE}")"
+fi
 
 # Generate blacklist zone
 hblock \
 		--quiet \
-		--output "${BLACKLIST}" \
+		${SOURCES:+   --sources   "${SOURCES}"   } \
+		${WHITELIST:+ --whitelist "${WHITELIST}" } \
+		${BLACKLIST:+ --blacklist "${BLACKLIST}" } \
+		--output "${OUTPUT_FILE_TMP}" \
 		--header "$(cat <<-'EOF'
 			$TTL 2h
 			@ IN SOA localhost. root.localhost. (1 6h 1h 1w 2h)
@@ -18,7 +46,12 @@ hblock \
 		--template '\1 CNAME .' \
 		--comment ';'
 
+if ! cmp --silent "${OUTPUT_FILE_TMP}" "${OUTPUT_FILE}"; then
+	MUST_RESTART_KRESD=true
+	mv -f "${OUTPUT_FILE_TMP}" "${OUTPUT_FILE}"
+fi
+
 # Restart Knot Resolver if it is running
-if supervisorctl-is-state kresd RUNNING; then
+if [ "${MUST_RESTART_KRESD}" = true ] && supervisorctl-is-state kresd RUNNING; then
 	supervisorctl restart kresd
 fi

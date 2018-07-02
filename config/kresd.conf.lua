@@ -49,7 +49,7 @@ end
 -- Add blacklist zone
 policy.add(policy.rpz(
 	policy.DENY_MSG('Blacklisted domain'),
-	'/var/lib/knot-resolver/blacklist.rpz'
+	'/var/lib/knot-resolver/hblock/hblock.rpz'
 ))
 
 -- DNS over TLS forwarding

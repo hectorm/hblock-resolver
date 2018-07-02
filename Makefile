@@ -5,6 +5,8 @@ MKFILE_ABSPATH := $(shell readlink -f -- '$(MKFILE_RELPATH)')
 MKFILE_DIR := $(shell dirname -- '$(MKFILE_ABSPATH)')
 
 HBLOCK_BRANCH := v1.6.2
+KNOT_DNS_BRANCH := v2.6.7
+KNOT_RESOLVER_BRANCH := master
 
 DIST_DIR := $(MKFILE_DIR)/dist
 
@@ -26,6 +28,8 @@ build-image:
 		--tag '$(DOCKER_IMAGE):latest' \
 		--tag '$(DOCKER_IMAGE):$(HBLOCK_BRANCH)' \
 		--build-arg HBLOCK_BRANCH='$(HBLOCK_BRANCH)' \
+		--build-arg KNOT_DNS_BRANCH='$(KNOT_DNS_BRANCH)' \
+		--build-arg KNOT_RESOLVER_BRANCH='$(KNOT_RESOLVER_BRANCH)' \
 		--file '$(DOCKERFILE)' \
 		-- '$(MKFILE_DIR)'
 

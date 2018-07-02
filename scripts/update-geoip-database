@@ -2,12 +2,23 @@
 
 set -eu
 
-GEOIP_DB_URL='https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz'
-GEOIP_DB='/var/lib/knot-resolver/geoip.mmdb'
+GEOIPDB_DIR='/var/lib/knot-resolver/'
+GEOIPDB_URL='https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz'
+GEOIPDB_FILE="${GEOIPDB_DIR}/geoip.mmdb"
+GEOIPDB_FILE_TMP=$(mktemp)
+MUST_RESTART_KRESD=false
 
-curl -fsSL "${GEOIP_DB_URL}" | gzip -d > "${GEOIP_DB}"
+cleanup() { rm -f "${GEOIPDB_FILE_TMP}"; }
+trap cleanup EXIT
+
+curl -fsSL "${GEOIPDB_URL}" | gzip -d > "${GEOIPDB_FILE_TMP}"
+
+if ! cmp --silent "${GEOIPDB_FILE_TMP}" "${GEOIPDB_FILE}"; then
+	MUST_RESTART_KRESD=true
+	mv -f "${GEOIPDB_FILE_TMP}" "${GEOIPDB_FILE}"
+fi
 
 # Restart Knot Resolver if it is running
-if supervisorctl-is-state kresd RUNNING; then
+if [ "${MUST_RESTART_KRESD}" = true ] && supervisorctl-is-state kresd RUNNING; then
 	supervisorctl restart kresd
 fi

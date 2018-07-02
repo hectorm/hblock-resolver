@@ -5,19 +5,19 @@ set -eu
 # Generate self-signed certificate if it does not exist
 if [ ! -f '/var/lib/knot-resolver/ssl/self.key' ]; then
 	printf '%s\n' 'Generating self-signed certificate...'
-	renew-self-signed-cert
+	su -c renew-self-signed-cert - knot-resolver
 fi
 
 # Download blacklist zone if it does not exist
-if [ ! -f '/var/lib/knot-resolver/blacklist.rpz' ]; then
+if [ ! -f '/var/lib/knot-resolver/hblock/hblock.rpz' ]; then
 	printf '%s\n' 'Downloading blacklist zone...'
-	update-blacklist-rpz
+	su -c update-blacklist-rpz - knot-resolver
 fi
 
 # Download GeoIP database if it does not exist
 if [ ! -f '/var/lib/knot-resolver/geoip.mmdb' ]; then
 	printf '%s\n' 'Downloading GeoIP database...'
-	update-geoip-database
+	su -c update-geoip-database - knot-resolver
 fi
 
 exec supervisord -c /etc/supervisord.conf
