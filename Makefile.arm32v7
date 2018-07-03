@@ -6,7 +6,7 @@ MKFILE_DIR := $(shell dirname -- '$(MKFILE_ABSPATH)')
 
 HBLOCK_BRANCH := v1.6.2
 KNOT_DNS_BRANCH := v2.6.7
-KNOT_RESOLVER_BRANCH := master
+KNOT_RESOLVER_BRANCH := v2.4.0
 
 DIST_DIR := $(MKFILE_DIR)/dist
 
