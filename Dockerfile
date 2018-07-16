@@ -91,8 +91,9 @@ RUN apt-get update \
 		OPENSSL_LIBDIR="/usr/lib/${HOST_MULTIARCH}" \
 		CRYPTO_LIBDIR="/usr/lib/${HOST_MULTIARCH}" \
 	# Install Knot DNS (only libknot and utilities)
-	&& git clone --recursive --branch "${KNOT_DNS_BRANCH}" "${KNOT_DNS_REMOTE}" /tmp/knot-dns/ \
+	&& git clone --recursive "${KNOT_DNS_REMOTE}" /tmp/knot-dns/ \
 	&& (cd /tmp/knot-dns/ \
+		&& git checkout "${KNOT_DNS_BRANCH}" \
 		&& ./autogen.sh \
 		&& ./configure \
 			--prefix=/usr \
@@ -106,8 +107,9 @@ RUN apt-get update \
 		&& /usr/bin/khost --version \
 	) \
 	# Install Knot Resolver
-	&& git clone --recursive --branch "${KNOT_RESOLVER_BRANCH}" "${KNOT_RESOLVER_REMOTE}" /tmp/knot-resolver/ \
+	&& git clone --recursive "${KNOT_RESOLVER_REMOTE}" /tmp/knot-resolver/ \
 	&& (cd /tmp/knot-resolver/ \
+		&& git checkout "${KNOT_RESOLVER_BRANCH}" \
 		&& make \
 			CFLAGS='-O2 -fstack-protector' \
 			PREFIX=/usr \
@@ -127,10 +129,13 @@ RUN apt-get update \
 	&& mkdir -p /var/lib/knot-resolver/ \
 	&& chown -R knot-resolver:knot-resolver /var/lib/knot-resolver/ \
 	# Install hBlock
-	&& git clone --recursive --branch "${HBLOCK_BRANCH}" "${HBLOCK_REMOTE}" /tmp/hblock/ \
-	&& mv /tmp/hblock/hblock /usr/bin/hblock \
-	&& chmod 755 /usr/bin/hblock \
-	&& /usr/bin/hblock --version \
+	&& git clone --recursive "${HBLOCK_REMOTE}" /tmp/hblock/ \
+	&& (cd /tmp/hblock/ \
+		git checkout "${HBLOCK_BRANCH}" \
+		&& mv ./hblock /usr/bin/hblock \
+		&& chmod 755 /usr/bin/hblock \
+		&& /usr/bin/hblock --version \
+	) \
 	# Create supervisor group
 	&& groupadd -r supervisor \
 	&& usermod -aG supervisor knot-resolver \
