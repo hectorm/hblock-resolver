@@ -2,6 +2,9 @@
 
 set -eu
 
+# Dump environment variables
+export-env > /etc/profile.d/container-environment.sh
+
 # Generate self-signed certificate if it does not exist
 if [ ! -f '/var/lib/knot-resolver/ssl/self.key' ]; then
 	printf '%s\n' 'Generating self-signed certificate...'
@@ -20,4 +23,5 @@ if [ ! -f '/var/lib/knot-resolver/geoip.mmdb' ]; then
 	su -c update-geoip-database - knot-resolver
 fi
 
+# Run supervisor
 exec supervisord -c /etc/supervisord.conf

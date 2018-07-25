@@ -2,7 +2,7 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # m h dom mon dow user command
- 0 5 * * * knot-resolver /usr/local/bin/renew-self-signed-cert >/proc/1/fd/1 2>&1
- 5 5 * * * knot-resolver /usr/local/bin/update-blacklist-rpz >/proc/1/fd/1 2>&1
-10 5 1 * * knot-resolver /usr/local/bin/update-geoip-database >/proc/1/fd/1 2>&1
+ 0 5 * * * root su -c renew-self-signed-cert - knot-resolver >/proc/1/fd/1 2>&1
+ 5 5 * * * root su -c update-blacklist-rpz - knot-resolver >/proc/1/fd/1 2>&1
+10 5 1 * * root su -c update-geoip-database - knot-resolver >/proc/1/fd/1 2>&1
 #

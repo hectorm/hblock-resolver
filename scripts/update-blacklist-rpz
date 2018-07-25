@@ -46,6 +46,9 @@ hblock \
 		--template '\1 CNAME .' \
 		--comment ';'
 
+# Remove timestamp
+sed -i '/^; Last updated: /d' "${OUTPUT_FILE_TMP}"
+
 if ! cmp --silent "${OUTPUT_FILE_TMP}" "${OUTPUT_FILE}"; then
 	MUST_RESTART_KRESD=true
 	mv -f "${OUTPUT_FILE_TMP}" "${OUTPUT_FILE}"

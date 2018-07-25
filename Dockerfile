@@ -150,6 +150,9 @@ COPY --chown=root:root config/crontab /etc/crontab
 COPY --chown=root:root config/kresd.conf.lua /etc/knot-resolver/kresd.conf
 COPY --chown=root:root scripts/ /usr/local/bin/
 
+# Ensure correct permissions for crontab
+RUN chmod 644 /etc/crontab
+
 WORKDIR /var/lib/knot-resolver/
 VOLUME /var/lib/knot-resolver/
 
