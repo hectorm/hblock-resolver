@@ -4,10 +4,6 @@ MKFILE_RELPATH := $(shell printf -- '%s' '$(MAKEFILE_LIST)' | sed 's|^\ ||')
 MKFILE_ABSPATH := $(shell readlink -f -- '$(MKFILE_RELPATH)')
 MKFILE_DIR := $(shell dirname -- '$(MKFILE_ABSPATH)')
 
-HBLOCK_BRANCH := v1.6.6
-KNOT_DNS_BRANCH := v2.6.8
-KNOT_RESOLVER_BRANCH := v2.4.0
-
 DIST_DIR := $(MKFILE_DIR)/dist
 
 DOCKER_IMAGE_NAMESPACE := hectormolinero
@@ -40,10 +36,6 @@ build-image:
 	awk -- 'f;/^FROM .+$$/{f=1}' '$(DOCKERFILE)' >> '$(QEMU_DOCKERFILE)'
 	docker build \
 		--tag '$(DOCKER_IMAGE):$(DOCKER_IMAGE_ARCH)' \
-		--tag '$(DOCKER_IMAGE):$(HBLOCK_BRANCH)-$(DOCKER_IMAGE_ARCH)' \
-		--build-arg HBLOCK_BRANCH='$(HBLOCK_BRANCH)' \
-		--build-arg KNOT_DNS_BRANCH='$(KNOT_DNS_BRANCH)' \
-		--build-arg KNOT_RESOLVER_BRANCH='$(KNOT_RESOLVER_BRANCH)' \
 		--build-arg KNOT_RESOLVER_SKIP_INSTALL_CHECK=true \
 		--file '$(QEMU_DOCKERFILE)' \
 		-- '$(MKFILE_DIR)'
@@ -57,7 +49,6 @@ clean: clean-image clean-dist
 
 clean-image: clean-container
 	-docker rmi -- '$(DOCKER_IMAGE):$(DOCKER_IMAGE_ARCH)'
-	-docker rmi -- '$(DOCKER_IMAGE):$(HBLOCK_BRANCH)-$(DOCKER_IMAGE_ARCH)'
 
 clean-container:
 	-docker stop -- '$(DOCKER_CONTAINER)'

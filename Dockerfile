@@ -1,14 +1,14 @@
 FROM ubuntu:18.04
 
 # Environment
-ARG KNOT_DNS_BRANCH=master
+ARG KNOT_DNS_BRANCH=v2.6.8
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 
-ARG KNOT_RESOLVER_BRANCH=master
+ARG KNOT_RESOLVER_BRANCH=v2.4.0
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_SKIP_INSTALL_CHECK=false
 
-ARG HBLOCK_BRANCH=master
+ARG HBLOCK_BRANCH=v1.6.6
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 
 ENV DEBIAN_FRONTEND=noninteractive
