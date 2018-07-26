@@ -12,7 +12,6 @@ DIST_DIR := $(MKFILE_DIR)/dist
 
 DOCKER_IMAGE_NAMESPACE := hectormolinero
 DOCKER_IMAGE_NAME := hblock-resolver
-DOCKER_IMAGE_TARBALL := $(DIST_DIR)/$(DOCKER_IMAGE_NAME).tgz
 DOCKER_IMAGE := $(DOCKER_IMAGE_NAMESPACE)/$(DOCKER_IMAGE_NAME)
 DOCKER_CONTAINER := $(DOCKER_IMAGE_NAME)
 DOCKERFILE := $(MKFILE_DIR)/Dockerfile
@@ -37,17 +36,18 @@ build-image:
 
 save-image: build-image
 	mkdir -p -- '$(DIST_DIR)'
-	docker save -- '$(DOCKER_IMAGE)' | gzip > '$(DOCKER_IMAGE_TARBALL)'
+	docker save -- '$(DOCKER_IMAGE):latest' | gzip > '$(DIST_DIR)/$(DOCKER_IMAGE_NAME).tgz'
 
 clean: clean-image clean-dist
 
 clean-image: clean-container
-	-docker rmi -- '$(DOCKER_IMAGE)'
+	-docker rmi -- '$(DOCKER_IMAGE):latest'
+	-docker rmi -- '$(DOCKER_IMAGE):$(HBLOCK_BRANCH)'
 
 clean-container:
 	-docker stop -- '$(DOCKER_CONTAINER)'
 	-docker rm -- '$(DOCKER_CONTAINER)'
 
 clean-dist:
-	rm -f -- '$(DOCKER_IMAGE_TARBALL)'
+	rm -f -- '$(DIST_DIR)/$(DOCKER_IMAGE_NAME).tgz'
 	-rmdir -- '$(DIST_DIR)'
