@@ -2,59 +2,55 @@
 
 set -eu
 
-HBLOCK_DIR='/var/lib/knot-resolver/hblock/'
-SOURCES_FILE="${HBLOCK_DIR}/sources.txt"
-WHITELIST_FILE="${HBLOCK_DIR}/whitelist.txt"
-BLACKLIST_FILE="${HBLOCK_DIR}/blacklist.txt"
-OUTPUT_FILE="${HBLOCK_DIR}/hblock.rpz"
-OUTPUT_FILE_TMP=$(mktemp)
-MUST_RESTART_KRESD=false
+HBLOCK_DIR='/var/lib/knot-resolver/'
+HBLOCK_OUTPUT="${HBLOCK_DIR}/hblock.rpz"
+HBLOCK_OUTPUT_TMP=$(mktemp)
 
-cleanup() { rm -f "${OUTPUT_FILE_TMP}"; }
+cleanup() { rm -f "${HBLOCK_OUTPUT_TMP}"; }
 trap cleanup EXIT
 
-if [ ! -d "${HBLOCK_DIR}" ]; then
-	mkdir -p "${HBLOCK_DIR}"
+if [ -z "${HBLOCK_HEADER-}" ]; then
+	HBLOCK_HEADER=$(cat <<-'EOF'
+		$TTL 2h
+		@ IN SOA localhost. root.localhost. (1 6h 1h 1w 2h)
+		  IN NS  localhost.
+	EOF
+	)
 fi
 
-if [ -f "${SOURCES_FILE}" ]; then
-	SOURCES="$(cat "${SOURCES_FILE}")"
+if [ -z "${HBLOCK_FOOTER-}" ]; then
+	HBLOCK_FOOTER=''
 fi
 
-if [ -f "${WHITELIST_FILE}" ]; then
-	WHITELIST="$(cat "${WHITELIST_FILE}")"
+if [ -z "${HBLOCK_TEMPLATE-}" ]; then
+	HBLOCK_TEMPLATE='\1 CNAME \2'
 fi
 
-if [ -f "${BLACKLIST_FILE}" ]; then
-	BLACKLIST="$(cat "${BLACKLIST_FILE}")"
+if [ -z "${HBLOCK_REDIRECTION-}" ]; then
+	HBLOCK_REDIRECTION='.'
+fi
+
+if [ -z "${HBLOCK_COMMENT-}" ]; then
+	HBLOCK_COMMENT=''
 fi
 
 # Generate blacklist zone
 hblock \
-		--quiet \
-		${SOURCES:+   --sources   "${SOURCES}"   } \
-		${WHITELIST:+ --whitelist "${WHITELIST}" } \
-		${BLACKLIST:+ --blacklist "${BLACKLIST}" } \
-		--output "${OUTPUT_FILE_TMP}" \
-		--header "$(cat <<-'EOF'
-			$TTL 2h
-			@ IN SOA localhost. root.localhost. (1 6h 1h 1w 2h)
-			  IN NS  localhost.
-		EOF
-		)" \
-		--footer '' \
-		--template '\1 CNAME .' \
-		--comment ';'
+		--output      "${HBLOCK_OUTPUT_TMP}" \
+		--header      "${HBLOCK_HEADER}" \
+		--footer      "${HBLOCK_FOOTER}" \
+		--template    "${HBLOCK_TEMPLATE}" \
+		--redirection "${HBLOCK_REDIRECTION}" \
+		--comment     "${HBLOCK_COMMENT}" \
+		${HBLOCK_SOURCES+   --sources   "${HBLOCK_SOURCES}"   } \
+		${HBLOCK_WHITELIST+ --whitelist "${HBLOCK_WHITELIST}" } \
+		${HBLOCK_BLACKLIST+ --blacklist "${HBLOCK_BLACKLIST}" }
 
-# Remove timestamp
-sed -i '/^; Last updated: /d' "${OUTPUT_FILE_TMP}"
-
-if ! cmp --silent "${OUTPUT_FILE_TMP}" "${OUTPUT_FILE}"; then
-	MUST_RESTART_KRESD=true
-	mv -f "${OUTPUT_FILE_TMP}" "${OUTPUT_FILE}"
-fi
-
-# Restart Knot Resolver if it is running
-if [ "${MUST_RESTART_KRESD}" = true ] && supervisorctl-is-state kresd RUNNING; then
-	supervisorctl restart kresd
+# Replace blacklist zone if it differs
+if ! cmp --silent "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"; then
+	mv -f "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"
+	# Restart Knot Resolver if it is running
+	if supervisorctl-is-state kresd RUNNING; then
+		supervisorctl restart kresd
+	fi
 fi
