@@ -6,6 +6,8 @@ HBLOCK_DIR='/var/lib/knot-resolver/'
 HBLOCK_OUTPUT="${HBLOCK_DIR}/hblock.rpz"
 HBLOCK_OUTPUT_TMP=$(mktemp)
 
+printf '%s\n' 'Downloading blacklist zone...'
+
 cleanup() { rm -f "${HBLOCK_OUTPUT_TMP}"; }
 trap cleanup EXIT
 

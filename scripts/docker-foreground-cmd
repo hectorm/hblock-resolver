@@ -7,19 +7,16 @@ export-env > /etc/profile.d/container-environment.sh
 
 # Generate self-signed certificate if it does not exist
 if [ ! -f '/var/lib/knot-resolver/ssl/self.key' ]; then
-	printf '%s\n' 'Generating self-signed certificate...'
 	su -c renew-self-signed-cert - knot-resolver
 fi
 
 # Download blacklist zone if it does not exist
 if [ ! -f '/var/lib/knot-resolver/hblock.rpz' ]; then
-	printf '%s\n' 'Downloading blacklist zone...'
 	su -c update-blacklist-rpz - knot-resolver
 fi
 
 # Download GeoIP database if it does not exist
 if [ ! -f '/var/lib/knot-resolver/geoip.mmdb' ]; then
-	printf '%s\n' 'Downloading GeoIP database...'
 	su -c update-geoip-database - knot-resolver
 fi
 

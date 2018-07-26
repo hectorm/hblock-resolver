@@ -5,6 +5,8 @@ set -eu
 CERT_DIR='/var/lib/knot-resolver/ssl/'
 MUST_RESTART_KRESD=false
 
+printf '%s\n' 'Checking self-signed certificate...'
+
 if [ ! -d "${CERT_DIR}" ]; then
 	mkdir -p "${CERT_DIR}"
 fi
@@ -12,6 +14,7 @@ fi
 # Generate private key if it does not exist
 if [ ! -f "${CERT_DIR}"/self.key ]; then
 	MUST_RESTART_KRESD=true
+	printf '%s\n' 'Generating private key...'
 	(cd "${CERT_DIR}" \
 		&& rm -f self.key self.csr self.crt \
 		&& openssl ecparam -genkey -name prime256v1 -out self.key \
@@ -22,6 +25,7 @@ fi
 # Generate self-signed certificate if it does not exist or will expire soon
 if [ ! -f "${CERT_DIR}"/self.crt ] || ! openssl x509 -checkend 604800 -noout -in "${CERT_DIR}"/self.crt; then
 	MUST_RESTART_KRESD=true
+	printf '%s\n' 'Generating self-signed certificate...'
 	(cd "${CERT_DIR}" \
 		&& rm -f self.csr self.crt \
 		&& openssl req -new -key self.key -out self.csr -subj '/CN=knot-resolver' \
