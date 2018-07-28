@@ -6,7 +6,8 @@ ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 
 ARG KNOT_RESOLVER_BRANCH=v2.4.0
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
-ARG KNOT_RESOLVER_SKIP_INSTALL_CHECK=false
+ARG KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK=false
+ARG KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK=false
 
 ARG HBLOCK_BRANCH=v1.6.6
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
@@ -118,9 +119,17 @@ RUN apt-get update \
 			ROOTHINTS=/usr/share/dns/root.hints \
 			-j$(nproc) check install \
 		&& rm /etc/knot-resolver/root.hints \
-		&& if [ "${KNOT_RESOLVER_SKIP_INSTALL_CHECK}" != true ]; then \
-			make PREFIX=/usr installcheck \
-			&& make PREFIX=/usr -j$(nproc) check-integration; \
+		&& if ! make PREFIX=/usr installcheck; then \
+			>&2 printf '%s\n' 'Installation check failed'; \
+			if [ "${KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK}" = true ]; then \
+				exit 1; \
+			fi; \
+		fi \
+		&& if ! make PREFIX=/usr check-integration; then \
+			>&2 printf '%s\n' 'Integration check failed'; \
+			if [ "${KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK}" = true ]; then \
+				exit 1; \
+			fi; \
 		fi \
 		&& /usr/sbin/kresd --version \
 	) \

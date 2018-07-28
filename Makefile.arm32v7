@@ -36,7 +36,6 @@ build-image:
 	awk -- 'f;/^FROM .+$$/{f=1}' '$(DOCKERFILE)' >> '$(QEMU_DOCKERFILE)'
 	docker build \
 		--tag '$(DOCKER_IMAGE):$(DOCKER_IMAGE_ARCH)' \
-		--build-arg KNOT_RESOLVER_SKIP_INSTALL_CHECK=true \
 		--file '$(QEMU_DOCKERFILE)' \
 		-- '$(MKFILE_DIR)'
 	rm -f -- '$(QEMU_DOCKERFILE)'

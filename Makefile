@@ -23,6 +23,8 @@ build: save-image
 build-image:
 	docker build \
 		--tag '$(DOCKER_IMAGE):latest' \
+		--build-arg KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK=true \
+		--build-arg KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK=true \
 		--file '$(DOCKERFILE)' \
 		-- '$(MKFILE_DIR)'
 
