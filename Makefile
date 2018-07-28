@@ -43,5 +43,4 @@ clean-container:
 	-docker rm -- '$(DOCKER_CONTAINER)'
 
 clean-dist:
-	rm -f -- '$(DIST_DIR)/$(DOCKER_IMAGE_NAME).tgz'
-	-rmdir -- '$(DIST_DIR)'
+	rm -rf -- '$(DIST_DIR)
