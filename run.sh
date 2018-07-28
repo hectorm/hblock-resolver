@@ -30,8 +30,6 @@ printf -- '%s\n' "Creating \"${DOCKER_CONTAINER}\" container..."
 exec docker run --detach \
 	--name "${DOCKER_CONTAINER}" \
 	--hostname "${DOCKER_CONTAINER}" \
-	--cpus 0.5 \
-	--memory 256mb \
 	--restart on-failure:3 \
 	--log-opt max-size=32m \
 	--publish '53:53/tcp' \
