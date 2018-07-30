@@ -1,3 +1,4 @@
+-- Main configuration of Knot Resolver.
 -- Refer to manual: https://knot-resolver.readthedocs.io/en/latest/daemon.html#configuration
 
 nicname = env.KRESD_NIC
@@ -65,3 +66,6 @@ policy.add(policy.all(policy.TLS_FORWARD({
 
 -- Enable verbose logging
 -- verbose(true)
+
+-- Load extra configuration
+dofile '/var/lib/knot-resolver/kresd.extra.conf'

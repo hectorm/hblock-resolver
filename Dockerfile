@@ -153,11 +153,12 @@ RUN apt-get update \
 	&& apt-get autoremove -y \
 	&& rm -rf /tmp/* /etc/cron.*/ /var/lib/apt/lists/*
 
-# Copy config and scripts
+# Copy scripts and config
+COPY --chown=root:root scripts/ /usr/local/bin/
 COPY --chown=root:root config/supervisord.conf /etc/supervisord.conf
 COPY --chown=root:root config/crontab /etc/crontab
 COPY --chown=root:root config/kresd.conf.lua /etc/knot-resolver/kresd.conf
-COPY --chown=root:root scripts/ /usr/local/bin/
+COPY --chown=knot-resolver:knot-resolver config/kresd.extra.conf.lua /var/lib/knot-resolver/kresd.extra.conf
 
 # Ensure correct permissions for crontab
 RUN chmod 644 /etc/crontab

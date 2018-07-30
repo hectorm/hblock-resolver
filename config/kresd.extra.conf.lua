@@ -1,0 +1,2 @@
+-- Extra configuration of Knot Resolver.
+-- Refer to manual: https://knot-resolver.readthedocs.io/en/latest/daemon.html#configuration
