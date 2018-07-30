@@ -19,9 +19,10 @@ user('knot-resolver', 'knot-resolver')
 
 -- Load useful modules
 modules = {
-	'rebinding < iterate',
-	'policy',
-	'hints',
+	'rebinding < iterate', -- Rebinding BEFORE iterate
+	'hints     > iterate', -- Hints AFTER iterate
+	'policy    > hints',   -- Policy AFTER hints
+	'view      < cache',   -- View BEFORE cache
 	'stats',
 	'predict',
 	http = {
