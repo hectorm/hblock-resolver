@@ -68,4 +68,9 @@ policy.add(policy.all(policy.TLS_FORWARD({
 -- verbose(true)
 
 -- Load extra configuration
-dofile '/var/lib/knot-resolver/kresd.extra.conf'
+extra_conf_path = '/var/lib/knot-resolver/kresd.extra.conf'
+extra_conf_file = io.open(extra_conf_path, 'r')
+if extra_conf_file ~= nil then
+	io.close(extra_conf_file)
+	dofile(extra_conf_path)
+end
