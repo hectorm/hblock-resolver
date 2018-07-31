@@ -12,6 +12,7 @@ else
 	io.stderr:write('Cannot find ' .. nicname .. ' interface\n')
 	os.exit(1)
 end
+net.tls('/var/lib/knot-resolver/ssl/server.crt', '/var/lib/knot-resolver/ssl/server.key')
 net.listen(addresses, 53)
 net.listen(addresses, 853, {tls = true})
 
@@ -29,8 +30,8 @@ modules = {
 	http = {
 		host = '::',
 		port = 8053,
-		key = '/var/lib/knot-resolver/ssl/self.key',
-		cert = '/var/lib/knot-resolver/ssl/self.crt',
+		key = '/var/lib/knot-resolver/ssl/server.key',
+		cert = '/var/lib/knot-resolver/ssl/server.crt',
 		geoip = '/var/lib/knot-resolver/geoip.mmdb'
 	}
 }

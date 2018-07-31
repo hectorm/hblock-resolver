@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-# Environment
+# Environment and arguments
 ARG KNOT_DNS_BRANCH=v2.6.8
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 
@@ -12,8 +12,11 @@ ARG KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK=false
 ARG HBLOCK_BRANCH=v1.6.6
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 
+ENV KRESD_NIC=
+ENV KRESD_CERT_MODE=self-signed
+
 ENV DEBIAN_FRONTEND=noninteractive
-ENV BUILD_PKGS=' \
+ARG BUILD_PKGS=' \
 	autoconf \
 	automake \
 	cmake \
@@ -49,7 +52,7 @@ ENV BUILD_PKGS=' \
 	python3-yaml \
 	xxd \
 '
-ENV RUN_PKGS=' \
+ARG RUN_PKGS=' \
 	ca-certificates \
 	cron \
 	curl \
@@ -76,7 +79,7 @@ ENV RUN_PKGS=' \
 	luajit \
 	supervisor \
 '
-ENV LUAROCKS_PKGS=' \
+ARG LUAROCKS_PKGS=' \
 	cqueues \
 	http \
 	luasec \

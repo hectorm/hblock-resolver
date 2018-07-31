@@ -6,7 +6,7 @@ set -eu
 export-env > /etc/profile.d/container-environment.sh
 
 # Generate self-signed certificate if it does not exist
-if [ ! -f '/var/lib/knot-resolver/ssl/self.key' ]; then
+if [ ! -f '/var/lib/knot-resolver/ssl/server.key' ]; then
 	su -c renew-self-signed-cert - knot-resolver
 fi
 
