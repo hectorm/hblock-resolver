@@ -57,11 +57,17 @@ policy.add(policy.rpz(
 -- DNS over TLS forwarding
 tls_ca_bundle = '/etc/ssl/certs/ca-certificates.crt'
 policy.add(policy.all(policy.TLS_FORWARD({
-	-- Cloudflare
+	-- Cloudflare (https://1.1.1.1)
 	{'1.1.1.1', hostname='cloudflare-dns.com', ca_file=tls_ca_bundle},
 	{'2606:4700:4700::1111', hostname='cloudflare-dns.com', ca_file=tls_ca_bundle},
 	{'1.0.0.1', hostname='cloudflare-dns.com', ca_file=tls_ca_bundle},
 	{'2606:4700:4700::1001', hostname='cloudflare-dns.com', ca_file=tls_ca_bundle}
+	-- Quad9 filtered (https://www.quad9.net)
+	--{'9.9.9.9', hostname='dns.quad9.net', ca_file=tls_ca_bundle},
+	--{'2620:fe::fe', hostname='dns.quad9.net', ca_file=tls_ca_bundle},
+	-- Quad9 unfiltered (https://www.quad9.net)
+	--{'9.9.9.10', hostname='dns.quad9.net', ca_file=tls_ca_bundle},
+	--{'2620:fe::10', hostname='dns.quad9.net', ca_file=tls_ca_bundle},
 })))
 
 -- Enable verbose logging
