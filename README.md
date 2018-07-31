@@ -6,7 +6,8 @@
 
 # hBlock Resolver
 
-A Docker image of [Knot DNS Resolver](https://www.knot-resolver.cz) configured to automatically block ads, tracking and malware domains with [hBlock](https://github.com/hectorm/hblock).
+A Docker image of [Knot DNS Resolver](https://www.knot-resolver.cz) configured to automatically block ads, tracking and malware domains with
+[hBlock](https://github.com/hectorm/hblock).
 
 ## Start an instance
 
@@ -22,7 +23,8 @@ docker run --detach \
   --mount type=volume,src=hblock-resolver-data,dst=/var/lib/knot-resolver/ \
   hectormolinero/hblock-resolver:latest
 ```
-> It is likely that port 53 is already being used, the solution is left as an exercise for the reader.
+> It is likely that port 53 is already being used. Given the variety of environments where this instance could be deployed, the solution is left as an
+> exercise for the reader.
 
 ## Environment variables
 
@@ -35,5 +37,11 @@ If defined, the value will be passed to the [`--whitelist` option](https://githu
 #### `HBLOCK_BLACKLIST`
 If defined, the value will be passed to the [`--blacklist` option](https://github.com/hectorm/hblock#script-arguments) of hBlock.
 
+#### `KRESD_NIC`
+If defined, kresd will only listen on the specified interface. Some performance gains may occur.
+
+#### `KRESD_CERT_MODE`
+If equals to `self-signed` (**default**), a self-signed certificate will be generated. Currently this mode is the only one supported.
+
 ## License
-See the [license](LICENSE.md) file.
+See the [license](https://github.com/hectorm/hblock-resolver/blob/master/LICENSE.md) file.
