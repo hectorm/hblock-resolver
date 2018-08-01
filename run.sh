@@ -36,4 +36,10 @@ exec docker run --detach \
 	--publish '53:53/udp' \
 	--publish '127.0.0.1:8053:8053/tcp' --publish '[::1]:8053:8053/tcp' \
 	--mount type=volume,src="${DOCKER_VOLUME}",dst='/var/lib/knot-resolver/' \
+	${EXTERNAL_SERVER_CERT+ \
+		--publish '853:853/tcp' \
+		--mount type=bind,src="${EXTERNAL_SERVER_KEY}",dst='/var/lib/knot-resolver/ssl/server.key',ro \
+		--mount type=bind,src="${EXTERNAL_SERVER_CERT}",dst='/var/lib/knot-resolver/ssl/server.crt',ro \
+		--env KRESD_CERT_MODE=external \
+	} \
 	"${DOCKER_IMAGE}" "$@"
