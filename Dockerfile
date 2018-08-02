@@ -4,7 +4,7 @@ FROM ubuntu:18.04
 ARG KNOT_DNS_BRANCH=v2.6.8
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 
-ARG KNOT_RESOLVER_BRANCH=v2.4.0
+ARG KNOT_RESOLVER_BRANCH=v2.4.1
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK=false
 ARG KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK=false
@@ -172,6 +172,6 @@ VOLUME /var/lib/knot-resolver/
 EXPOSE 53/tcp 53/udp 8053/tcp
 
 HEALTHCHECK --start-period=60s --interval=60s --timeout=3s --retries=3 \
-	CMD [ "$(curl -fs http://localhost:8053/health)" = OK ]
+	CMD [ "$(curl -kfs https://localhost:8053/health)" = OK ]
 
 CMD ["/usr/local/bin/docker-foreground-cmd"]
