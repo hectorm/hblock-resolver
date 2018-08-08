@@ -136,10 +136,6 @@ RUN apt-get update \
 		fi \
 		&& /usr/sbin/kresd --version \
 	) \
-	&& groupadd -r -g 500 knot-resolver \
-	&& useradd -r -u 500 -g 500 -md /var/cache/knot-resolver/ knot-resolver \
-	&& mkdir -p /var/lib/knot-resolver/ \
-	&& chown -R knot-resolver:knot-resolver /var/lib/knot-resolver/ \
 	# Install hBlock
 	&& git clone --recursive "${HBLOCK_REMOTE}" /tmp/hblock/ \
 	&& (cd /tmp/hblock/ \
@@ -148,9 +144,13 @@ RUN apt-get update \
 		&& chmod 755 /usr/bin/hblock \
 		&& /usr/bin/hblock --version \
 	) \
-	# Create supervisor group
-	&& groupadd -r supervisor \
-	&& usermod -aG supervisor knot-resolver \
+	# Create users and groups
+	&& groupadd -r --gid 998 supervisor \
+	&& groupadd -r --gid 999 knot-resolver \
+	&& useradd  -r --uid 999 --gid 999 --groups 998 -md /var/cache/knot-resolver/ knot-resolver \
+	# Create data directory
+	&& mkdir /var/lib/knot-resolver/ \
+	&& chown knot-resolver:knot-resolver /var/lib/knot-resolver/ \
 	# Cleanup
 	&& apt-get purge -y ${BUILD_PKGS} \
 	&& apt-get autoremove -y \
