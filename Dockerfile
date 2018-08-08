@@ -15,7 +15,7 @@ ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 ENV KRESD_NIC=
 ENV KRESD_CERT_MODE=self-signed
 
-ENV DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 ARG BUILD_PKGS=' \
 	autoconf \
 	automake \
