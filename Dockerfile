@@ -171,7 +171,7 @@ VOLUME /var/lib/knot-resolver/
 
 EXPOSE 53/tcp 53/udp 8053/tcp
 
-HEALTHCHECK --start-period=60s --interval=60s --timeout=3s --retries=3 \
-	CMD [ "$(curl -kfs https://localhost:8053/health)" = OK ]
+HEALTHCHECK --start-period=60s --interval=60s --timeout=5s --retries=3 \
+	CMD /usr/local/bin/docker-healthcheck-cmd
 
 CMD ["/usr/local/bin/docker-foreground-cmd"]

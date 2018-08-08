@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -eu
+
+# crond daemon must be running
+if ! supervisorctl-is-state crond RUNNING; then
+	>&2 printf '%s\n' 'crond daemon is not running'
+	exit 1
+fi
+
+# kresd daemon must be running
+if ! supervisorctl-is-state kresd RUNNING; then
+	>&2 printf '%s\n' 'kresd daemon is not running'
+	exit 1
+fi
+
+# DNS server must resolve localhost A record
+if [ "$(kdig @127.0.0.1 -p 53 +short +time=1 +retry=0 localhost A)" != 127.0.0.1 ]; then
+	>&2 printf '%s\n' 'DNS server returned an unexpected result'
+	exit 1
+fi
+
+# DNS (over TLS) server must resolve localhost A record
+if [ "$(kdig @127.0.0.1 -p 853 +short +time=1 +retry=0 +tls localhost A)" != 127.0.0.1 ]; then
+	>&2 printf '%s\n' 'DNS (over TLS) server returned an unexpected result'
+	exit 1
+fi
+
+# HTTP server must return "OK"
+if [ "$(curl -kfs https://localhost:8053/health)" != OK ]; then
+	>&2 printf '%s\n' 'HTTP server returned an unexpected result'
+	exit 1
+fi
