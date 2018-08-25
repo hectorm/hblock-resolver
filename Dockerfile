@@ -1,15 +1,15 @@
 FROM ubuntu:18.04
 
 # Environment and arguments
-ARG KNOT_DNS_BRANCH=v2.6.8
+ARG KNOT_DNS_BRANCH=v2.7.1
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 
-ARG KNOT_RESOLVER_BRANCH=v2.4.1
+ARG KNOT_RESOLVER_BRANCH=v3.0.0
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK=false
 ARG KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK=false
 
-ARG HBLOCK_BRANCH=v1.6.6
+ARG HBLOCK_BRANCH=v1.6.7
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 
 ENV KRESD_NIC=
@@ -24,6 +24,7 @@ ARG BUILD_PKGS=' \
 	g++ \
 	gcc \
 	git \
+	libaugeas0 \
 	libcap-ng-dev \
 	libcmocka-dev \
 	libedit-dev \
@@ -44,12 +45,9 @@ ARG BUILD_PKGS=' \
 	make \
 	pkg-config \
 	protobuf-c-compiler \
-	python3-augeas \
-	python3-dnspython \
-	python3-jinja2 \
-	python3-pytest \
-	python3-pytest-xdist \
-	python3-yaml \
+	python3 \
+	python3-pip \
+	python3-setuptools \
 	xxd \
 '
 ARG RUN_PKGS=' \
@@ -114,6 +112,7 @@ RUN apt-get update \
 	&& git clone --recursive "${KNOT_RESOLVER_REMOTE}" /tmp/knot-resolver/ \
 	&& (cd /tmp/knot-resolver/ \
 		&& git checkout "${KNOT_RESOLVER_BRANCH}" \
+		&& pip3 install --user -r tests/deckard/requirements.txt \
 		&& make \
 			CFLAGS='-O2 -fstack-protector' \
 			PREFIX=/usr \
@@ -154,7 +153,10 @@ RUN apt-get update \
 	# Cleanup
 	&& apt-get purge -y ${BUILD_PKGS} \
 	&& apt-get autoremove -y \
-	&& rm -rf /tmp/* /etc/cron.*/ /var/lib/apt/lists/*
+	&& rm -rf \
+		/tmp/* /var/lib/apt/lists/* \
+		/root/.cache/ /root/.local/ \
+		/etc/cron.*/
 
 # Copy scripts and config
 COPY --chown=root:root scripts/ /usr/local/bin/
