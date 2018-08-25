@@ -43,4 +43,4 @@ clean-container:
 	-docker rm -- '$(DOCKER_CONTAINER)'
 
 clean-dist:
-	rm -rf -- '$(DIST_DIR)
+	rm -rf -- '$(DIST_DIR)'
