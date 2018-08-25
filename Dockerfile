@@ -28,6 +28,7 @@ ARG BUILD_PKGS=' \
 	libcap-ng-dev \
 	libcmocka-dev \
 	libedit-dev \
+	libffi-dev \
 	libfstrm-dev \
 	libgeoip-dev \
 	libgnutls28-dev \
@@ -46,8 +47,10 @@ ARG BUILD_PKGS=' \
 	pkg-config \
 	protobuf-c-compiler \
 	python3 \
+	python3-dev \
 	python3-pip \
 	python3-setuptools \
+	python3-wheel \
 	xxd \
 '
 ARG RUN_PKGS=' \
