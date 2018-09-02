@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 
 # Environment and arguments
-ARG KNOT_DNS_BRANCH=v2.7.1
+ARG KNOT_DNS_BRANCH=v2.7.2
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 
 ARG KNOT_RESOLVER_BRANCH=v3.0.0
