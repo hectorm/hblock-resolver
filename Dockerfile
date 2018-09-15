@@ -14,8 +14,8 @@ RUN DEBIAN_FRONTEND=noninteractive \
 # Build Tiny
 ARG TINY_BRANCH=v0.18.0
 ARG TINY_REMOTE=https://github.com/krallin/tini.git
-RUN git clone --recursive "${TINY_REMOTE}" /tmp/tiny/ \
-	&& cd /tmp/tiny/ \
+RUN git clone --recursive "${TINY_REMOTE}" /tmp/tini/ \
+	&& cd /tmp/tini/ \
 	&& git checkout "${TINY_BRANCH}" \
 	&& export CFLAGS='-DPR_SET_CHILD_SUBREAPER=36 -DPR_GET_CHILD_SUBREAPER=37' \
 	&& cmake . -DCMAKE_INSTALL_PREFIX=/usr \
@@ -191,8 +191,8 @@ RUN DEBIAN_FRONTEND=noninteractive \
 		runit \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Copy tiny binary
-COPY --from=build-tini --chown=root:root /usr/bin/tini /usr/bin/tiny
+# Copy tini binary
+COPY --from=build-tini --chown=root:root /usr/bin/tini /usr/bin/tini
 
 # Copy supercronic binary
 COPY --from=build-supercronic --chown=root:root /go/bin/supercronic /usr/bin/supercronic
@@ -262,5 +262,5 @@ VOLUME /var/lib/knot-resolver/
 HEALTHCHECK --start-period=60s --interval=30s --timeout=5s --retries=3 \
 	CMD /usr/local/bin/docker-healthcheck-cmd
 
-ENTRYPOINT ["/usr/bin/tiny", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/local/bin/docker-foreground-cmd"]
