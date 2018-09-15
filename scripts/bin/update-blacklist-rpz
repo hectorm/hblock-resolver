@@ -52,7 +52,7 @@ hblock \
 if ! cmp --silent "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"; then
 	mv -f "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"
 	# Restart Knot Resolver if it is running
-	if is-sv-state kresd run; then
+	if is-sv-status kresd run; then
 		sv restart ~/service/kresd
 	fi
 fi

@@ -1,3 +1,0 @@
-#!/bin/sh
-
-[ "$(cat ~/service/"${1:?}"/supervise/stat)" = "${2:?}" ]

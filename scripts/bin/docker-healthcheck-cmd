@@ -3,13 +3,13 @@
 set -eu
 
 # supercronic daemon must be running
-if ! is-sv-state supercronic run; then
+if ! is-sv-status supercronic run; then
 	>&2 printf '%s\n' 'supercronic daemon is not running'
 	exit 1
 fi
 
 # kresd daemon must be running
-if ! is-sv-state kresd run; then
+if ! is-sv-status kresd run; then
 	>&2 printf '%s\n' 'kresd daemon is not running'
 	exit 1
 fi
