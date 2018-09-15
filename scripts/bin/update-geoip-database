@@ -22,7 +22,7 @@ curl -L "${GEOIPDB_URL}" | gzip -d > "${GEOIPDB_FILE_TMP}"
 if ! cmp --silent "${GEOIPDB_FILE_TMP}" "${GEOIPDB_FILE}"; then
 	mv -f "${GEOIPDB_FILE_TMP}" "${GEOIPDB_FILE}"
 	# Restart Knot Resolver if it is running
-	if supervisorctl-is-state kresd RUNNING; then
-		supervisorctl restart kresd
+	if is-sv-state kresd run; then
+		sv restart ~/service/kresd
 	fi
 fi

@@ -41,6 +41,6 @@ if [ ! -f "${CERT_DIR}"/server.crt ] || ! openssl x509 -checkend 604800 -noout -
 fi
 
 # Restart Knot Resolver if it is running
-if [ "${MUST_RESTART_KRESD}" = true ] && supervisorctl-is-state kresd RUNNING; then
-	supervisorctl restart kresd
+if [ "${MUST_RESTART_KRESD}" = true ] && is-sv-state kresd run; then
+	sv restart ~/service/kresd
 fi

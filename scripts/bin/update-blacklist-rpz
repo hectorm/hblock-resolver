@@ -38,21 +38,21 @@ fi
 
 # Generate blacklist zone
 hblock \
-		--output      "${HBLOCK_OUTPUT_TMP}" \
-		--header      "${HBLOCK_HEADER}" \
-		--footer      "${HBLOCK_FOOTER}" \
-		--template    "${HBLOCK_TEMPLATE}" \
-		--redirection "${HBLOCK_REDIRECTION}" \
-		--comment     "${HBLOCK_COMMENT}" \
-		${HBLOCK_SOURCES+   --sources   "${HBLOCK_SOURCES}"   } \
-		${HBLOCK_WHITELIST+ --whitelist "${HBLOCK_WHITELIST}" } \
-		${HBLOCK_BLACKLIST+ --blacklist "${HBLOCK_BLACKLIST}" }
+	--output      "${HBLOCK_OUTPUT_TMP}" \
+	--header      "${HBLOCK_HEADER}" \
+	--footer      "${HBLOCK_FOOTER}" \
+	--template    "${HBLOCK_TEMPLATE}" \
+	--redirection "${HBLOCK_REDIRECTION}" \
+	--comment     "${HBLOCK_COMMENT}" \
+	${HBLOCK_SOURCES+   --sources   "${HBLOCK_SOURCES}"   } \
+	${HBLOCK_WHITELIST+ --whitelist "${HBLOCK_WHITELIST}" } \
+	${HBLOCK_BLACKLIST+ --blacklist "${HBLOCK_BLACKLIST}" }
 
 # Replace blacklist zone if it differs
 if ! cmp --silent "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"; then
 	mv -f "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"
 	# Restart Knot Resolver if it is running
-	if supervisorctl-is-state kresd RUNNING; then
-		supervisorctl restart kresd
+	if is-sv-state kresd run; then
+		sv restart ~/service/kresd
 	fi
 fi

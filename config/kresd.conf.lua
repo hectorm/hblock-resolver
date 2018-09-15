@@ -16,9 +16,6 @@ net.tls('/var/lib/knot-resolver/ssl/server.crt', '/var/lib/knot-resolver/ssl/ser
 net.listen(addresses, 53)
 net.listen(addresses, 853, {tls = true})
 
--- Drop root privileges
-user('knot-resolver', 'knot-resolver')
-
 -- Load useful modules
 modules = {
 	'rebinding < iterate', -- Rebinding BEFORE iterate

@@ -2,14 +2,14 @@
 
 set -eu
 
-# crond daemon must be running
-if ! supervisorctl-is-state crond RUNNING; then
-	>&2 printf '%s\n' 'crond daemon is not running'
+# supercronic daemon must be running
+if ! is-sv-state supercronic run; then
+	>&2 printf '%s\n' 'supercronic daemon is not running'
 	exit 1
 fi
 
 # kresd daemon must be running
-if ! supervisorctl-is-state kresd RUNNING; then
+if ! is-sv-state kresd run; then
 	>&2 printf '%s\n' 'kresd daemon is not running'
 	exit 1
 fi

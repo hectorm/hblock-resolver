@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eu
+
+cd ~/
+exec 2>&1
+exec kresd \
+	--forks=1 \
+	--keyfile-ro=/usr/share/dns/root.key \
+	--config=/etc/knot-resolver/kresd.conf
