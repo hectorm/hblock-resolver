@@ -2,7 +2,7 @@ FROM ubuntu:18.04 AS build-tini
 ###############################
 
 # Install system packages
-RUN DEBIAN_FRONTEND=noninteractive \
+RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		build-essential \
@@ -45,7 +45,7 @@ FROM ubuntu:18.04 AS build-knot-resolver
 ########################################
 
 # Install system packages
-RUN DEBIAN_FRONTEND=noninteractive \
+RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		autoconf \
@@ -163,7 +163,7 @@ ENV KRESD_NIC=
 ENV KRESD_CERT_MODE=self-signed
 
 # Install system packages
-RUN DEBIAN_FRONTEND=noninteractive \
+RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		ca-certificates \
