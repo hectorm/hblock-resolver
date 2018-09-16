@@ -188,6 +188,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
 		liburcu6 \
 		libuv1 \
 		luajit \
+		openssl \
 		runit \
 	&& rm -rf /var/lib/apt/lists/*
 
