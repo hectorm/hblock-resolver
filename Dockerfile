@@ -146,7 +146,7 @@ RUN git clone --recursive "${KNOT_RESOLVER_REMOTE}" /tmp/knot-resolver/ \
 	&& /usr/sbin/kresd --version
 
 # Download hBlock
-ARG HBLOCK_BRANCH=v1.6.7
+ARG HBLOCK_BRANCH=v1.6.9
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 RUN git clone --recursive "${HBLOCK_REMOTE}" /tmp/hblock/ \
 	&& cd /tmp/hblock/ \
