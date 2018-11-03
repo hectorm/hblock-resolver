@@ -115,7 +115,7 @@ RUN git clone --recursive "${KNOT_DNS_REMOTE}" /tmp/knot-dns/ \
 	&& /usr/bin/khost --version
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_BRANCH=v3.0.0
+ARG KNOT_RESOLVER_BRANCH=v3.1.0
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK=false
 ARG KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK=false
