@@ -8,18 +8,20 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		build-essential \
 		ca-certificates \
 		cmake \
-		git \
-	&& rm -rf /var/lib/apt/lists/*
+		git
 
 # Build Tiny
-ARG TINY_BRANCH=v0.18.0
+ARG TINY_TREEISH=v0.18.0
 ARG TINY_REMOTE=https://github.com/krallin/tini.git
-RUN git clone --recursive "${TINY_REMOTE}" /tmp/tini/ \
-	&& cd /tmp/tini/ \
-	&& git checkout "${TINY_BRANCH}" \
+RUN mkdir -p /tmp/tini/ && cd /tmp/tini/ \
+	&& git clone --recursive "${TINY_REMOTE}" ./ \
+	&& git checkout "${TINY_TREEISH}"
+RUN cd /tmp/tini/ \
 	&& export CFLAGS='-DPR_SET_CHILD_SUBREAPER=36 -DPR_GET_CHILD_SUBREAPER=37' \
 	&& cmake . -DCMAKE_INSTALL_PREFIX=/usr \
-	&& make -j$(nproc) install
+	&& make -j$(nproc) \
+	&& make install \
+	&& /usr/bin/tini --version
 
 FROM golang:1-stretch AS build-supercronic
 ##########################################
@@ -28,18 +30,21 @@ FROM golang:1-stretch AS build-supercronic
 RUN go get -d github.com/golang/dep \
 	&& cd "${GOPATH}/src/github.com/golang/dep" \
 	&& DEP_LATEST=$(git describe --abbrev=0 --tags) \
-	&& git checkout "${DEP_LATEST}" \
+	&& git checkout "${DEP_LATEST}"
+RUN cd "${GOPATH}/src/github.com/golang/dep" \
 	&& go install -ldflags="-X main.version=${DEP_LATEST}" ./cmd/dep \
-	&& dep version
+	&& "${GOPATH}"/bin/dep version
 
 # Build supercronic
-ARG SUPERCRONIC_BRANCH=v0.1.6
+ARG SUPERCRONIC_TREEISH=v0.1.6
 ARG SUPERCRONIC_PACKAGE=github.com/aptible/supercronic
 RUN go get -d "${SUPERCRONIC_PACKAGE}" \
 	&& cd "${GOPATH}/src/${SUPERCRONIC_PACKAGE}" \
-	&& git checkout "${SUPERCRONIC_BRANCH}" \
-	&& dep ensure \
-	&& go install
+	&& git checkout "${SUPERCRONIC_TREEISH}" \
+	&& dep ensure
+RUN cd "${GOPATH}/src/${SUPERCRONIC_PACKAGE}" \
+	&& go install \
+	&& [ -x "${GOPATH}"/bin/supercronic ]
 
 FROM ubuntu:18.04 AS build-knot-resolver
 ########################################
@@ -52,8 +57,10 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		automake \
 		build-essential \
 		ca-certificates \
+		checkinstall \
 		cmake \
 		dns-root-data \
+		gawk \
 		git \
 		libaugeas0 \
 		libcap-ng-dev \
@@ -82,8 +89,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		python3-pip \
 		python3-setuptools \
 		python3-wheel \
-		xxd \
-	&& rm -rf /var/lib/apt/lists/*
+		xxd
 
 # Install luarocks packages
 RUN HOST_MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" \
@@ -98,46 +104,62 @@ RUN HOST_MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" \
 		CRYPTO_LIBDIR="/usr/lib/${HOST_MULTIARCH}"
 
 # Build Knot DNS (only libknot and utilities)
-ARG KNOT_DNS_BRANCH=v2.7.3
+ARG KNOT_DNS_TREEISH=v2.7.3
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
-RUN git clone --recursive "${KNOT_DNS_REMOTE}" /tmp/knot-dns/ \
-	&& cd /tmp/knot-dns/ \
-	&& git checkout "${KNOT_DNS_BRANCH}" \
+RUN mkdir -p /tmp/knot-dns/ && cd /tmp/knot-dns/ \
+	&& git clone --recursive "${KNOT_DNS_REMOTE}" ./ \
+	&& git checkout "${KNOT_DNS_TREEISH}"
+RUN cd /tmp/knot-dns/ \
 	&& ./autogen.sh \
 	&& ./configure \
 		--prefix=/usr \
 		--disable-daemon \
 		--disable-modules \
 		--disable-documentation \
+		--enable-fastparser \
+		--enable-dnstap \
 		--enable-utilities \
-	&& make -j$(nproc) install \
+	&& make -j$(nproc) \
+	&& checkinstall --default \
+		--pkgname=knot-dns \
+		--pkgversion=0 --pkgrelease=0 \
+		--exclude=/usr/include/,/usr/lib/pkgconfig/,/usr/share/man/ \
+		--nodoc \
+		make install \
 	&& /usr/bin/kdig --version \
 	&& /usr/bin/khost --version
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_BRANCH=v3.1.0
+ARG KNOT_RESOLVER_TREEISH=v3.1.0
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK=false
 ARG KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK=false
-RUN git clone --recursive "${KNOT_RESOLVER_REMOTE}" /tmp/knot-resolver/ \
-	&& cd /tmp/knot-resolver/ \
-	&& git checkout "${KNOT_RESOLVER_BRANCH}" \
-	&& pip3 install --user -r tests/deckard/requirements.txt \
-	&& make \
+RUN mkdir -p /tmp/knot-resolver/ && cd /tmp/knot-resolver/ \
+	&& git clone --recursive "${KNOT_RESOLVER_REMOTE}" ./ \
+	&& git checkout "${KNOT_RESOLVER_TREEISH}" \
+	&& pip3 install --user -r tests/deckard/requirements.txt
+RUN cd /tmp/knot-resolver/ \
+	&& export \
 		CFLAGS='-O2 -fstack-protector' \
 		PREFIX=/usr \
 		ETCDIR=/etc/knot-resolver \
 		MODULEDIR=/usr/lib/knot-resolver \
 		ROOTHINTS=/usr/share/dns/root.hints \
-		-j$(nproc) check install \
-	&& rm /etc/knot-resolver/root.hints \
-	&& if ! make PREFIX=/usr installcheck; then \
+	&& make -j$(nproc) \
+	&& make check \
+	&& checkinstall --default \
+		--pkgname=knot-resolver \
+		--pkgversion=0 --pkgrelease=0 \
+		--exclude=/usr/include/,/usr/lib/pkgconfig/,/usr/share/man/ \
+		--nodoc \
+		make install \
+	&& if ! make installcheck; then \
 		>&2 printf '%s\n' 'Installation check failed'; \
 		if [ "${KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK}" = true ]; then \
 			exit 1; \
 		fi; \
 	fi \
-	&& if ! make PREFIX=/usr check-integration; then \
+	&& if ! make check-integration; then \
 		>&2 printf '%s\n' 'Integration check failed'; \
 		if [ "${KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK}" = true ]; then \
 			exit 1; \
@@ -146,13 +168,13 @@ RUN git clone --recursive "${KNOT_RESOLVER_REMOTE}" /tmp/knot-resolver/ \
 	&& /usr/sbin/kresd --version
 
 # Download hBlock
-ARG HBLOCK_BRANCH=v1.6.9
+ARG HBLOCK_TREEISH=v1.6.9
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
-RUN git clone --recursive "${HBLOCK_REMOTE}" /tmp/hblock/ \
-	&& cd /tmp/hblock/ \
-	&& git checkout "${HBLOCK_BRANCH}" \
-	&& mv ./hblock /usr/bin/hblock \
-	&& chmod 755 /usr/bin/hblock \
+RUN mkdir -p /tmp/hblock/ && cd /tmp/hblock/ \
+	&& git clone --recursive "${HBLOCK_REMOTE}" ./ \
+	&& git checkout "${HBLOCK_TREEISH}"
+RUN cd /tmp/hblock/ \
+	&& install -m 0755 ./hblock /usr/bin/hblock \
 	&& /usr/bin/hblock --version
 
 FROM ubuntu:18.04
@@ -202,19 +224,13 @@ COPY --from=build-supercronic --chown=root:root /go/bin/supercronic /usr/bin/sup
 COPY --from=build-knot-resolver --chown=root:root /usr/local/lib/lua/ /usr/local/lib/lua/
 COPY --from=build-knot-resolver --chown=root:root /usr/local/share/lua/ /usr/local/share/lua/
 
-# Copy Knot DNS installation
-COPY --from=build-knot-resolver --chown=root:root /usr/lib/libknot.* /usr/lib/
-COPY --from=build-knot-resolver --chown=root:root /usr/lib/libdnssec.* /usr/lib/
-COPY --from=build-knot-resolver --chown=root:root /usr/lib/libzscanner.* /usr/lib/
-COPY --from=build-knot-resolver --chown=root:root /usr/bin/kdig /usr/bin/kdig
-COPY --from=build-knot-resolver --chown=root:root /usr/bin/khost /usr/bin/khost
+# Install Knot DNS from package
+COPY --from=build-knot-resolver --chown=root:root /tmp/knot-dns/knot-dns_*.deb /tmp/
+RUN dpkg -i /tmp/knot-dns_*.deb && rm /tmp/knot-dns_*.deb
 
-# Copy Knot Resolver installation
-COPY --from=build-knot-resolver --chown=root:root /etc/knot-resolver/ /etc/knot-resolver/
-COPY --from=build-knot-resolver --chown=root:root /usr/lib/knot-resolver/ /usr/lib/knot-resolver/
-COPY --from=build-knot-resolver --chown=root:root /usr/lib/libkres.* /usr/lib/
-COPY --from=build-knot-resolver --chown=root:root /usr/sbin/kresc /usr/sbin/kresc
-COPY --from=build-knot-resolver --chown=root:root /usr/sbin/kresd /usr/sbin/kresd
+# Install Knot Resolver from package
+COPY --from=build-knot-resolver --chown=root:root /tmp/knot-resolver/knot-resolver_*.deb /tmp/
+RUN dpkg -i /tmp/knot-resolver_*.deb && rm /tmp/knot-resolver_*.deb
 
 # Copy hBlock script
 COPY --from=build-knot-resolver --chown=root:root /usr/bin/hblock /usr/bin/hblock
