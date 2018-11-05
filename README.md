@@ -49,8 +49,8 @@ If equals to `self-signed` (**default**), a self-signed certificate will be gene
 ```
 
 ## Additional configuration
-Main Knot DNS Resolver configuration is located in `/etc/knot-resolver/kresd.conf`. If you want add your own configuration you should modify
-`/var/lib/knot-resolver/kresd.extra.conf`, which is loaded after the main configuration.
+Main Knot DNS Resolver configuration is located in `/etc/knot-resolver/kresd.conf`. If you would like to add additional configuration, add one or more
+`*.conf` files under `/etc/knot-resolver/kresd.conf.d/`.
 
 ## License
 See the [license](https://github.com/hectorm/hblock-resolver/blob/master/LICENSE.md) file.

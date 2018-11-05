@@ -96,6 +96,7 @@ RUN HOST_MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" \
 	&& printf '%s\n' \
 		cqueues \
 		http \
+		luafilesystem \
 		luasec \
 		luasocket \
 		mmdblua \
@@ -251,7 +252,7 @@ RUN mkdir /var/lib/knot-resolver/ \
 
 # Copy kresd config
 COPY --chown=root:root config/kresd.conf.lua /etc/knot-resolver/kresd.conf
-COPY --chown=knot-resolver:knot-resolver config/kresd.extra.conf.lua /var/lib/knot-resolver/kresd.extra.conf
+COPY --chown=root:root config/kresd.extra.conf.lua /etc/knot-resolver/kresd.conf.d/extra.conf
 
 # Copy services
 COPY --chown=knot-resolver:knot-resolver scripts/service/ /home/knot-resolver/service/
