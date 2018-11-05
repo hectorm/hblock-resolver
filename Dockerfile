@@ -274,8 +274,10 @@ EXPOSE 853/tcp
 ## HTTPS interface
 EXPOSE 8053/tcp
 
+# Don't declare volumes, let the user decide
+#VOLUME /var/lib/knot-resolver/
+
 WORKDIR /var/lib/knot-resolver/
-VOLUME /var/lib/knot-resolver/
 
 HEALTHCHECK --start-period=60s --interval=30s --timeout=5s --retries=3 \
 	CMD /usr/local/bin/docker-healthcheck-cmd
