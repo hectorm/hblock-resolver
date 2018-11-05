@@ -26,6 +26,18 @@ if containerExists "${DOCKER_CONTAINER}"; then
 	docker rm "${DOCKER_CONTAINER}" >/dev/null
 fi
 
+if [ -z "${KRESD_ADDITIONAL_CONF_DIR-}" ] && [ -d '/etc/knot-resolver/kresd.conf.d/' ]; then
+	KRESD_ADDITIONAL_CONF_DIR='/etc/knot-resolver/kresd.conf.d/'
+fi
+
+if [ -z "${KRESD_EXTERNAL_CERT_KEY-}" ] && [ -f '/etc/knot-resolver/ssl/server.key' ]; then
+	KRESD_EXTERNAL_CERT_KEY='/etc/knot-resolver/ssl/server.key'
+fi
+
+if [ -z "${KRESD_EXTERNAL_CERT-}" ] && [ -f '/etc/knot-resolver/ssl/server.crt' ]; then
+	KRESD_EXTERNAL_CERT='/etc/knot-resolver/ssl/server.crt'
+fi
+
 printf -- '%s\n' "Creating \"${DOCKER_CONTAINER}\" container..."
 exec docker run --detach \
 	--name "${DOCKER_CONTAINER}" \
@@ -36,10 +48,13 @@ exec docker run --detach \
 	--publish '53:53/udp' \
 	--publish '127.0.0.1:8053:8053/tcp' --publish '[::1]:8053:8053/tcp' \
 	--mount type=volume,src="${DOCKER_VOLUME}",dst='/var/lib/knot-resolver/' \
-	${EXTERNAL_SERVER_CERT+ \
-		--publish '853:853/tcp' \
-		--mount type=bind,src="${EXTERNAL_SERVER_KEY}",dst='/var/lib/knot-resolver/ssl/server.key',ro \
-		--mount type=bind,src="${EXTERNAL_SERVER_CERT}",dst='/var/lib/knot-resolver/ssl/server.crt',ro \
-		--env KRESD_CERT_MODE=external \
+	${KRESD_ADDITIONAL_CONF_DIR+ \
+		--mount type=bind,src="${KRESD_ADDITIONAL_CONF_DIR}",dst='/etc/knot-resolver/kresd.conf.d/',ro \
 	} \
+	${KRESD_EXTERNAL_CERT_KEY+${KRESD_EXTERNAL_CERT+ \
+		--publish '853:853/tcp' \
+		--mount type=bind,src="${KRESD_EXTERNAL_CERT_KEY}",dst='/var/lib/knot-resolver/ssl/server.key',ro \
+		--mount type=bind,src="${KRESD_EXTERNAL_CERT}",dst='/var/lib/knot-resolver/ssl/server.crt',ro \
+		--env KRESD_CERT_MODE=external \
+	}} \
 	"${DOCKER_IMAGE}" "$@"
