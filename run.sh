@@ -3,9 +3,13 @@
 set -eu
 export LC_ALL=C
 
-DOCKER_IMAGE=hectormolinero/hblock-resolver:latest
-DOCKER_CONTAINER=hblock-resolver
-DOCKER_VOLUME="${DOCKER_CONTAINER}"-data
+DOCKER_IMAGE_NAMESPACE=hectormolinero
+DOCKER_IMAGE_NAME=hblock-resolver
+DOCKER_IMAGE_VERSION=latest
+DOCKER_IMAGE_ARCH=amd64
+DOCKER_IMAGE=${DOCKER_IMAGE_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VERSION}-${DOCKER_IMAGE_ARCH}
+DOCKER_CONTAINER=${DOCKER_IMAGE_NAME}
+DOCKER_VOLUME=${DOCKER_CONTAINER}-data
 
 imageExists() { [ -n "$(docker images -q "$1")" ]; }
 containerExists() { docker ps -aqf name="$1" --format '{{.Names}}' | grep -Fxq "$1"; }
