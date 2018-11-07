@@ -133,8 +133,8 @@ RUN cd /tmp/knot-dns/ \
 # Build Knot Resolver
 ARG KNOT_RESOLVER_TREEISH=v3.1.0
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
-ARG KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK=false
-ARG KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK=false
+ARG KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true
+ARG KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true
 RUN mkdir -p /tmp/knot-resolver/ && cd /tmp/knot-resolver/ \
 	&& git clone --recursive "${KNOT_RESOLVER_REMOTE}" ./ \
 	&& git checkout "${KNOT_RESOLVER_TREEISH}" \
@@ -154,17 +154,11 @@ RUN cd /tmp/knot-resolver/ \
 		--exclude=/usr/include/,/usr/lib/pkgconfig/,/usr/share/man/ \
 		--nodoc \
 		make install \
-	&& if ! make installcheck; then \
-		>&2 printf '%s\n' 'Installation check failed'; \
-		if [ "${KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK}" = true ]; then \
-			exit 1; \
-		fi; \
+	&& if [ "${KNOT_RESOLVER_SKIP_INSTALLATION_CHECK}" != true ]; then \
+		make installcheck || exit 1; \
 	fi \
-	&& if ! make check-integration; then \
-		>&2 printf '%s\n' 'Integration check failed'; \
-		if [ "${KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK}" = true ]; then \
-			exit 1; \
-		fi; \
+	&& if [ "${KNOT_RESOLVER_SKIP_INTEGRATION_CHECK}" != true ]; then \
+		make check-integration || exit 1; \
 	fi \
 	&& /usr/sbin/kresd --version
 

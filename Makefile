@@ -24,8 +24,8 @@ build: save-image
 build-image:
 	docker build \
 		--tag '$(DOCKER_IMAGE):$(DOCKER_IMAGE_TAG)' \
-		--build-arg KNOT_RESOLVER_REQUIRE_INSTALLATION_CHECK=true \
-		--build-arg KNOT_RESOLVER_REQUIRE_INTEGRATION_CHECK=true \
+		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=false \
+		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=false \
 		--file '$(DOCKERFILE)' \
 		-- '$(MKFILE_DIR)'
 
