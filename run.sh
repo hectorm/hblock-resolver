@@ -54,7 +54,7 @@ if [ -z "${KRESD_EXTERNAL_CERT-}" ] && [ -f '/etc/hblock-resolver/ssl/server.crt
 fi
 
 printf -- '%s\n' "Creating \"${DOCKER_CONTAINER}\" container..."
-exec docker run --detach \
+docker run --detach \
 	--name "${DOCKER_CONTAINER}" \
 	--hostname "${DOCKER_CONTAINER}" \
 	--restart on-failure:3 \
@@ -84,4 +84,7 @@ exec docker run --detach \
 	${KRESD_ADDITIONAL_CONF_DIR+ \
 		--mount type=bind,src="${KRESD_ADDITIONAL_CONF_DIR}",dst='/etc/knot-resolver/kresd.conf.d/',ro \
 	} \
-	"${DOCKER_IMAGE}" "$@"
+	"${DOCKER_IMAGE}" "$@" >/dev/null
+
+printf -- '%s\n\n' 'Done!'
+exec docker logs -f "${DOCKER_CONTAINER}"
