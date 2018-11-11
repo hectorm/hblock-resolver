@@ -1,32 +1,29 @@
-FROM ubuntu:18.04 AS build-tini
-###############################
+m4_changequote([[, ]])
+
+m4_ifdef([[CROSS_QEMU]], [[
+##################################################
+## "qemu-user-static" stage
+##################################################
+
+FROM ubuntu:18.04 AS qemu-user-static
+RUN DEBIAN_FRONTEND=noninteractive \
+	&& apt-get update \
+	&& apt-get install -y --no-install-recommends qemu-user-static
+]])
+
+##################################################
+## "build-golang" stage
+##################################################
+
+FROM golang:1-stretch AS build-golang
 
 # Install system packages
-RUN export DEBIAN_FRONTEND=noninteractive \
+RUN DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
-		build-essential \
-		ca-certificates \
-		cmake \
-		git
+		file
 
-# Build Tiny
-ARG TINY_TREEISH=v0.18.0
-ARG TINY_REMOTE=https://github.com/krallin/tini.git
-RUN mkdir -p /tmp/tini/ && cd /tmp/tini/ \
-	&& git clone --recursive "${TINY_REMOTE}" ./ \
-	&& git checkout "${TINY_TREEISH}"
-RUN cd /tmp/tini/ \
-	&& export CFLAGS='-DPR_SET_CHILD_SUBREAPER=36 -DPR_GET_CHILD_SUBREAPER=37' \
-	&& cmake . -DCMAKE_INSTALL_PREFIX=/usr \
-	&& make -j$(nproc) \
-	&& make install \
-	&& /usr/bin/tini --version
-
-FROM golang:1-stretch AS build-supercronic
-##########################################
-
-# Build dep
+# Build Dep
 RUN go get -d github.com/golang/dep \
 	&& cd "${GOPATH}/src/github.com/golang/dep" \
 	&& DEP_LATEST=$(git describe --abbrev=0 --tags) \
@@ -35,7 +32,7 @@ RUN cd "${GOPATH}/src/github.com/golang/dep" \
 	&& go install -ldflags="-X main.version=${DEP_LATEST}" ./cmd/dep \
 	&& "${GOPATH}"/bin/dep version
 
-# Build supercronic
+# Build Supercronic
 ARG SUPERCRONIC_TREEISH=v0.1.6
 ARG SUPERCRONIC_PACKAGE=github.com/aptible/supercronic
 RUN go get -d "${SUPERCRONIC_PACKAGE}" \
@@ -43,14 +40,22 @@ RUN go get -d "${SUPERCRONIC_PACKAGE}" \
 	&& git checkout "${SUPERCRONIC_TREEISH}" \
 	&& dep ensure
 RUN cd "${GOPATH}/src/${SUPERCRONIC_PACKAGE}" \
-	&& go install \
-	&& [ -x "${GOPATH}"/bin/supercronic ]
+	&& export GOOS=m4_ifdef([[CROSS_GOOS]], [[CROSS_GOOS]]) \
+	&& export GOARCH=m4_ifdef([[CROSS_GOARCH]], [[CROSS_GOARCH]]) \
+	&& export GOARM=m4_ifdef([[CROSS_GOARM]], [[CROSS_GOARM]]) \
+	&& go build \
+	&& file ./supercronic \
+	&& mv ./supercronic "${GOPATH}"/bin/supercronic
 
-FROM ubuntu:18.04 AS build-knot-resolver
-########################################
+##################################################
+## "build-main" stage
+##################################################
+
+m4_ifdef([[CROSS_ARCH]], [[FROM CROSS_ARCH/ubuntu:18.04]], [[FROM ubuntu:18.04]]) AS build-main
+m4_ifdef([[CROSS_QEMU]], [[COPY --from=qemu-user-static CROSS_QEMU CROSS_QEMU]])
 
 # Install system packages
-RUN export DEBIAN_FRONTEND=noninteractive \
+RUN DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		autoconf \
@@ -91,8 +96,21 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		python3-wheel \
 		xxd
 
-# Install luarocks packages
-RUN HOST_MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" \
+# Build Tiny
+ARG TINY_TREEISH=v0.18.0
+ARG TINY_REMOTE=https://github.com/krallin/tini.git
+RUN mkdir -p /tmp/tini/ && cd /tmp/tini/ \
+	&& git clone --recursive "${TINY_REMOTE}" ./ \
+	&& git checkout "${TINY_TREEISH}"
+RUN cd /tmp/tini/ \
+	&& export CFLAGS='-DPR_SET_CHILD_SUBREAPER=36 -DPR_GET_CHILD_SUBREAPER=37' \
+	&& cmake . -DCMAKE_INSTALL_PREFIX=/usr \
+	&& make -j$(nproc) \
+	&& make install \
+	&& /usr/bin/tini --version
+
+# Install LuaRocks packages
+RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 	&& printf '%s\n' \
 		cqueues \
 		http \
@@ -133,19 +151,18 @@ RUN cd /tmp/knot-dns/ \
 # Build Knot Resolver
 ARG KNOT_RESOLVER_TREEISH=v3.1.0
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
-ARG KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true
-ARG KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true
+ARG KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=false
+ARG KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=false
 RUN mkdir -p /tmp/knot-resolver/ && cd /tmp/knot-resolver/ \
 	&& git clone --recursive "${KNOT_RESOLVER_REMOTE}" ./ \
 	&& git checkout "${KNOT_RESOLVER_TREEISH}" \
 	&& pip3 install --user -r tests/deckard/requirements.txt
 RUN cd /tmp/knot-resolver/ \
-	&& export \
-		CFLAGS='-O2 -fstack-protector' \
-		PREFIX=/usr \
-		ETCDIR=/etc/knot-resolver \
-		MODULEDIR=/usr/lib/knot-resolver \
-		ROOTHINTS=/usr/share/dns/root.hints \
+	&& export CFLAGS='-O2 -fstack-protector' \
+	&& export PREFIX=/usr \
+	&& export ETCDIR=/etc/knot-resolver \
+	&& export MODULEDIR=/usr/lib/knot-resolver \
+	&& export ROOTHINTS=/usr/share/dns/root.hints \
 	&& make -j$(nproc) \
 	&& make check \
 	&& checkinstall --default \
@@ -172,15 +189,19 @@ RUN cd /tmp/hblock/ \
 	&& install -m 0755 ./hblock /usr/bin/hblock \
 	&& /usr/bin/hblock --version
 
-FROM ubuntu:18.04
-#################
+##################################################
+## "hblock-resolver" stage
+##################################################
+
+m4_ifdef([[CROSS_ARCH]], [[FROM CROSS_ARCH/ubuntu:18.04]], [[FROM ubuntu:18.04]]) AS hblock-resolver
+m4_ifdef([[CROSS_QEMU]], [[COPY --from=qemu-user-static CROSS_QEMU CROSS_QEMU]])
 
 # Environment
 ENV KRESD_NIC=
 ENV KRESD_CERT_MODE=self-signed
 
 # Install system packages
-RUN export DEBIAN_FRONTEND=noninteractive \
+RUN DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		ca-certificates \
@@ -209,26 +230,26 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		runit \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Copy tini binary
-COPY --from=build-tini --chown=root:root /usr/bin/tini /usr/bin/tini
+# Copy Supercronic binary
+COPY --from=build-golang --chown=root:root /go/bin/supercronic /usr/bin/supercronic
 
-# Copy supercronic binary
-COPY --from=build-supercronic --chown=root:root /go/bin/supercronic /usr/bin/supercronic
+# Copy Tini binary
+COPY --from=build-main --chown=root:root /usr/bin/tini /usr/bin/tini
 
-# Copy luarocks packages
-COPY --from=build-knot-resolver --chown=root:root /usr/local/lib/lua/ /usr/local/lib/lua/
-COPY --from=build-knot-resolver --chown=root:root /usr/local/share/lua/ /usr/local/share/lua/
+# Copy LuaRocks packages
+COPY --from=build-main --chown=root:root /usr/local/lib/lua/ /usr/local/lib/lua/
+COPY --from=build-main --chown=root:root /usr/local/share/lua/ /usr/local/share/lua/
 
 # Install Knot DNS from package
-COPY --from=build-knot-resolver --chown=root:root /tmp/knot-dns/knot-dns_*.deb /tmp/
+COPY --from=build-main --chown=root:root /tmp/knot-dns/knot-dns_*.deb /tmp/
 RUN dpkg -i /tmp/knot-dns_*.deb && rm /tmp/knot-dns_*.deb
 
 # Install Knot Resolver from package
-COPY --from=build-knot-resolver --chown=root:root /tmp/knot-resolver/knot-resolver_*.deb /tmp/
+COPY --from=build-main --chown=root:root /tmp/knot-resolver/knot-resolver_*.deb /tmp/
 RUN dpkg -i /tmp/knot-resolver_*.deb && rm /tmp/knot-resolver_*.deb
 
 # Copy hBlock script
-COPY --from=build-knot-resolver --chown=root:root /usr/bin/hblock /usr/bin/hblock
+COPY --from=build-main --chown=root:root /usr/bin/hblock /usr/bin/hblock
 
 # Add capabilities to the kresd binary
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd

@@ -1,51 +1,201 @@
 #!/usr/bin/make -f
 
-MKFILE_RELPATH := $(shell printf -- '%s' '$(MAKEFILE_LIST)' | sed 's|^\ ||')
-MKFILE_ABSPATH := $(shell readlink -f -- '$(MKFILE_RELPATH)')
-MKFILE_DIR := $(shell dirname -- '$(MKFILE_ABSPATH)')
+SHELL := /bin/sh
+.SHELLFLAGS = -eu -c
 
-DIST_DIR := $(MKFILE_DIR)/dist
+M4 := $(shell command -v m4 2>/dev/null)
+DOCKER := $(shell command -v docker 2>/dev/null)
 
-DOCKER_IMAGE_NAMESPACE := hectormolinero
-DOCKER_IMAGE_NAME := hblock-resolver
-DOCKER_IMAGE_VERSION := latest
-DOCKER_IMAGE_TAG := $(DOCKER_IMAGE_VERSION)
-DOCKER_IMAGE := $(DOCKER_IMAGE_NAMESPACE)/$(DOCKER_IMAGE_NAME)
-DOCKER_CONTAINER := $(DOCKER_IMAGE_NAME)
-DOCKERFILE := $(MKFILE_DIR)/Dockerfile
+DISTDIR := ./dist
+
+IMAGE_NAMESPACE := hectormolinero
+IMAGE_NAME := hblock-resolver
+IMAGE_VERSION := edge
+
+IMAGE_LATEST_TAG := $(IMAGE_NAMESPACE)/$(IMAGE_NAME):latest
+IMAGE_VERSION_TAG := $(IMAGE_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_VERSION)
+
+IMAGE_NATIVE_DOCKERFILE := $(DISTDIR)/Dockerfile
+IMAGE_NATIVE_TARBALL := $(DISTDIR)/$(IMAGE_NAME).tgz
+
+IMAGE_AMD64_DOCKERFILE := $(DISTDIR)/Dockerfile.amd64
+IMAGE_AMD64_TARBALL := $(DISTDIR)/$(IMAGE_NAME).amd64.tgz
+
+IMAGE_ARM32V7_DOCKERFILE := $(DISTDIR)/Dockerfile.arm32v7
+IMAGE_ARM32V7_TARBALL := $(DISTDIR)/$(IMAGE_NAME).arm32v7.tgz
+
+IMAGE_ARM64V8_DOCKERFILE := $(DISTDIR)/Dockerfile.arm64v8
+IMAGE_ARM64V8_TARBALL := $(DISTDIR)/$(IMAGE_NAME).arm64v8.tgz
+
+DOCKERFILE_TEMPLATE := ./Dockerfile.m4
+
+##################################################
+## "all" target
+##################################################
 
 .PHONY: all
-all: build
+all: save-native-image
 
-.PHONY: build
-build: save-image
+##################################################
+## "build-*" targets
+##################################################
 
-.PHONY: build-image
-build-image:
-	docker build \
-		--tag '$(DOCKER_IMAGE):$(DOCKER_IMAGE_TAG)' \
-		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=false \
-		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=false \
-		--file '$(DOCKERFILE)' \
-		-- '$(MKFILE_DIR)'
+.PHONY: build-native-image
+build-native-image: $(IMAGE_NATIVE_DOCKERFILE)
 
-.PHONY: save-image
-save-image: build-image
-	mkdir -p -- '$(DIST_DIR)'
-	docker save -- '$(DOCKER_IMAGE):$(DOCKER_IMAGE_TAG)' | gzip > '$(DIST_DIR)/$(DOCKER_IMAGE_NAME).$(DOCKER_IMAGE_TAG).tgz'
+$(IMAGE_NATIVE_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
+	mkdir -p '$(DISTDIR)'
+	'$(M4)' \
+		--prefix-builtins \
+		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
+	'$(DOCKER)' build \
+		--tag '$(IMAGE_LATEST_TAG)' \
+		--tag '$(IMAGE_VERSION_TAG)' \
+		--file '$@' ./
+
+.PHONY: build-cross-images
+build-cross-images: build-amd64-image build-arm32v7-image build-arm64v8-image
+
+.PHONY: build-amd64-image
+build-amd64-image: $(IMAGE_AMD64_DOCKERFILE)
+
+$(IMAGE_AMD64_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
+	mkdir -p '$(DISTDIR)'
+	'$(M4)' \
+		--prefix-builtins \
+		-D CROSS_ARCH=amd64 \
+		-D CROSS_QEMU=/usr/bin/qemu-x86_64-static \
+		-D CROSS_GOOS=linux -D CROSS_GOARCH=amd64 \
+		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
+	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-amd64' || true
+	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-amd64' \
+		--tag '$(IMAGE_LATEST_TAG)-amd64' \
+		--tag '$(IMAGE_VERSION_TAG)-amd64' \
+		--file '$@' ./
+
+.PHONY: build-arm32v7-image
+build-arm32v7-image: $(IMAGE_ARM32V7_DOCKERFILE)
+
+$(IMAGE_ARM32V7_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
+	mkdir -p '$(DISTDIR)'
+	'$(M4)' \
+		--prefix-builtins \
+		-D CROSS_ARCH=arm32v7 \
+		-D CROSS_QEMU=/usr/bin/qemu-arm-static \
+		-D CROSS_GOOS=linux -D CROSS_GOARCH=arm -D CROSS_GOARM=7 \
+		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
+	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-arm32v7' || true
+	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-arm32v7' \
+		--tag '$(IMAGE_LATEST_TAG)-arm32v7' \
+		--tag '$(IMAGE_VERSION_TAG)-arm32v7' \
+		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true \
+		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true \
+		--file '$@' ./
+
+.PHONY: build-arm64v8-image
+build-arm64v8-image: $(IMAGE_ARM64V8_DOCKERFILE)
+
+$(IMAGE_ARM64V8_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
+	mkdir -p '$(DISTDIR)'
+	'$(M4)' \
+		--prefix-builtins \
+		-D CROSS_ARCH=arm64v8 \
+		-D CROSS_QEMU=/usr/bin/qemu-aarch64-static \
+		-D CROSS_GOOS=linux -D CROSS_GOARCH=arm64 \
+		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
+	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-arm64v8' || true
+	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-arm64v8' \
+		--tag '$(IMAGE_LATEST_TAG)-arm64v8' \
+		--tag '$(IMAGE_VERSION_TAG)-arm64v8' \
+		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true \
+		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true \
+		--file '$@' ./
+
+##################################################
+## "save-*" targets
+##################################################
+
+.PHONY: save-native-image
+save-native-image: $(IMAGE_NATIVE_TARBALL)
+
+$(IMAGE_NATIVE_TARBALL): $(IMAGE_NATIVE_DOCKERFILE)
+	'$(DOCKER)' save '$(IMAGE_VERSION_TAG)' | gzip -n > '$@'
+
+.PHONY: save-cross-images
+save-cross-images: save-amd64-image save-arm32v7-image save-arm64v8-image
+
+.PHONY: save-amd64-image
+save-amd64-image: $(IMAGE_AMD64_TARBALL)
+
+$(IMAGE_AMD64_TARBALL): $(IMAGE_AMD64_DOCKERFILE)
+	'$(DOCKER)' save '$(IMAGE_VERSION_TAG)-amd64' | gzip -n > '$@'
+
+.PHONY: save-arm32v7-image
+save-arm32v7-image: $(IMAGE_ARM32V7_TARBALL)
+
+$(IMAGE_ARM32V7_TARBALL): $(IMAGE_ARM32V7_DOCKERFILE)
+	'$(DOCKER)' save '$(IMAGE_VERSION_TAG)-arm32v7' | gzip -n > '$@'
+
+.PHONY: save-arm64v8-image
+save-arm64v8-image: $(IMAGE_ARM64V8_TARBALL)
+
+$(IMAGE_ARM64V8_TARBALL): $(IMAGE_ARM64V8_DOCKERFILE)
+	'$(DOCKER)' save '$(IMAGE_VERSION_TAG)-arm64v8' | gzip -n > '$@'
+
+##################################################
+## "push-*" targets
+##################################################
+
+define push_manifest
+	'$(DOCKER)' manifest create --amend '$(1)' '$(1)-amd64' '$(1)-arm32v7' '$(1)-arm64v8'
+	'$(DOCKER)' manifest annotate '$(1)' '$(1)-amd64' --os linux --arch amd64
+	'$(DOCKER)' manifest annotate '$(1)' '$(1)-arm32v7' --os linux --arch arm --variant v7
+	'$(DOCKER)' manifest annotate '$(1)' '$(1)-arm64v8' --os linux --arch arm64 --variant v8
+	'$(DOCKER)' manifest push --purge '$(1)'
+endef
+
+.PHONY: push-native-image
+push-native-image: $(IMAGE_NATIVE_DOCKERFILE)
+	@printf '%s\n' 'Unimplemented'
+
+.PHONY: push-cross-images
+push-cross-images: push-amd64-image push-arm32v7-image push-arm64v8-image
+	$(call push_manifest,$(IMAGE_LATEST_TAG))
+	$(call push_manifest,$(IMAGE_VERSION_TAG))
+
+.PHONY: push-amd64-image
+push-amd64-image: $(IMAGE_AMD64_DOCKERFILE)
+	'$(DOCKER)' push '$(IMAGE_LATEST_TAG)-amd64'
+	'$(DOCKER)' push '$(IMAGE_VERSION_TAG)-amd64'
+
+.PHONY: push-arm32v7-image
+push-arm32v7-image: $(IMAGE_ARM32V7_DOCKERFILE)
+	'$(DOCKER)' push '$(IMAGE_LATEST_TAG)-arm32v7'
+	'$(DOCKER)' push '$(IMAGE_VERSION_TAG)-arm32v7'
+
+.PHONY: push-arm64v8-image
+push-arm64v8-image: $(IMAGE_ARM64V8_DOCKERFILE)
+	'$(DOCKER)' push '$(IMAGE_LATEST_TAG)-arm64v8'
+	'$(DOCKER)' push '$(IMAGE_VERSION_TAG)-arm64v8'
+
+##################################################
+## "binfmt-*" targets
+##################################################
+
+.PHONY: binfmt-register
+binfmt-register:
+	'$(DOCKER)' run --rm --privileged multiarch/qemu-user-static:register
+
+.PHONY: binfmt-reset
+binfmt-reset:
+	'$(DOCKER)' run --rm --privileged multiarch/qemu-user-static:register --reset
+
+##################################################
+## "clean" target
+##################################################
 
 .PHONY: clean
-clean: clean-image clean-dist
-
-.PHONY: clean-image
-clean-image: clean-container
-	-docker rmi -- '$(DOCKER_IMAGE):$(DOCKER_IMAGE_TAG)'
-
-.PHONY: clean-container
-clean-container:
-	-docker stop -- '$(DOCKER_CONTAINER)'
-	-docker rm -- '$(DOCKER_CONTAINER)'
-
-.PHONY: clean-dist
-clean-dist:
-	rm -rf -- '$(DIST_DIR)'
+clean:
+	rm -f '$(IMAGE_NATIVE_DOCKERFILE)' '$(IMAGE_AMD64_DOCKERFILE)' '$(IMAGE_ARM32V7_DOCKERFILE)' '$(IMAGE_ARM64V8_DOCKERFILE)'
+	rm -f '$(IMAGE_NATIVE_TARBALL)' '$(IMAGE_AMD64_TARBALL)' '$(IMAGE_ARM32V7_TARBALL)' '$(IMAGE_ARM64V8_TARBALL)'
+	if [ -d '$(DISTDIR)' ]; then rmdir '$(DISTDIR)'; fi
