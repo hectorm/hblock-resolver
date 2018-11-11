@@ -1,6 +1,7 @@
-[![Docker Build Status](https://img.shields.io/docker/build/hectormolinero/hblock-resolver.svg)](https://hub.docker.com/r/hectormolinero/hblock-resolver/)
+[![Pipeline Status](https://gitlab.com/hectorm/hblock-resolver/badges/master/pipeline.svg)](https://gitlab.com/hectorm/hblock-resolver/pipelines)
 [![Docker Image Size](https://img.shields.io/microbadger/image-size/hectormolinero/hblock-resolver/latest.svg)](https://hub.docker.com/r/hectormolinero/hblock-resolver/)
 [![Docker Image Layers](https://img.shields.io/microbadger/layers/hectormolinero/hblock-resolver/latest.svg)](https://hub.docker.com/r/hectormolinero/hblock-resolver/)
+[![License](https://img.shields.io/github/license/hectorm/hblock-resolver.svg)](LICENSE.md)
 
 ***
 
@@ -53,4 +54,4 @@ Main Knot DNS Resolver configuration is located in `/etc/knot-resolver/kresd.con
 `*.conf` files under `/etc/knot-resolver/kresd.conf.d/`.
 
 ## License
-See the [license](https://github.com/hectorm/hblock-resolver/blob/master/LICENSE.md) file.
+See the [license](LICENSE.md) file.
