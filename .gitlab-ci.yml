@@ -21,8 +21,8 @@ build:native-image:
       IMAGE_VERSION="${CI_COMMIT_REF_SLUG}"
       build-native-image
       save-native-image
-  only:
-    - branches
+  except:
+    - tags
   artifacts:
     expire_in: 1 day
     paths:
