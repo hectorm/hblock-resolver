@@ -191,6 +191,17 @@ binfmt-reset:
 	'$(DOCKER)' run --rm --privileged multiarch/qemu-user-static:register --reset
 
 ##################################################
+## "version" target
+##################################################
+
+.PHONY: version
+version:
+	@printf '%s\n' '$(IMAGE_VERSION)' > ./VERSION
+	git add ./VERSION
+	git commit -m '$(IMAGE_VERSION)'
+	git tag -a '$(IMAGE_VERSION)' -m '$(IMAGE_VERSION)'
+
+##################################################
 ## "clean" target
 ##################################################
 
