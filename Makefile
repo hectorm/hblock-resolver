@@ -49,7 +49,6 @@ $(IMAGE_NATIVE_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		--prefix-builtins \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' build \
-		--tag '$(IMAGE_LATEST_TAG)' \
 		--tag '$(IMAGE_VERSION_TAG)' \
 		--file '$@' ./
 
@@ -69,7 +68,6 @@ $(IMAGE_AMD64_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-amd64' || true
 	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-amd64' \
-		--tag '$(IMAGE_LATEST_TAG)-amd64' \
 		--tag '$(IMAGE_VERSION_TAG)-amd64' \
 		--file '$@' ./
 
@@ -86,7 +84,6 @@ $(IMAGE_ARM32V7_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-arm32v7' || true
 	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-arm32v7' \
-		--tag '$(IMAGE_LATEST_TAG)-arm32v7' \
 		--tag '$(IMAGE_VERSION_TAG)-arm32v7' \
 		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true \
 		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true \
@@ -105,7 +102,6 @@ $(IMAGE_ARM64V8_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-arm64v8' || true
 	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-arm64v8' \
-		--tag '$(IMAGE_LATEST_TAG)-arm64v8' \
 		--tag '$(IMAGE_VERSION_TAG)-arm64v8' \
 		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true \
 		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true \
@@ -115,11 +111,15 @@ $(IMAGE_ARM64V8_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 ## "save-*" targets
 ##################################################
 
+define save_image
+	'$(DOCKER)' save '$(1)' | gzip -n > '$(2)'
+endef
+
 .PHONY: save-native-image
 save-native-image: $(IMAGE_NATIVE_TARBALL)
 
 $(IMAGE_NATIVE_TARBALL): $(IMAGE_NATIVE_DOCKERFILE)
-	'$(DOCKER)' save '$(IMAGE_VERSION_TAG)' | gzip -n > '$@'
+	$(call save_image,$(IMAGE_VERSION_TAG),$@)
 
 .PHONY: save-cross-images
 save-cross-images: save-amd64-image save-arm32v7-image save-arm64v8-image
@@ -128,55 +128,85 @@ save-cross-images: save-amd64-image save-arm32v7-image save-arm64v8-image
 save-amd64-image: $(IMAGE_AMD64_TARBALL)
 
 $(IMAGE_AMD64_TARBALL): $(IMAGE_AMD64_DOCKERFILE)
-	'$(DOCKER)' save '$(IMAGE_VERSION_TAG)-amd64' | gzip -n > '$@'
+	$(call save_image,$(IMAGE_VERSION_TAG)-amd64,$@)
 
 .PHONY: save-arm32v7-image
 save-arm32v7-image: $(IMAGE_ARM32V7_TARBALL)
 
 $(IMAGE_ARM32V7_TARBALL): $(IMAGE_ARM32V7_DOCKERFILE)
-	'$(DOCKER)' save '$(IMAGE_VERSION_TAG)-arm32v7' | gzip -n > '$@'
+	$(call save_image,$(IMAGE_VERSION_TAG)-arm32v7,$@)
 
 .PHONY: save-arm64v8-image
 save-arm64v8-image: $(IMAGE_ARM64V8_TARBALL)
 
 $(IMAGE_ARM64V8_TARBALL): $(IMAGE_ARM64V8_DOCKERFILE)
-	'$(DOCKER)' save '$(IMAGE_VERSION_TAG)-arm64v8' | gzip -n > '$@'
+	$(call save_image,$(IMAGE_VERSION_TAG)-arm64v8,$@)
+
+##################################################
+## "load-*" targets
+##################################################
+
+define load_image
+	'$(DOCKER)' load -i '$(1)'
+endef
+
+.PHONY: load-native-image
+load-native-image:
+	$(call load_image,$(IMAGE_AMD64_TARBALL))
+
+.PHONY: load-cross-images
+load-cross-images: load-amd64-image load-arm32v7-image load-arm64v8-image
+
+.PHONY: load-amd64-image
+load-amd64-image:
+	$(call load_image,$(IMAGE_AMD64_TARBALL))
+
+.PHONY: load-arm32v7-image
+load-arm32v7-image:
+	$(call load_image,$(IMAGE_ARM32V7_TARBALL))
+
+.PHONY: load-arm64v8-image
+load-arm64v8-image:
+	$(call load_image,$(IMAGE_ARM64V8_TARBALL))
 
 ##################################################
 ## "push-*" targets
 ##################################################
 
-define push_manifest
-	'$(DOCKER)' manifest create --amend '$(1)' '$(1)-amd64' '$(1)-arm32v7' '$(1)-arm64v8'
-	'$(DOCKER)' manifest annotate '$(1)' '$(1)-amd64' --os linux --arch amd64
-	'$(DOCKER)' manifest annotate '$(1)' '$(1)-arm32v7' --os linux --arch arm --variant v7
-	'$(DOCKER)' manifest annotate '$(1)' '$(1)-arm64v8' --os linux --arch arm64 --variant v8
+define push_image
+	'$(DOCKER)' push '$(1)'
+endef
+
+define push_cross_manifest
+	'$(DOCKER)' manifest create --amend '$(1)' '$(2)-amd64' '$(2)-arm32v7' '$(2)-arm64v8'
+	'$(DOCKER)' manifest annotate '$(1)' '$(2)-amd64' --os linux --arch amd64
+	'$(DOCKER)' manifest annotate '$(1)' '$(2)-arm32v7' --os linux --arch arm --variant v7
+	'$(DOCKER)' manifest annotate '$(1)' '$(2)-arm64v8' --os linux --arch arm64 --variant v8
 	'$(DOCKER)' manifest push --purge '$(1)'
 endef
 
 .PHONY: push-native-image
-push-native-image: $(IMAGE_NATIVE_DOCKERFILE)
+push-native-image:
 	@printf '%s\n' 'Unimplemented'
 
 .PHONY: push-cross-images
 push-cross-images: push-amd64-image push-arm32v7-image push-arm64v8-image
-	$(call push_manifest,$(IMAGE_LATEST_TAG))
-	$(call push_manifest,$(IMAGE_VERSION_TAG))
 
 .PHONY: push-amd64-image
-push-amd64-image: $(IMAGE_AMD64_DOCKERFILE)
-	'$(DOCKER)' push '$(IMAGE_LATEST_TAG)-amd64'
-	'$(DOCKER)' push '$(IMAGE_VERSION_TAG)-amd64'
+push-amd64-image:
+	$(call push_image,$(IMAGE_VERSION_TAG)-amd64)
 
 .PHONY: push-arm32v7-image
-push-arm32v7-image: $(IMAGE_ARM32V7_DOCKERFILE)
-	'$(DOCKER)' push '$(IMAGE_LATEST_TAG)-arm32v7'
-	'$(DOCKER)' push '$(IMAGE_VERSION_TAG)-arm32v7'
+push-arm32v7-image:
+	$(call push_image,$(IMAGE_VERSION_TAG)-arm32v7)
 
 .PHONY: push-arm64v8-image
-push-arm64v8-image: $(IMAGE_ARM64V8_DOCKERFILE)
-	'$(DOCKER)' push '$(IMAGE_LATEST_TAG)-arm64v8'
-	'$(DOCKER)' push '$(IMAGE_VERSION_TAG)-arm64v8'
+push-arm64v8-image:
+	$(call push_image,$(IMAGE_VERSION_TAG)-arm64v8)
+
+push-cross-manifest:
+	$(call push_cross_manifest,$(IMAGE_VERSION_TAG),$(IMAGE_VERSION_TAG))
+	$(call push_cross_manifest,$(IMAGE_LATEST_TAG),$(IMAGE_VERSION_TAG))
 
 ##################################################
 ## "binfmt-*" targets
