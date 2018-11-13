@@ -49,7 +49,7 @@ $(IMAGE_NATIVE_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		--prefix-builtins \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' build \
-		--tag '$(IMAGE_VERSION_TAG)' \
+		--tag '$(IMAGE_LATEST_TAG)' \
 		--file '$@' ./
 
 .PHONY: build-cross-images
@@ -119,7 +119,7 @@ endef
 save-native-image: $(IMAGE_NATIVE_TARBALL)
 
 $(IMAGE_NATIVE_TARBALL): $(IMAGE_NATIVE_DOCKERFILE)
-	$(call save_image,$(IMAGE_VERSION_TAG),$@)
+	$(call save_image,$(IMAGE_LATEST_TAG),$@)
 
 .PHONY: save-cross-images
 save-cross-images: save-amd64-image save-arm32v7-image save-arm64v8-image
@@ -152,7 +152,7 @@ endef
 
 .PHONY: load-native-image
 load-native-image:
-	$(call load_image,$(IMAGE_AMD64_TARBALL))
+	$(call load_image,$(IMAGE_NATIVE_TARBALL))
 
 .PHONY: load-cross-images
 load-cross-images: load-amd64-image load-arm32v7-image load-arm64v8-image
