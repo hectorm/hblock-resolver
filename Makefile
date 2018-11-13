@@ -3,14 +3,20 @@
 SHELL := /bin/sh
 .SHELLFLAGS = -eu -c
 
-M4 := $(shell command -v m4 2>/dev/null)
 DOCKER := $(shell command -v docker 2>/dev/null)
+GIT := $(shell command -v git 2>/dev/null)
+M4 := $(shell command -v m4 2>/dev/null)
 
 DISTDIR := ./dist
 
 IMAGE_NAMESPACE := hectormolinero
 IMAGE_NAME := hblock-resolver
-IMAGE_VERSION := edge
+IMAGE_VERSION := v0
+
+# If git is available and the directory is a repository, use the latest tag as IMAGE_VERSION.
+ifeq ([$(notdir $(GIT))][$(wildcard .git/.)],[git][.git/.])
+	IMAGE_VERSION := $(shell '$(GIT)' describe --abbrev=0 --tags 2>/dev/null || printf '%s' '$(IMAGE_VERSION)')
+endif
 
 IMAGE_LATEST_TAG := $(IMAGE_NAMESPACE)/$(IMAGE_NAME):latest
 IMAGE_VERSION_TAG := $(IMAGE_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_VERSION)
@@ -227,9 +233,9 @@ binfmt-reset:
 .PHONY: version
 version:
 	@printf '%s\n' '$(IMAGE_VERSION)' > ./VERSION
-	git add ./VERSION
-	git commit -m '$(IMAGE_VERSION)'
-	git tag -a '$(IMAGE_VERSION)' -m '$(IMAGE_VERSION)'
+	'$(GIT)' add ./VERSION
+	'$(GIT)' commit -m '$(IMAGE_VERSION)'
+	'$(GIT)' tag -a '$(IMAGE_VERSION)' -m '$(IMAGE_VERSION)'
 
 ##################################################
 ## "clean" target
