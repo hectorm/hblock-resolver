@@ -11,42 +11,12 @@ printf '%s\n' 'Downloading blacklist zone...'
 cleanup() { rm -f "${HBLOCK_OUTPUT_TMP}"; }
 trap cleanup EXIT
 
-if [ -z "${HBLOCK_HEADER-}" ]; then
-	HBLOCK_HEADER=$(cat <<-'EOF'
-		$TTL 2h
-		@ IN SOA localhost. root.localhost. (1 6h 1h 1w 2h)
-		  IN NS  localhost.
-	EOF
-	)
-fi
-
-if [ -z "${HBLOCK_FOOTER-}" ]; then
-	HBLOCK_FOOTER=''
-fi
-
-if [ -z "${HBLOCK_TEMPLATE-}" ]; then
-	HBLOCK_TEMPLATE='\1 CNAME \2'
-fi
-
-if [ -z "${HBLOCK_REDIRECTION-}" ]; then
-	HBLOCK_REDIRECTION='.'
-fi
-
-if [ -z "${HBLOCK_COMMENT-}" ]; then
-	HBLOCK_COMMENT=''
-fi
-
 # Generate blacklist zone
 hblock \
-	--output      "${HBLOCK_OUTPUT_TMP}" \
-	--header      "${HBLOCK_HEADER}" \
-	--footer      "${HBLOCK_FOOTER}" \
-	--template    "${HBLOCK_TEMPLATE}" \
-	--redirection "${HBLOCK_REDIRECTION}" \
-	--comment     "${HBLOCK_COMMENT}" \
-	${HBLOCK_SOURCES+   --sources   "${HBLOCK_SOURCES}"   } \
-	${HBLOCK_WHITELIST+ --whitelist "${HBLOCK_WHITELIST}" } \
-	${HBLOCK_BLACKLIST+ --blacklist "${HBLOCK_BLACKLIST}" }
+	--output "${HBLOCK_OUTPUT_TMP}" \
+	--template '\1 CNAME \2' \
+	--redirection '.' \
+	--comment ''
 
 # Replace blacklist zone if it differs
 if ! cmp --silent "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"; then

@@ -180,7 +180,7 @@ RUN cd /tmp/knot-resolver/ \
 	&& /usr/sbin/kresd --version
 
 # Download hBlock
-ARG HBLOCK_TREEISH=v1.6.9
+ARG HBLOCK_TREEISH=v2.0.0
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 RUN mkdir -p /tmp/hblock/ && cd /tmp/hblock/ \
 	&& git clone --recursive "${HBLOCK_REMOTE}" ./ \
@@ -266,8 +266,10 @@ RUN mkdir /var/lib/knot-resolver/ \
 	&& chown knot-resolver:knot-resolver /var/lib/knot-resolver/
 
 # Copy kresd config
-COPY --chown=root:root config/kresd.conf.lua /etc/knot-resolver/kresd.conf
-COPY --chown=root:root config/kresd.extra.conf.lua /etc/knot-resolver/kresd.conf.d/extra.conf
+COPY --chown=root:root config/knot-resolver/ /etc/knot-resolver/
+
+# Copy hBlock config
+COPY --chown=root:root config/hblock.d/ /etc/hblock.d/
 
 # Copy services
 COPY --chown=knot-resolver:knot-resolver scripts/service/ /home/knot-resolver/service/

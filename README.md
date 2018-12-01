@@ -27,15 +27,6 @@ docker run --detach \
 different attacks, such as [DNS amplification attacks](https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/).
 
 ## Environment variables
-#### `HBLOCK_SOURCES`
-If defined, the value will be passed to the [`--sources` option](https://github.com/hectorm/hblock#script-arguments) of hBlock.
-
-#### `HBLOCK_WHITELIST`
-If defined, the value will be passed to the [`--whitelist` option](https://github.com/hectorm/hblock#script-arguments) of hBlock.
-
-#### `HBLOCK_BLACKLIST`
-If defined, the value will be passed to the [`--blacklist` option](https://github.com/hectorm/hblock#script-arguments) of hBlock.
-
 #### `KRESD_NIC`
 If defined, kresd will only listen on the specified interface. Some users observed a considerable, close to 100%, performance gain in Docker
 containers when they bound the daemon to a single interface:ip address pair ([CZ-NIC/knot-resolver#32](https://github.com/CZ-NIC/knot-resolver/pull/32),

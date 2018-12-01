@@ -1,0 +1,3 @@
+$TTL 2h
+@ IN SOA localhost. root.localhost. (1 6h 1h 1w 2h)
+  IN NS  localhost.
