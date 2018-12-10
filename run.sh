@@ -71,9 +71,9 @@ docker run --detach \
 	--hostname "${DOCKER_CONTAINER}" \
 	--restart on-failure:3 \
 	--log-opt max-size=32m \
-	--publish '53:53/tcp' \
-	--publish '53:53/udp' \
-	--publish '127.0.0.1:8053:8053/tcp' --publish '[::1]:8053:8053/tcp' \
+	--publish '127.0.0.1:53:53/tcp' \
+	--publish '127.0.0.1:53:53/udp' \
+	--publish '127.0.0.1:8053:8053/tcp' \
 	--mount type=volume,src="${DOCKER_VOLUME}",dst='/var/lib/knot-resolver/' \
 	${HBLOCK_HEADER_FILE+ \
 		--mount type=bind,src="${HBLOCK_HEADER_FILE}",dst='/etc/hblock.d/header',ro \
@@ -100,7 +100,7 @@ docker run --detach \
 		--env KRESD_NIC="${KRESD_NIC}" \
 	} \
 	${KRESD_EXTERNAL_CERT_KEY+${KRESD_EXTERNAL_CERT+ \
-		--publish '853:853/tcp' \
+		--publish '127.0.0.1:853:853/tcp' \
 		--mount type=bind,src="${KRESD_EXTERNAL_CERT_KEY}",dst='/var/lib/knot-resolver/ssl/server.key',ro \
 		--mount type=bind,src="${KRESD_EXTERNAL_CERT}",dst='/var/lib/knot-resolver/ssl/server.crt',ro \
 		--env KRESD_CERT_MODE=external \
