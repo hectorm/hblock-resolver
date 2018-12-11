@@ -68,42 +68,33 @@ fi
 printf -- '%s\n' "Creating \"${DOCKER_CONTAINER}\" container..."
 docker run --detach \
 	--name "${DOCKER_CONTAINER}" \
-	--hostname "${DOCKER_CONTAINER}" \
+	--hostname "${DOCKER_CONTAINER}.localhost" \
 	--restart on-failure:3 \
 	--log-opt max-size=32m \
 	--publish '127.0.0.1:53:53/tcp' \
 	--publish '127.0.0.1:53:53/udp' \
+	--publish '127.0.0.1:853:853/tcp' \
 	--publish '127.0.0.1:8053:8053/tcp' \
 	--mount type=volume,src="${DOCKER_VOLUME}",dst='/var/lib/knot-resolver/' \
-	${HBLOCK_HEADER_FILE+ \
-		--mount type=bind,src="${HBLOCK_HEADER_FILE}",dst='/etc/hblock.d/header',ro \
-	} \
-	${HBLOCK_FOOTER_FILE+ \
-		--mount type=bind,src="${HBLOCK_FOOTER_FILE}",dst='/etc/hblock.d/footer',ro \
-	} \
-	${HBLOCK_SOURCES_FILE+ \
-		--mount type=bind,src="${HBLOCK_SOURCES_FILE}",dst='/etc/hblock.d/sources.list',ro \
-	} \
-	${HBLOCK_WHITELIST_FILE+ \
-		--mount type=bind,src="${HBLOCK_WHITELIST_FILE}",dst='/etc/hblock.d/whitelist.list',ro \
-	} \
-	${HBLOCK_BLACKLIST_FILE+ \
-		--mount type=bind,src="${HBLOCK_BLACKLIST_FILE}",dst='/etc/hblock.d/blacklist.list',ro \
-	} \
-	${KRESD_CONF_FILE+ \
-		--mount type=bind,src="${KRESD_CONF_FILE}",dst='/etc/knot-resolver/kresd.conf',ro \
-	} \
-	${KRESD_CONF_DIR+ \
-		--mount type=bind,src="${KRESD_CONF_DIR}",dst='/etc/knot-resolver/kresd.conf.d/',ro \
-	} \
-	${KRESD_NIC+ \
-		--env KRESD_NIC="${KRESD_NIC}" \
-	} \
+	${HBLOCK_HEADER_FILE+--mount type=bind,src="${HBLOCK_HEADER_FILE}",dst='/etc/hblock.d/header',ro} \
+	${HBLOCK_FOOTER_FILE+--mount type=bind,src="${HBLOCK_FOOTER_FILE}",dst='/etc/hblock.d/footer',ro} \
+	${HBLOCK_SOURCES_FILE+--mount type=bind,src="${HBLOCK_SOURCES_FILE}",dst='/etc/hblock.d/sources.list',ro} \
+	${HBLOCK_WHITELIST_FILE+--mount type=bind,src="${HBLOCK_WHITELIST_FILE}",dst='/etc/hblock.d/whitelist.list',ro} \
+	${HBLOCK_BLACKLIST_FILE+--mount type=bind,src="${HBLOCK_BLACKLIST_FILE}",dst='/etc/hblock.d/blacklist.list',ro} \
+	${KRESD_CONF_FILE+--mount type=bind,src="${KRESD_CONF_FILE}",dst='/etc/knot-resolver/kresd.conf',ro} \
+	${KRESD_CONF_DIR+$(
+		for file in "${KRESD_CONF_DIR-}"/*; do
+			[ -e "${file}" ] || continue
+			srcFile="$(readlink -f -- "${file}")"
+			dstFile="/etc/knot-resolver/kresd.conf.d/$(basename -- "${file}")"
+			printf -- ' --mount type=bind,src=%s,dst=%s,ro' "${srcFile}" "${dstFile}"
+		done
+	)} \
+	${KRESD_NIC+--env KRESD_NIC="${KRESD_NIC}"} \
 	${KRESD_EXTERNAL_CERT_KEY+${KRESD_EXTERNAL_CERT+ \
-		--publish '127.0.0.1:853:853/tcp' \
+		--env KRESD_CERT_MODE=external \
 		--mount type=bind,src="${KRESD_EXTERNAL_CERT_KEY}",dst='/var/lib/knot-resolver/ssl/server.key',ro \
 		--mount type=bind,src="${KRESD_EXTERNAL_CERT}",dst='/var/lib/knot-resolver/ssl/server.crt',ro \
-		--env KRESD_CERT_MODE=external \
 	}} \
 	"${DOCKER_IMAGE}" "$@" >/dev/null
 
