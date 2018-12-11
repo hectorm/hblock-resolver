@@ -22,9 +22,9 @@ if [ ! -f "${CERT_DIR}"/server.key ]; then
 	MUST_RESTART_KRESD=true
 	printf '%s\n' 'Generating private key...'
 	(cd "${CERT_DIR}" \
+		&& umask 077 \
 		&& rm -f server.key server.csr server.crt \
 		&& openssl ecparam -genkey -name prime256v1 -out server.key \
-		&& chmod 640 server.key \
 	)
 fi
 
@@ -33,10 +33,11 @@ if [ ! -f "${CERT_DIR}"/server.crt ] || ! openssl x509 -checkend 604800 -noout -
 	MUST_RESTART_KRESD=true
 	printf '%s\n' 'Generating self-signed certificate...'
 	(cd "${CERT_DIR}" \
+		&& umask 022 \
 		&& rm -f server.csr server.crt \
-		&& openssl req -new -key server.key -out server.csr -subj '/CN=knot-resolver' \
-		&& openssl req -x509 -days 90 -key server.key -in server.csr -out server.crt \
-		&& chmod 644 server.csr server.crt \
+		&& openssl req -new -sha256 -subj "/CN=$(uname -n)" -key server.key -out server.csr \
+		&& openssl x509 -req -sha256 -days 90 -signkey server.key -in server.csr -out server.crt \
+		&& openssl x509 -in server.crt -text -noout \
 	)
 fi
 
