@@ -18,7 +18,7 @@ build:native-image:
     - docker info
     - apk add --no-cache coreutils m4 make
   script:
-    - make IMAGE_VERSION="${CI_COMMIT_REF_SLUG}" build-native-image save-native-image
+    - make build-native-image save-native-image
   except:
     - tags
   artifacts:
@@ -33,7 +33,7 @@ build:amd64-image:
     - apk add --no-cache coreutils m4 make
     - make binfmt-register
   script:
-    - make IMAGE_VERSION="${CI_COMMIT_REF_SLUG}" build-amd64-image save-amd64-image
+    - make build-amd64-image save-amd64-image
   only:
     - /^v([0-9.]+)(-.+)?$/
   except:
@@ -50,7 +50,7 @@ build:arm32v7-image:
     - apk add --no-cache coreutils m4 make
     - make binfmt-register
   script:
-    - make IMAGE_VERSION="${CI_COMMIT_REF_SLUG}" build-arm32v7-image save-arm32v7-image
+    - make build-arm32v7-image save-arm32v7-image
   only:
     - /^v([0-9.]+)(-.+)?$/
   except:
@@ -67,7 +67,7 @@ build:arm64v8-image:
     - apk add --no-cache coreutils m4 make
     - make binfmt-register
   script:
-    - make IMAGE_VERSION="${CI_COMMIT_REF_SLUG}" build-arm64v8-image save-arm64v8-image
+    - make build-arm64v8-image save-arm64v8-image
   only:
     - /^v([0-9.]+)(-.+)?$/
   except:
@@ -83,7 +83,7 @@ push:amd64-image:
     - apk add --no-cache coreutils make
     - docker login -u "${CI_DEPLOY_USER}" -p "${CI_DEPLOY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
   script:
-    - make IMAGE_VERSION="${CI_COMMIT_REF_SLUG}" load-amd64-image push-amd64-image
+    - make load-amd64-image push-amd64-image
   only:
     - /^v([0-9.]+)(-.+)?$/
   except:
@@ -97,7 +97,7 @@ push:arm32v7-image:
     - apk add --no-cache coreutils make
     - docker login -u "${CI_DEPLOY_USER}" -p "${CI_DEPLOY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
   script:
-    - make IMAGE_VERSION="${CI_COMMIT_REF_SLUG}" load-arm32v7-image push-arm32v7-image
+    - make load-arm32v7-image push-arm32v7-image
   only:
     - /^v([0-9.]+)(-.+)?$/
   except:
@@ -111,7 +111,7 @@ push:arm64v8-image:
     - apk add --no-cache coreutils make
     - docker login -u "${CI_DEPLOY_USER}" -p "${CI_DEPLOY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
   script:
-    - make IMAGE_VERSION="${CI_COMMIT_REF_SLUG}" load-arm64v8-image push-arm64v8-image
+    - make load-arm64v8-image push-arm64v8-image
   only:
     - /^v([0-9.]+)(-.+)?$/
   except:
@@ -126,7 +126,7 @@ push:cross-manifest:
     - "mkdir -p ~/.docker/ && printf '%s\n' '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
     - docker login -u "${CI_DEPLOY_USER}" -p "${CI_DEPLOY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
   script:
-    - make IMAGE_VERSION="${CI_COMMIT_REF_SLUG}" push-cross-manifest
+    - make push-cross-manifest
   only:
     - /^v([0-9.]+)(-.+)?$/
   except:

@@ -232,10 +232,15 @@ binfmt-reset:
 
 .PHONY: version
 version:
-	@printf '%s\n' '$(IMAGE_VERSION)' > ./VERSION
-	'$(GIT)' add ./VERSION
-	'$(GIT)' commit -m '$(IMAGE_VERSION)'
-	'$(GIT)' tag -a '$(IMAGE_VERSION)' -m '$(IMAGE_VERSION)'
+	@if printf -- '%s' '$(IMAGE_VERSION)' | grep -q '^v[0-9]\{1,\}$$'; then \
+		NEW_IMAGE_VERSION=$$(awk -v 'v=$(IMAGE_VERSION)' 'BEGIN {printf "v%.0f", substr(v,2)+1}'); \
+		printf -- '%s\n' "$${NEW_IMAGE_VERSION}" > ./VERSION; \
+		'$(GIT)' add ./VERSION; '$(GIT)' commit -m "$${NEW_IMAGE_VERSION}"; \
+		'$(GIT)' tag -a "$${NEW_IMAGE_VERSION}" -m "$${NEW_IMAGE_VERSION}"; \
+	else \
+		>&2 printf -- 'Malformed version string: %s\n' '$(IMAGE_VERSION)'; \
+		exit 1; \
+	fi
 
 ##################################################
 ## "clean" target
