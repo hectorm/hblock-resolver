@@ -13,12 +13,10 @@ A Docker image of [Knot DNS Resolver](https://www.knot-resolver.cz) configured t
 ```sh
 docker run --detach \
   --name hblock-resolver \
-  --hostname hblock-resolver \
   --restart on-failure:3 \
-  --log-opt max-size=32m \
-  --publish 53:53/tcp \
-  --publish 53:53/udp \
-  --publish 853:853/tcp \
+  --publish 127.0.0.1:53:53/tcp \
+  --publish 127.0.0.1:53:53/udp \
+  --publish 127.0.0.1:853:853/tcp \
   --publish 127.0.0.1:8053:8053/tcp \
   --mount type=volume,src=hblock-resolver-data,dst=/var/lib/knot-resolver/ \
   hectormolinero/hblock-resolver:latest
