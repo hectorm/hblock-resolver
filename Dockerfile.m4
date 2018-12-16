@@ -26,11 +26,11 @@ RUN DEBIAN_FRONTEND=noninteractive \
 # Build Dep
 RUN go get -d github.com/golang/dep \
 	&& cd "${GOPATH}/src/github.com/golang/dep" \
-	&& DEP_LATEST=$(git describe --abbrev=0 --tags) \
-	&& git checkout "${DEP_LATEST}"
+	&& git checkout "$(git describe --abbrev=0 --tags)"
 RUN cd "${GOPATH}/src/github.com/golang/dep" \
-	&& go install -ldflags="-X main.version=${DEP_LATEST}" ./cmd/dep \
-	&& "${GOPATH}"/bin/dep version
+	&& go build -o ./cmd/dep/dep ./cmd/dep/ \
+	&& mv ./cmd/dep/dep /usr/bin/dep \
+	&& file /usr/bin/dep
 
 # Build Supercronic
 ARG SUPERCRONIC_TREEISH=v0.1.6
@@ -43,9 +43,9 @@ RUN cd "${GOPATH}/src/${SUPERCRONIC_PACKAGE}" \
 	&& export GOOS=m4_ifdef([[CROSS_GOOS]], [[CROSS_GOOS]]) \
 	&& export GOARCH=m4_ifdef([[CROSS_GOARCH]], [[CROSS_GOARCH]]) \
 	&& export GOARM=m4_ifdef([[CROSS_GOARM]], [[CROSS_GOARM]]) \
-	&& go build \
-	&& file ./supercronic \
-	&& mv ./supercronic "${GOPATH}"/bin/supercronic
+	&& go build -o ./supercronic ./main.go \
+	&& mv ./supercronic /usr/bin/supercronic \
+	&& file /usr/bin/supercronic
 
 ##################################################
 ## "build-main" stage
@@ -231,7 +231,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Copy Supercronic binary
-COPY --from=build-golang --chown=root:root /go/bin/supercronic /usr/bin/supercronic
+COPY --from=build-golang --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
 
 # Copy Tini binary
 COPY --from=build-main --chown=root:root /usr/bin/tini /usr/bin/tini
