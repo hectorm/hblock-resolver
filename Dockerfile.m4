@@ -105,7 +105,7 @@ RUN mkdir -p /tmp/tini/ && cd /tmp/tini/ \
 RUN cd /tmp/tini/ \
 	&& export CFLAGS='-DPR_SET_CHILD_SUBREAPER=36 -DPR_GET_CHILD_SUBREAPER=37' \
 	&& cmake . -DCMAKE_INSTALL_PREFIX=/usr \
-	&& make -j$(nproc) \
+	&& make -j"$(nproc)" \
 	&& make install \
 	&& /usr/bin/tini --version
 
@@ -138,7 +138,7 @@ RUN cd /tmp/knot-dns/ \
 		--enable-fastparser \
 		--enable-dnstap \
 		--enable-utilities \
-	&& make -j$(nproc) \
+	&& make -j"$(nproc)" \
 	&& checkinstall --default \
 		--pkgname=knot-dns \
 		--pkgversion=0 --pkgrelease=0 \
@@ -163,7 +163,7 @@ RUN cd /tmp/knot-resolver/ \
 	&& export ETCDIR=/etc/knot-resolver \
 	&& export MODULEDIR=/usr/lib/knot-resolver \
 	&& export ROOTHINTS=/usr/share/dns/root.hints \
-	&& make -j$(nproc) \
+	&& make -j"$(nproc)" \
 	&& make check \
 	&& checkinstall --default \
 		--pkgname=knot-resolver \
