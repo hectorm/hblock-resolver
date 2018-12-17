@@ -96,12 +96,12 @@ RUN DEBIAN_FRONTEND=noninteractive \
 		python3-wheel \
 		xxd
 
-# Build Tiny
-ARG TINY_TREEISH=v0.18.0
-ARG TINY_REMOTE=https://github.com/krallin/tini.git
+# Build Tini
+ARG TINI_TREEISH=v0.18.0
+ARG TINI_REMOTE=https://github.com/krallin/tini.git
 RUN mkdir -p /tmp/tini/ && cd /tmp/tini/ \
-	&& git clone --recursive "${TINY_REMOTE}" ./ \
-	&& git checkout "${TINY_TREEISH}"
+	&& git clone --recursive "${TINI_REMOTE}" ./ \
+	&& git checkout "${TINI_TREEISH}"
 RUN cd /tmp/tini/ \
 	&& export CFLAGS='-DPR_SET_CHILD_SUBREAPER=36 -DPR_GET_CHILD_SUBREAPER=37' \
 	&& cmake . -DCMAKE_INSTALL_PREFIX=/usr \
