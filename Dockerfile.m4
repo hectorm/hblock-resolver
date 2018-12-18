@@ -6,7 +6,7 @@ m4_ifdef([[CROSS_QEMU]], [[
 ##################################################
 
 FROM ubuntu:18.04 AS qemu-user-static
-RUN DEBIAN_FRONTEND=noninteractive \
+RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends qemu-user-static
 ]])
@@ -18,7 +18,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
 FROM golang:1-stretch AS build-golang
 
 # Install system packages
-RUN DEBIAN_FRONTEND=noninteractive \
+RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		file
@@ -55,7 +55,7 @@ m4_ifdef([[CROSS_ARCH]], [[FROM CROSS_ARCH/ubuntu:18.04]], [[FROM ubuntu:18.04]]
 m4_ifdef([[CROSS_QEMU]], [[COPY --from=qemu-user-static CROSS_QEMU CROSS_QEMU]])
 
 # Install system packages
-RUN DEBIAN_FRONTEND=noninteractive \
+RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		autoconf \
@@ -201,7 +201,7 @@ ENV KRESD_NIC=
 ENV KRESD_CERT_MODE=self-signed
 
 # Install system packages
-RUN DEBIAN_FRONTEND=noninteractive \
+RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		ca-certificates \
