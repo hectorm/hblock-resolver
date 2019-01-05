@@ -64,6 +64,9 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		ca-certificates \
 		checkinstall \
 		cmake \
+		curl \
+		debhelper \
+		dh-systemd \
 		dns-root-data \
 		gawk \
 		git \
@@ -180,13 +183,14 @@ RUN cd /tmp/knot-resolver/ \
 	&& /usr/sbin/kresd --version
 
 # Download hBlock
-ARG HBLOCK_TREEISH=v2.0.0
+ARG HBLOCK_TREEISH=v2.0.2
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 RUN mkdir -p /tmp/hblock/ && cd /tmp/hblock/ \
 	&& git clone --recursive "${HBLOCK_REMOTE}" ./ \
 	&& git checkout "${HBLOCK_TREEISH}"
 RUN cd /tmp/hblock/ \
-	&& install -m 0755 ./hblock /usr/bin/hblock \
+	&& make package-deb \
+	&& dpkg -i ./dist/hblock-*.deb \
 	&& /usr/bin/hblock --version
 
 ##################################################
@@ -248,8 +252,9 @@ RUN dpkg -i /tmp/knot-dns_*.deb && rm /tmp/knot-dns_*.deb
 COPY --from=build-main --chown=root:root /tmp/knot-resolver/knot-resolver_*.deb /tmp/
 RUN dpkg -i /tmp/knot-resolver_*.deb && rm /tmp/knot-resolver_*.deb
 
-# Copy hBlock script
-COPY --from=build-main --chown=root:root /usr/bin/hblock /usr/bin/hblock
+# Install hBlock from package
+COPY --from=build-main --chown=root:root /tmp/hblock/dist/hblock-*.deb /tmp/
+RUN dpkg -i /tmp/hblock-*.deb && rm /tmp/hblock-*.deb
 
 # Add capabilities to the kresd binary
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
