@@ -250,4 +250,4 @@ version:
 clean:
 	rm -f '$(IMAGE_NATIVE_DOCKERFILE)' '$(IMAGE_AMD64_DOCKERFILE)' '$(IMAGE_ARM32V7_DOCKERFILE)' '$(IMAGE_ARM64V8_DOCKERFILE)'
 	rm -f '$(IMAGE_NATIVE_TARBALL)' '$(IMAGE_AMD64_TARBALL)' '$(IMAGE_ARM32V7_TARBALL)' '$(IMAGE_ARM64V8_TARBALL)'
-	if [ -d '$(DISTDIR)' ]; then rmdir '$(DISTDIR)'; fi
+	if [ -d '$(DISTDIR)' ] && [ -z "$$(ls -A '$(DISTDIR)')" ]; then rmdir '$(DISTDIR)'; fi
