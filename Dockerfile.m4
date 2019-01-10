@@ -152,7 +152,7 @@ RUN cd /tmp/knot-dns/ \
 	&& /usr/bin/khost --version
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_TREEISH=v3.2.0
+ARG KNOT_RESOLVER_TREEISH=v3.2.1
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=false
 ARG KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=false
