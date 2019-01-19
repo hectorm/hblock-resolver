@@ -12,42 +12,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 ]])
 
 ##################################################
-## "build-golang" stage
-##################################################
-
-FROM golang:1-stretch AS build-golang
-
-# Install system packages
-RUN export DEBIAN_FRONTEND=noninteractive \
-	&& apt-get update \
-	&& apt-get install -y --no-install-recommends \
-		file
-
-# Build Dep
-RUN go get -d github.com/golang/dep \
-	&& cd "${GOPATH}/src/github.com/golang/dep" \
-	&& git checkout "$(git describe --abbrev=0 --tags)"
-RUN cd "${GOPATH}/src/github.com/golang/dep" \
-	&& go build -o ./cmd/dep/dep ./cmd/dep/ \
-	&& mv ./cmd/dep/dep /usr/bin/dep \
-	&& file /usr/bin/dep
-
-# Build Supercronic
-ARG SUPERCRONIC_TREEISH=v0.1.6
-ARG SUPERCRONIC_PACKAGE=github.com/aptible/supercronic
-RUN go get -d "${SUPERCRONIC_PACKAGE}" \
-	&& cd "${GOPATH}/src/${SUPERCRONIC_PACKAGE}" \
-	&& git checkout "${SUPERCRONIC_TREEISH}" \
-	&& dep ensure
-RUN cd "${GOPATH}/src/${SUPERCRONIC_PACKAGE}" \
-	&& export GOOS=m4_ifdef([[CROSS_GOOS]], [[CROSS_GOOS]]) \
-	&& export GOARCH=m4_ifdef([[CROSS_GOARCH]], [[CROSS_GOARCH]]) \
-	&& export GOARM=m4_ifdef([[CROSS_GOARM]], [[CROSS_GOARM]]) \
-	&& go build -o ./supercronic ./main.go \
-	&& mv ./supercronic /usr/bin/supercronic \
-	&& file /usr/bin/supercronic
-
-##################################################
 ## "build-main" stage
 ##################################################
 
@@ -98,19 +62,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		python3-setuptools \
 		python3-wheel \
 		xxd
-
-# Build Tini
-ARG TINI_TREEISH=v0.18.0
-ARG TINI_REMOTE=https://github.com/krallin/tini.git
-RUN mkdir -p /tmp/tini/ && cd /tmp/tini/ \
-	&& git clone --recursive "${TINI_REMOTE}" ./ \
-	&& git checkout "${TINI_TREEISH}"
-RUN cd /tmp/tini/ \
-	&& export CFLAGS='-DPR_SET_CHILD_SUBREAPER=36 -DPR_GET_CHILD_SUBREAPER=37' \
-	&& cmake . -DCMAKE_INSTALL_PREFIX=/usr \
-	&& make -j"$(nproc)" \
-	&& make install \
-	&& /usr/bin/tini --version
 
 # Install LuaRocks packages
 RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
@@ -234,11 +185,13 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		runit \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Copy Supercronic binary
-COPY --from=build-golang --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
+# Copy Tini build
+m4_define([[TINI_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[v1-CROSS_ARCH]], [[v1]]))m4_dnl
+COPY --from=hectormolinero/tini:TINI_IMAGE_TAG --chown=root:root /usr/bin/tini /usr/bin/tini
 
-# Copy Tini binary
-COPY --from=build-main --chown=root:root /usr/bin/tini /usr/bin/tini
+# Copy Supercronic build
+m4_define([[SUPERCRONIC_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[v1-CROSS_ARCH]], [[v1]]))m4_dnl
+COPY --from=hectormolinero/supercronic:SUPERCRONIC_IMAGE_TAG --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
 
 # Copy LuaRocks packages
 COPY --from=build-main --chown=root:root /usr/local/lib/lua/ /usr/local/lib/lua/
