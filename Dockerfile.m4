@@ -77,7 +77,7 @@ RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 		CRYPTO_LIBDIR="/usr/lib/${HOST_MULTIARCH}"
 
 # Build Knot DNS (only libknot and utilities)
-ARG KNOT_DNS_TREEISH=v2.7.5
+ARG KNOT_DNS_TREEISH=v2.7.6
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 RUN mkdir -p /tmp/knot-dns/ && cd /tmp/knot-dns/ \
 	&& git clone --recursive "${KNOT_DNS_REMOTE}" ./ \
