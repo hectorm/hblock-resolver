@@ -186,7 +186,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Copy Tini build
-m4_define([[TINI_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[v1-CROSS_ARCH]], [[v1]]))m4_dnl
+m4_define([[TINI_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[v2-CROSS_ARCH]], [[v2]]))m4_dnl
 COPY --from=hectormolinero/tini:TINI_IMAGE_TAG --chown=root:root /usr/bin/tini /usr/bin/tini
 
 # Copy Supercronic build
