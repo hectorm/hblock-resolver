@@ -71,7 +71,6 @@ $(IMAGE_AMD64_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		--prefix-builtins \
 		-D CROSS_ARCH=amd64 \
 		-D CROSS_QEMU=/usr/bin/qemu-x86_64-static \
-		-D CROSS_GOOS=linux -D CROSS_GOARCH=amd64 \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-amd64' || true
 	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-amd64' \
@@ -87,7 +86,6 @@ $(IMAGE_ARM32V7_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		--prefix-builtins \
 		-D CROSS_ARCH=arm32v7 \
 		-D CROSS_QEMU=/usr/bin/qemu-arm-static \
-		-D CROSS_GOOS=linux -D CROSS_GOARCH=arm -D CROSS_GOARM=7 \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-arm32v7' || true
 	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-arm32v7' \
@@ -105,7 +103,6 @@ $(IMAGE_ARM64V8_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		--prefix-builtins \
 		-D CROSS_ARCH=arm64v8 \
 		-D CROSS_QEMU=/usr/bin/qemu-aarch64-static \
-		-D CROSS_GOOS=linux -D CROSS_GOARCH=arm64 \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-arm64v8' || true
 	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-arm64v8' \
