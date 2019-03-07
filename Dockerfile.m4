@@ -213,10 +213,17 @@ RUN dpkg -i /tmp/hblock-*.deb && rm /tmp/hblock-*.deb
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
 
 # Create users and groups
-RUN groupadd --system --gid 999 knot-resolver \
-	&& useradd --system --uid 999 --gid 999 \
-		--create-home --home-dir /home/knot-resolver/ \
+ARG KNOT_RESOLVER_USER_UID=999
+ARG KNOT_RESOLVER_USER_GID=999
+RUN groupadd \
+		--gid "${KNOT_RESOLVER_USER_GID}" \
+		knot-resolver
+RUN useradd \
+		--uid "${KNOT_RESOLVER_USER_UID}" \
+		--gid "${KNOT_RESOLVER_USER_GID}" \
 		--shell="$(which bash)" \
+		--home-dir /home/knot-resolver/ \
+		--create-home \
 		knot-resolver
 
 # Create data directory
