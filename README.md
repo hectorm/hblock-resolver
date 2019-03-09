@@ -33,10 +33,12 @@ containers when they bound the daemon to a single interface:ip address pair ([CZ
 #### `KRESD_CERT_MODE`
 If equals to `self-signed` (**default**), a self-signed certificate will be generated. You can provide your own certificate with these options:
 ```
+  --env KRESD_CERT_MODE=external \
   --mount type=bind,src='/path/to/server.key',dst='/var/lib/knot-resolver/ssl/server.key',ro \
   --mount type=bind,src='/path/to/server.crt',dst='/var/lib/knot-resolver/ssl/server.crt',ro \
-  --env KRESD_CERT_MODE=external \
 ```
+> **Note:** for a more advanced setup, look at the [following example](examples/dot-with-letsencrypt) with [Let's Encrypt](https://letsencrypt.org) and
+[lego](https://github.com/xenolf/lego/).
 
 ## Additional configuration
 Main Knot DNS Resolver configuration is located in `/etc/knot-resolver/kresd.conf`. If you would like to add additional configuration, add one or more

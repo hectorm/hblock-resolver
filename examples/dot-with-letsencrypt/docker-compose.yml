@@ -1,0 +1,65 @@
+version: "3.7"
+
+services:
+
+  hblock-resolver:
+    image: hectormolinero/hblock-resolver:latest
+    restart: on-failure:3
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    ports:
+      - 127.0.0.1:53:53/tcp
+      - 127.0.0.1:53:53/udp
+      - 127.0.0.1:853:853/tcp
+      - 127.0.0.1:8053:8053/tcp
+    volumes:
+      - "hblock-resolver-data:/var/lib/knot-resolver"
+      - "lego-data:/var/lib/lego:ro"
+    environment:
+      KRESD_CERT_MODE: external
+      KRESD_CERT_CRT_FILE: /var/lib/lego/certificates/${LEGO_DOMAIN}.crt
+      KRESD_CERT_KEY_FILE: /var/lib/lego/certificates/${LEGO_DOMAIN}.key
+    entrypoint: /bin/sh
+    command: |
+      -eu -c ' \
+        until [ -f "$${KRESD_CERT_CRT_FILE}" ] && [ -f "$${KRESD_CERT_KEY_FILE}" ]; do
+          echo "Waiting for lego..."; sleep 5;
+        done;
+        exec tini docker-foreground-cmd
+      ;'
+    depends_on:
+      - "lego"
+
+  lego:
+    image: hectormolinero/lego:latest
+    restart: on-failure:3
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    volumes:
+      - "lego-data:/var/lib/lego"
+    env_file: .env
+    entrypoint: /bin/sh
+    command: |
+      -eu -c '
+        while true; do
+          if [ -f "/var/lib/lego/certificates/$${LEGO_DOMAIN}.crt" ]; then
+            LEGO_ACTION="renew --days $${LEGO_RENEW_DAYS}";
+          else
+            LEGO_ACTION="run";
+          fi;
+          lego --accept-tos \
+            $${LEGO_SERVER+ --server "$${LEGO_SERVER}" } \
+            $${LEGO_DOMAIN+ --domains "$${LEGO_DOMAIN}" } \
+            $${LEGO_EMAIL+  --email "$${LEGO_EMAIL}" } \
+            $${LEGO_DNS+    --dns "$${LEGO_DNS}" } \
+            $${LEGO_ACTION};
+          sleep "$${LEGO_RENEW_CHECK_SECONDS}";
+        done
+      ;'
+
+volumes:
+
+  hblock-resolver-data:
+  lego-data:
