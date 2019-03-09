@@ -2,11 +2,11 @@
 
 set -eu
 
+printf '%s\n' 'Downloading GeoIP database...'
+
 GEOIPDB_DIR='/var/lib/knot-resolver/'
 GEOIPDB_FILE="${GEOIPDB_DIR}/geoip.mmdb"
-GEOIPDB_FILE_TMP=$(mktemp)
-
-printf '%s\n' 'Downloading GeoIP database...'
+GEOIPDB_FILE_TMP=$(mktemp --dry-run)
 
 cleanup() { rm -f "${GEOIPDB_FILE_TMP}"; }
 trap cleanup EXIT

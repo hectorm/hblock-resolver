@@ -7,41 +7,34 @@ if [ "${KRESD_CERT_MODE}" != 'self-signed' ]; then
 	exit 0
 fi
 
-CERT_DIR='/var/lib/knot-resolver/ssl/'
-MUST_RESTART_KRESD=false
-
 printf '%s\n' 'Checking self-signed certificate...'
 
-# Create certificate directory if it does not exist
-if [ ! -d "${CERT_DIR}" ]; then
-	mkdir -p "${CERT_DIR}"
-fi
+CRT_FILE=${KRESD_CERT_CRT_FILE}
+KEY_FILE=${KRESD_CERT_KEY_FILE}
 
 # Generate private key if it does not exist
-if [ ! -f "${CERT_DIR}"/server.key ]; then
-	MUST_RESTART_KRESD=true
+if [ ! -f "${KEY_FILE}" ]; then
 	printf '%s\n' 'Generating private key...'
-	(cd "${CERT_DIR}" \
-		&& umask 077 \
-		&& rm -f server.key server.csr server.crt \
-		&& openssl ecparam -genkey -name prime256v1 -out server.key \
+
+	(umask 077 \
+		&& mkdir -p "$(dirname "${KEY_FILE}")" \
+		&& rm -f "${CRT_FILE}" "${KEY_FILE}" \
+		&& openssl ecparam -genkey -name prime256v1 -out "${KEY_FILE}" \
 	)
 fi
 
 # Generate self-signed certificate if it does not exist or will expire soon
-if [ ! -f "${CERT_DIR}"/server.crt ] || ! openssl x509 -checkend 604800 -noout -in "${CERT_DIR}"/server.crt; then
-	MUST_RESTART_KRESD=true
+if [ ! -f "${CRT_FILE}" ] || ! openssl x509 -checkend 604800 -noout -in "${CRT_FILE}"; then
 	printf '%s\n' 'Generating self-signed certificate...'
-	(cd "${CERT_DIR}" \
-		&& umask 022 \
-		&& rm -f server.csr server.crt \
-		&& openssl req -new -sha256 -subj "/CN=$(uname -n)" -key server.key -out server.csr \
-		&& openssl x509 -req -sha256 -days 90 -signkey server.key -in server.csr -out server.crt \
-		&& openssl x509 -in server.crt -text -noout \
-	)
-fi
 
-# Restart Knot Resolver if it is running
-if [ "${MUST_RESTART_KRESD}" = true ] && is-sv-status kresd run; then
-	sv restart ~/service/kresd
+	(umask 022 \
+		&& mkdir -p "$(dirname "${CRT_FILE}")" \
+		&& rm -f "${CRT_FILE}" \
+		&& SUBJ="/CN=$(uname -n)" \
+		&& CSR_FILE=$(mktemp --dry-run) \
+		&& openssl req -new -sha256 -subj "${SUBJ}" -key "${KEY_FILE}" -out "${CSR_FILE}" \
+		&& openssl x509 -req -sha256 -days 90 -signkey "${KEY_FILE}" -in "${CSR_FILE}" -out "${CRT_FILE}" \
+		&& openssl x509 -in "${CRT_FILE}" -text -noout \
+		&& rm -f "${CSR_FILE}"
+	)
 fi

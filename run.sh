@@ -57,14 +57,6 @@ if [ -z "${KRESD_CONF_DIR-}" ] && [ -d '/etc/hblock-resolver/kresd.conf.d/' ]; t
 	KRESD_CONF_DIR='/etc/hblock-resolver/kresd.conf.d/'
 fi
 
-if [ -z "${KRESD_EXTERNAL_CERT_KEY-}" ] && [ -f '/etc/hblock-resolver/ssl/server.key' ]; then
-	KRESD_EXTERNAL_CERT_KEY='/etc/hblock-resolver/ssl/server.key'
-fi
-
-if [ -z "${KRESD_EXTERNAL_CERT-}" ] && [ -f '/etc/hblock-resolver/ssl/server.crt' ]; then
-	KRESD_EXTERNAL_CERT='/etc/hblock-resolver/ssl/server.crt'
-fi
-
 printf -- '%s\n' "Creating \"${DOCKER_CONTAINER}\" container..."
 docker run --detach \
 	--name "${DOCKER_CONTAINER}" \
@@ -91,12 +83,6 @@ docker run --detach \
 			printf -- ' --mount type=bind,src=%s,dst=%s,ro' "${srcFile}" "${dstFile}"
 		done
 	)} \
-	${KRESD_NIC+--env KRESD_NIC="${KRESD_NIC}"} \
-	${KRESD_EXTERNAL_CERT_KEY+${KRESD_EXTERNAL_CERT+ \
-		--env KRESD_CERT_MODE=external \
-		--mount type=bind,src="${KRESD_EXTERNAL_CERT_KEY}",dst='/var/lib/knot-resolver/ssl/server.key',ro \
-		--mount type=bind,src="${KRESD_EXTERNAL_CERT}",dst='/var/lib/knot-resolver/ssl/server.crt',ro \
-	}} \
 	"${DOCKER_IMAGE}" "$@" >/dev/null
 
 printf -- '%s\n\n' 'Done!'

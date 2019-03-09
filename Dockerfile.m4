@@ -73,8 +73,8 @@ RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 		luasocket \
 		mmdblua \
 	| xargs -n1 -iPKG luarocks install PKG \
-		OPENSSL_LIBDIR="/usr/lib/${HOST_MULTIARCH}" \
-		CRYPTO_LIBDIR="/usr/lib/${HOST_MULTIARCH}"
+		CRYPTO_LIBDIR="/usr/lib/${HOST_MULTIARCH}" \
+		OPENSSL_LIBDIR="/usr/lib/${HOST_MULTIARCH}"
 
 # Build Knot DNS (only libknot and utilities)
 ARG KNOT_DNS_TREEISH=v2.7.6
@@ -154,6 +154,8 @@ m4_ifdef([[CROSS_QEMU]], [[COPY --from=qemu-user-static CROSS_QEMU CROSS_QEMU]])
 # Environment
 ENV KRESD_NIC=
 ENV KRESD_CERT_MODE=self-signed
+ENV KRESD_CERT_CRT_FILE=/var/lib/knot-resolver/ssl/server.crt
+ENV KRESD_CERT_KEY_FILE=/var/lib/knot-resolver/ssl/server.key
 
 # Install system packages
 RUN export DEBIAN_FRONTEND=noninteractive \
