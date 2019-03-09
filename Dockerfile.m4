@@ -213,8 +213,8 @@ RUN dpkg -i /tmp/hblock-*.deb && rm /tmp/hblock-*.deb
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
 
 # Create users and groups
-ARG KNOT_RESOLVER_USER_UID=999
-ARG KNOT_RESOLVER_USER_GID=999
+ARG KNOT_RESOLVER_USER_UID=1000
+ARG KNOT_RESOLVER_USER_GID=1000
 RUN groupadd \
 		--gid "${KNOT_RESOLVER_USER_GID}" \
 		knot-resolver
