@@ -134,7 +134,7 @@ RUN cd /tmp/knot-resolver/ \
 	&& /usr/sbin/kresd --version
 
 # Download hBlock
-ARG HBLOCK_TREEISH=v2.0.4
+ARG HBLOCK_TREEISH=v2.0.5
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 RUN mkdir -p /tmp/hblock/ && cd /tmp/hblock/ \
 	&& git clone --recursive "${HBLOCK_REMOTE}" ./ \
