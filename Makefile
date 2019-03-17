@@ -88,8 +88,8 @@ $(IMAGE_ARM32V7_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' build \
 		--tag '$(IMAGE_VERSION_TAG)-arm32v7' \
-		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true \
-		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true \
+		--build-arg KNOT_RESOLVER_INSTALLATION_TESTS=disabled \
+		--build-arg KNOT_RESOLVER_INTEGRATION_TESTS=disabled \
 		--file '$@' ./
 
 .PHONY: build-arm64v8-image
@@ -104,8 +104,8 @@ $(IMAGE_ARM64V8_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' build \
 		--tag '$(IMAGE_VERSION_TAG)-arm64v8' \
-		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true \
-		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true \
+		--build-arg KNOT_RESOLVER_INSTALLATION_TESTS=disabled \
+		--build-arg KNOT_RESOLVER_INTEGRATION_TESTS=disabled \
 		--file '$@' ./
 
 ##################################################
