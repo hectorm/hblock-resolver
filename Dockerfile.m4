@@ -32,6 +32,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		debhelper \
 		dh-systemd \
 		dns-root-data \
+		file \
 		gawk \
 		git \
 		libaugeas0 \
@@ -100,8 +101,8 @@ RUN cd /tmp/knot-dns/ \
 		--exclude=/usr/include/,/usr/lib/pkgconfig/,/usr/share/man/ \
 		--nodoc \
 		make install \
-	&& /usr/bin/kdig --version \
-	&& /usr/bin/khost --version
+	&& file /usr/bin/kdig && /usr/bin/kdig --version \
+	&& file /usr/bin/khost && /usr/bin/khost --version
 
 # Build Knot Resolver
 ARG KNOT_RESOLVER_TREEISH=v3.2.1
@@ -135,7 +136,8 @@ RUN cd /tmp/knot-resolver/ \
 	&& if [ "${KNOT_RESOLVER_SKIP_INTEGRATION_CHECK}" != true ]; then \
 		make check-integration || exit 1; \
 	fi \
-	&& /usr/sbin/kresd --version
+	&& file /usr/sbin/kresd && /usr/sbin/kresd --version \
+	&& file /usr/sbin/kresc
 
 # Download hBlock
 ARG HBLOCK_TREEISH=v2.0.5
