@@ -72,8 +72,7 @@ $(IMAGE_AMD64_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		-D CROSS_ARCH=amd64 \
 		-D CROSS_QEMU=/usr/bin/qemu-x86_64-static \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
-	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-amd64' || true
-	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-amd64' \
+	'$(DOCKER)' build \
 		--tag '$(IMAGE_VERSION_TAG)-amd64' \
 		--file '$@' ./
 
@@ -87,8 +86,7 @@ $(IMAGE_ARM32V7_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		-D CROSS_ARCH=arm32v7 \
 		-D CROSS_QEMU=/usr/bin/qemu-arm-static \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
-	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-arm32v7' || true
-	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-arm32v7' \
+	'$(DOCKER)' build \
 		--tag '$(IMAGE_VERSION_TAG)-arm32v7' \
 		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true \
 		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true \
@@ -104,8 +102,7 @@ $(IMAGE_ARM64V8_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		-D CROSS_ARCH=arm64v8 \
 		-D CROSS_QEMU=/usr/bin/qemu-aarch64-static \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
-	'$(DOCKER)' pull '$(IMAGE_VERSION_TAG)-arm64v8' || true
-	'$(DOCKER)' build --cache-from '$(IMAGE_VERSION_TAG)-arm64v8' \
+	'$(DOCKER)' build \
 		--tag '$(IMAGE_VERSION_TAG)-arm64v8' \
 		--build-arg KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=true \
 		--build-arg KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=true \
