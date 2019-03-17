@@ -80,8 +80,9 @@ RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 ARG KNOT_DNS_TREEISH=v2.7.6
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 RUN mkdir -p /tmp/knot-dns/ && cd /tmp/knot-dns/ \
-	&& git clone --recursive "${KNOT_DNS_REMOTE}" ./ \
-	&& git checkout "${KNOT_DNS_TREEISH}"
+	&& git clone "${KNOT_DNS_REMOTE}" ./ \
+	&& git checkout "${KNOT_DNS_TREEISH}" \
+	&& git submodule update --init --recursive
 RUN cd /tmp/knot-dns/ \
 	&& ./autogen.sh \
 	&& ./configure \
@@ -108,9 +109,12 @@ ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_SKIP_INSTALLATION_CHECK=false
 ARG KNOT_RESOLVER_SKIP_INTEGRATION_CHECK=false
 RUN mkdir -p /tmp/knot-resolver/ && cd /tmp/knot-resolver/ \
-	&& git clone --recursive "${KNOT_RESOLVER_REMOTE}" ./ \
+	&& git clone "${KNOT_RESOLVER_REMOTE}" ./ \
 	&& git checkout "${KNOT_RESOLVER_TREEISH}" \
-	&& pip3 install --user -r tests/deckard/requirements.txt
+	&& git submodule update --init --recursive
+RUN cd /tmp/knot-resolver/ \
+	&& pip3 install --user -r ./tests/pytests/requirements.txt \
+	&& pip3 install --user -r ./tests/deckard/requirements.txt
 RUN cd /tmp/knot-resolver/ \
 	&& export CFLAGS='-O2 -fstack-protector' \
 	&& export PREFIX=/usr \
@@ -137,8 +141,9 @@ RUN cd /tmp/knot-resolver/ \
 ARG HBLOCK_TREEISH=v2.0.5
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 RUN mkdir -p /tmp/hblock/ && cd /tmp/hblock/ \
-	&& git clone --recursive "${HBLOCK_REMOTE}" ./ \
-	&& git checkout "${HBLOCK_TREEISH}"
+	&& git clone "${HBLOCK_REMOTE}" ./ \
+	&& git checkout "${HBLOCK_TREEISH}" \
+	&& git submodule update --init --recursive
 RUN cd /tmp/hblock/ \
 	&& make package-deb \
 	&& dpkg -i ./dist/hblock-*.deb \
