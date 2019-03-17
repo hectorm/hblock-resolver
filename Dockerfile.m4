@@ -195,7 +195,7 @@ m4_define([[TINI_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[v4-CROSS_ARCH]], [[v4]]
 COPY --from=hectormolinero/tini:TINI_IMAGE_TAG --chown=root:root /usr/bin/tini /usr/bin/tini
 
 # Copy Supercronic build
-m4_define([[SUPERCRONIC_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[v5-CROSS_ARCH]], [[v5]]))m4_dnl
+m4_define([[SUPERCRONIC_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[v6-CROSS_ARCH]], [[v6]]))m4_dnl
 COPY --from=hectormolinero/supercronic:SUPERCRONIC_IMAGE_TAG --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
 
 # Copy LuaRocks packages
