@@ -35,34 +35,32 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		file \
 		gawk \
 		git \
-		libaugeas0 \
-		libcap-ng-dev \
+		libaugeas-dev \
 		libcmocka-dev \
 		libedit-dev \
 		libffi-dev \
-		libfstrm-dev \
 		libgeoip-dev \
 		libgnutls28-dev \
 		libidn2-dev \
 		libjansson-dev \
 		liblmdb-dev \
 		libluajit-5.1-dev \
-		libprotobuf-c-dev \
-		libprotobuf-dev \
 		libssl-dev \
+		libsystemd-dev \
 		libtool \
+		libunistring-dev \
 		liburcu-dev \
 		libuv1-dev \
 		luajit \
 		luarocks \
 		pkg-config \
-		protobuf-c-compiler \
 		python3 \
 		python3-dev \
 		python3-pip \
 		python3-setuptools \
 		python3-wheel \
-		xxd
+		xxd \
+	&& rm -rf /var/lib/apt/lists/*
 
 # Install LuaRocks packages
 RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
@@ -88,18 +86,17 @@ RUN cd /tmp/knot-dns/ \
 	&& ./autogen.sh \
 	&& ./configure \
 		--prefix=/usr \
+		--enable-utilities \
+		--enable-fastparser \
 		--disable-daemon \
 		--disable-modules \
+		--disable-dnstap \
 		--disable-documentation \
-		--enable-fastparser \
-		--enable-dnstap \
-		--enable-utilities \
 	&& make -j"$(nproc)" \
 	&& checkinstall --default \
 		--pkgname=knot-dns \
 		--pkgversion=0 --pkgrelease=0 \
-		--exclude=/usr/include/,/usr/lib/pkgconfig/,/usr/share/man/ \
-		--nodoc \
+		--exclude=/usr/include/,/usr/lib/pkgconfig/,/usr/share/man/ --nodoc \
 		make install \
 	&& file /usr/bin/kdig && /usr/bin/kdig --version \
 	&& file /usr/bin/khost && /usr/bin/khost --version
@@ -127,8 +124,7 @@ RUN cd /tmp/knot-resolver/ \
 	&& checkinstall --default \
 		--pkgname=knot-resolver \
 		--pkgversion=0 --pkgrelease=0 \
-		--exclude=/usr/include/,/usr/lib/pkgconfig/,/usr/share/man/ \
-		--nodoc \
+		--exclude=/usr/include/,/usr/lib/pkgconfig/,/usr/share/man/ --nodoc \
 		make install \
 	&& if [ "${KNOT_RESOLVER_INSTALLATION_TESTS}" = enabled ]; then make installcheck || exit 1; fi \
 	&& if [ "${KNOT_RESOLVER_INTEGRATION_TESTS}"  = enabled ]; then make check-integration || exit 1; fi \
@@ -169,20 +165,18 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		diffutils \
 		dns-root-data \
 		gzip \
-		libcap-ng0 \
 		libcap2-bin \
 		libedit2 \
-		libfstrm0 \
 		libgcc1 \
 		libgeoip1 \
 		libgnutls30 \
 		libidn2-0 \
 		libjansson4 \
 		liblmdb0 \
-		libprotobuf-c1 \
-		libprotobuf10 \
 		libssl1.1 \
 		libstdc++6 \
+		libsystemd0 \
+		libunistring2 \
 		liburcu6 \
 		libuv1 \
 		luajit \
