@@ -152,6 +152,7 @@ m4_ifdef([[CROSS_QEMU]], [[COPY --from=qemu-user-static CROSS_QEMU CROSS_QEMU]])
 
 # Environment
 ENV KRESD_NIC=
+ENV KRESD_VERBOSE=false
 ENV KRESD_CERT_MODE=self-signed
 ENV KRESD_CERT_CRT_FILE=/var/lib/knot-resolver/ssl/server.crt
 ENV KRESD_CERT_KEY_FILE=/var/lib/knot-resolver/ssl/server.key

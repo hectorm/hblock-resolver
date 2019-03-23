@@ -30,8 +30,11 @@ If defined, kresd will only listen on the specified interface. Some users observ
 containers when they bound the daemon to a single interface:ip address pair ([CZ-NIC/knot-resolver#32](https://github.com/CZ-NIC/knot-resolver/pull/32),
 [dynamic configuration docs](https://knot-resolver.readthedocs.io/en/latest/daemon.html?highlight=docker#dynamic-configuration)).
 
+#### `KRESD_VERBOSE`
+If equals `true`, verbose logging will be enabled.
+
 #### `KRESD_CERT_MODE`
-If equals to `self-signed` (**default**), a self-signed certificate will be generated. You can provide your own certificate with these options:
+If equals `self-signed` (**default**), a self-signed certificate will be generated. You can provide your own certificate with these options:
 ```
   --env KRESD_CERT_MODE=external \
   --mount type=bind,src='/path/to/server.key',dst='/var/lib/knot-resolver/ssl/server.key',ro \
