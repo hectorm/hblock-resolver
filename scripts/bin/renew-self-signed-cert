@@ -20,7 +20,7 @@ if [ ! -f "${KEY_FILE}" ]; then
 		&& mkdir -p "$(dirname "${KEY_FILE}")" \
 		&& rm -f "${CRT_FILE}" "${KEY_FILE}" \
 		&& openssl ecparam -genkey -name prime256v1 -out "${KEY_FILE}" \
-	)
+	) >/dev/null
 fi
 
 # Generate self-signed certificate if it does not exist or will expire soon
@@ -36,5 +36,5 @@ if [ ! -f "${CRT_FILE}" ] || ! openssl x509 -checkend 604800 -noout -in "${CRT_F
 		&& openssl x509 -req -sha256 -days 90 -signkey "${KEY_FILE}" -in "${CSR_FILE}" -out "${CRT_FILE}" \
 		&& openssl x509 -in "${CRT_FILE}" -text -noout \
 		&& rm -f "${CSR_FILE}"
-	)
+	) >/dev/null
 fi

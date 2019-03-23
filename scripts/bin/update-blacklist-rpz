@@ -16,7 +16,8 @@ hblock \
 	--output "${HBLOCK_OUTPUT_TMP}" \
 	--template '\1 CNAME \2' \
 	--redirection '.' \
-	--comment ''
+	--comment '' \
+	--quiet
 
 # Replace blacklist zone if it differs
 if ! cmp --silent "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"; then

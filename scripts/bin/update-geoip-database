@@ -16,7 +16,7 @@ if [ -z "${GEOIPDB_URL-}" ]; then
 fi
 
 # Download GeoIP database
-curl -L "${GEOIPDB_URL}" | gzip -d > "${GEOIPDB_FILE_TMP}"
+curl -fsSL "${GEOIPDB_URL}" | gzip -d > "${GEOIPDB_FILE_TMP}"
 
 # Replace GeoIP database if it differs
 if ! cmp --silent "${GEOIPDB_FILE_TMP}" "${GEOIPDB_FILE}"; then
