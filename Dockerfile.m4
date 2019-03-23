@@ -227,8 +227,8 @@ RUN useradd \
 		knot-resolver
 
 # Create data directory
-RUN mkdir /var/lib/knot-resolver/ \
-	&& chown knot-resolver:knot-resolver /var/lib/knot-resolver/
+RUN mkdir /var/lib/knot-resolver/ && chown knot-resolver:knot-resolver /var/lib/knot-resolver/
+WORKDIR /var/lib/knot-resolver/
 
 # Copy kresd config
 COPY --chown=root:root config/knot-resolver/ /etc/knot-resolver/
@@ -236,33 +236,26 @@ COPY --chown=root:root config/knot-resolver/ /etc/knot-resolver/
 # Copy hBlock config
 COPY --chown=root:root config/hblock.d/ /etc/hblock.d/
 
-# Copy services
-COPY --chown=knot-resolver:knot-resolver scripts/service/ /home/knot-resolver/service/
-
 # Copy crontab
 COPY --chown=root:root config/crontab /etc/crontab
 
 # Copy scripts
 COPY --chown=root:root scripts/bin/ /usr/local/bin/
 
+# Copy services
+COPY --chown=knot-resolver:knot-resolver scripts/service/ /home/knot-resolver/service/
+
 # Drop root privileges
 USER knot-resolver:knot-resolver
 
-# Expose ports
-## DNS
+# DNS
 EXPOSE 53/tcp 53/udp
-## DNS over TLS
+# DNS over TLS
 EXPOSE 853/tcp
-## HTTPS interface
+# HTTPS interface
 EXPOSE 8053/tcp
 
-# Don't declare volumes, let the user decide
-#VOLUME /var/lib/knot-resolver/
-
-WORKDIR /var/lib/knot-resolver/
-
-HEALTHCHECK --start-period=60s --interval=30s --timeout=5s --retries=3 \
-	CMD /usr/local/bin/docker-healthcheck-cmd
+HEALTHCHECK --start-period=60s --interval=30s --timeout=5s --retries=3 CMD /usr/local/bin/docker-healthcheck-cmd
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/local/bin/docker-foreground-cmd"]
