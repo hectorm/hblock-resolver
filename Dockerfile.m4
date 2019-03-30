@@ -59,6 +59,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		python3-pip \
 		python3-setuptools \
 		python3-wheel \
+		tzdata \
 		xxd \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -183,6 +184,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		luajit \
 		openssl \
 		runit \
+		tzdata \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Copy Tini build
