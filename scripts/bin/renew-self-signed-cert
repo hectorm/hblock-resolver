@@ -2,8 +2,8 @@
 
 set -eu
 
-# Do nothing if the mode is not equal to "self-signed"
-if [ "${KRESD_CERT_MODE}" != 'self-signed' ]; then
+# Do nothing if the certificate is not managed
+if [ "${KRESD_CERT_MANAGED}" != 'true' ]; then
 	exit 0
 fi
 

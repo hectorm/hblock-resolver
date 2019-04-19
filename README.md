@@ -16,8 +16,9 @@ docker run --detach \
   --restart on-failure:3 \
   --publish 127.0.0.1:53:53/tcp \
   --publish 127.0.0.1:53:53/udp \
+  --publish 127.0.0.1:443:443/tcp \
   --publish 127.0.0.1:853:853/tcp \
-  --publish 127.0.0.1:8053:8053/tcp \
+  --publish 127.0.0.1:8453:8453/tcp \
   --mount type=volume,src=hblock-resolver-data,dst=/var/lib/knot-resolver/ \
   hectormolinero/hblock-resolver:latest
 ```
@@ -33,15 +34,15 @@ containers when they bound the daemon to a single interface:ip address pair ([CZ
 #### `KRESD_VERBOSE`
 If equals `true`, verbose logging will be enabled.
 
-#### `KRESD_CERT_MODE`
-If equals `self-signed` (**default**), a self-signed certificate will be generated. You can provide your own certificate with these options:
+#### `KRESD_CERT_MANAGED`
+If equals `true` (**default**), a self-signed certificate will be generated. You can provide your own certificate with these options:
 ```
-  --env KRESD_CERT_MODE=external \
+  --env KRESD_CERT_MANAGED=false \
   --mount type=bind,src='/path/to/server.key',dst='/var/lib/knot-resolver/ssl/server.key',ro \
   --mount type=bind,src='/path/to/server.crt',dst='/var/lib/knot-resolver/ssl/server.crt',ro \
 ```
-> **Note:** for a more advanced setup, look at the [following example](examples/dot-with-letsencrypt) with [Let's Encrypt](https://letsencrypt.org) and
-[lego](https://github.com/xenolf/lego/).
+> **Note:** for a more advanced setup, look at the [following example](examples/caddy) with [Let's Encrypt](https://letsencrypt.org) and
+[Caddy](https://caddyserver.com/).
 
 ## Additional configuration
 Main Knot DNS Resolver configuration is located in `/etc/knot-resolver/kresd.conf`. If you would like to add additional configuration, add one or more

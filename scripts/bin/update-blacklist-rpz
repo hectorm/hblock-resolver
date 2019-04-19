@@ -4,26 +4,10 @@ set -eu
 
 printf '%s\n' 'Downloading blacklist zone...'
 
-HBLOCK_DIR='/var/lib/knot-resolver/'
-HBLOCK_OUTPUT="${HBLOCK_DIR}/hblock.rpz"
-HBLOCK_OUTPUT_TMP=$(mktemp --dry-run)
-
-cleanup() { rm -f "${HBLOCK_OUTPUT_TMP}"; }
-trap cleanup EXIT
-
 # Generate blacklist zone
 hblock \
-	--output "${HBLOCK_OUTPUT_TMP}" \
+	--output "${KRESD_BLACKLIST_RPZ_FILE}" \
 	--template '\1 CNAME \2' \
 	--redirection '.' \
 	--comment '' \
 	--quiet
-
-# Replace blacklist zone if it differs
-if ! cmp --silent "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"; then
-	mv -f "${HBLOCK_OUTPUT_TMP}" "${HBLOCK_OUTPUT}"
-	# Restart Knot Resolver if it is running
-	if is-sv-status kresd run; then
-		sv restart ~/service/kresd
-	fi
-fi

@@ -66,8 +66,9 @@ docker run --detach \
 	--dns '1.1.1.1' --dns '1.0.0.1' \
 	--publish '127.0.0.1:53:53/tcp' \
 	--publish '127.0.0.1:53:53/udp' \
+	--publish '127.0.0.1:443:443/tcp' \
 	--publish '127.0.0.1:853:853/tcp' \
-	--publish '127.0.0.1:8053:8053/tcp' \
+	--publish '127.0.0.1:8453:8453/tcp' \
 	--mount type=volume,src="${DOCKER_VOLUME}",dst='/var/lib/knot-resolver/' \
 	${HBLOCK_HEADER_FILE+--mount type=bind,src="${HBLOCK_HEADER_FILE}",dst='/etc/hblock.d/header',ro} \
 	${HBLOCK_FOOTER_FILE+--mount type=bind,src="${HBLOCK_FOOTER_FILE}",dst='/etc/hblock.d/footer',ro} \
