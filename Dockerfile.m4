@@ -277,11 +277,9 @@ COPY --chown=knot-resolver:knot-resolver scripts/service/ /home/knot-resolver/se
 USER knot-resolver:knot-resolver
 
 # DNS over UDP & TCP
-EXPOSE 53/tcp 53/udp
-# DNS over HTTPS
-EXPOSE 443/tcp
-# DNS over TLS
-EXPOSE 853/tcp
+EXPOSE 53/udp 53/tcp
+# DNS over HTTPS & TLS
+EXPOSE 443/tcp 853/tcp
 # Web interface
 EXPOSE 8453/tcp
 

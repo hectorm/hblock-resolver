@@ -64,9 +64,8 @@ docker run --detach \
 	--restart on-failure:3 \
 	--log-opt max-size=32m \
 	--dns '1.1.1.1' --dns '1.0.0.1' \
-	--publish '127.0.0.1:53:53/tcp' \
 	--publish '127.0.0.1:53:53/udp' \
-	--publish '127.0.0.1:443:443/tcp' \
+	--publish '127.0.0.1:53:53/tcp' \
 	--publish '127.0.0.1:853:853/tcp' \
 	--publish '127.0.0.1:8453:8453/tcp' \
 	--mount type=volume,src="${DOCKER_VOLUME}",dst='/var/lib/knot-resolver/' \

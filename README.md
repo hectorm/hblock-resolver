@@ -14,9 +14,8 @@ A Docker image of [Knot DNS Resolver](https://www.knot-resolver.cz) configured t
 docker run --detach \
   --name hblock-resolver \
   --restart on-failure:3 \
-  --publish 127.0.0.1:53:53/tcp \
   --publish 127.0.0.1:53:53/udp \
-  --publish 127.0.0.1:443:443/tcp \
+  --publish 127.0.0.1:53:53/tcp \
   --publish 127.0.0.1:853:853/tcp \
   --publish 127.0.0.1:8453:8453/tcp \
   --mount type=volume,src=hblock-resolver-data,dst=/var/lib/knot-resolver/ \
