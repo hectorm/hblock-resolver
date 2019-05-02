@@ -152,10 +152,10 @@ RUN make install PREFIX=/usr
 RUN /usr/bin/hblock --version
 
 ##################################################
-## "hblock-resolver" stage
+## "base" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[FROM CROSS_ARCH/ubuntu:18.04]], [[FROM ubuntu:18.04]]) AS hblock-resolver
+m4_ifdef([[CROSS_ARCH]], [[FROM CROSS_ARCH/ubuntu:18.04]], [[FROM ubuntu:18.04]]) AS base
 m4_ifdef([[CROSS_QEMU]], [[COPY --from=qemu-user-static CROSS_QEMU CROSS_QEMU]])
 
 # Environment
@@ -261,6 +261,27 @@ COPY --chown=knot-resolver:knot-resolver scripts/service/ /home/knot-resolver/se
 
 # Drop root privileges
 USER knot-resolver:knot-resolver
+
+##################################################
+## "test" stage
+##################################################
+
+m4_ifdef([[CROSS_ARCH]], [[]], [[
+FROM base AS test
+
+# Perform a test run
+RUN printf '%s\n' 'Starting services...' \
+	&& (nohup docker-foreground-cmd &) \
+	&& TIMEOUT_DURATION=120s \
+	&& TIMEOUT_COMMAND='until docker-healthcheck-cmd; do sleep 5; done' \
+	&& timeout "${TIMEOUT_DURATION}" sh -eu -c "${TIMEOUT_COMMAND}"
+]])
+
+##################################################
+## "main" stage
+##################################################
+
+FROM base AS main
 
 # DNS over UDP & TCP
 EXPOSE 53/udp 53/tcp
