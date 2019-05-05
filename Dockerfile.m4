@@ -251,11 +251,11 @@ COPY --chown=knot-resolver:knot-resolver scripts/service/ /home/knot-resolver/se
 # Drop root privileges
 USER knot-resolver:knot-resolver
 
+m4_ifdef([[CROSS_ARCH]], [[]], [[
 ##################################################
 ## "test" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[]], [[
 FROM base AS test
 
 # Perform a test run
