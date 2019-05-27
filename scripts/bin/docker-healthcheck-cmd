@@ -27,7 +27,7 @@ if [ "$(kdig @127.0.0.1 -p 853 +tls +short +time=1 +retry=0 localhost A)" != 127
 fi
 
 # HTTP server must return "OK"
-if [ "$(curl -kfs https://localhost:8453/health)" != OK ]; then
+if [ "$(curl -kfs --http1.1 https://localhost:8453/health)" != OK ]; then
 	>&2 printf '%s\n' 'HTTP server returned an unexpected result'
 	exit 1
 fi
