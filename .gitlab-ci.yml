@@ -81,7 +81,7 @@ push:amd64-image:
   stage: push:images
   before_script:
     - apk add --no-cache coreutils git make
-    - docker login -u "${CI_DEPLOY_USER}" -p "${CI_DEPLOY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
+    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
   script:
     - make load-amd64-image push-amd64-image
   only:
@@ -95,7 +95,7 @@ push:arm32v7-image:
   stage: push:images
   before_script:
     - apk add --no-cache coreutils git make
-    - docker login -u "${CI_DEPLOY_USER}" -p "${CI_DEPLOY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
+    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
   script:
     - make load-arm32v7-image push-arm32v7-image
   only:
@@ -109,7 +109,7 @@ push:arm64v8-image:
   stage: push:images
   before_script:
     - apk add --no-cache coreutils git make
-    - docker login -u "${CI_DEPLOY_USER}" -p "${CI_DEPLOY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
+    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
   script:
     - make load-arm64v8-image push-arm64v8-image
   only:
@@ -124,7 +124,7 @@ push:cross-manifest:
   before_script:
     - apk add --no-cache coreutils git make
     - "mkdir -p ~/.docker/ && printf '%s\n' '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
-    - docker login -u "${CI_DEPLOY_USER}" -p "${CI_DEPLOY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
+    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}" >/dev/null 2>&1
   script:
     - make push-cross-manifest
   only:

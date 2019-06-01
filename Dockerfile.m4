@@ -4,8 +4,8 @@ m4_changequote([[, ]])
 ## "build" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[FROM CROSS_ARCH/ubuntu:18.04]], [[FROM ubuntu:18.04]]) AS build
-m4_ifdef([[CROSS_QEMU]], [[COPY --from=hectormolinero/qemu-user-static:latest CROSS_QEMU CROSS_QEMU]])
+m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:18.04]], [[FROM docker.io/ubuntu:18.04]]) AS build
+m4_ifdef([[CROSS_QEMU]], [[COPY --from=docker.io/hectormolinero/qemu-user-static:latest CROSS_QEMU CROSS_QEMU]])
 
 # Install system packages
 RUN export DEBIAN_FRONTEND=noninteractive \
@@ -144,8 +144,8 @@ RUN /usr/bin/hblock --version
 ## "base" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[FROM CROSS_ARCH/ubuntu:18.04]], [[FROM ubuntu:18.04]]) AS base
-m4_ifdef([[CROSS_QEMU]], [[COPY --from=hectormolinero/qemu-user-static:latest CROSS_QEMU CROSS_QEMU]])
+m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:18.04]], [[FROM docker.io/ubuntu:18.04]]) AS base
+m4_ifdef([[CROSS_QEMU]], [[COPY --from=docker.io/hectormolinero/qemu-user-static:latest CROSS_QEMU CROSS_QEMU]])
 
 # Environment
 ENV KRESD_NIC=
@@ -200,11 +200,11 @@ RUN useradd \
 
 # Copy Tini build
 m4_define([[TINI_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[latest-CROSS_ARCH]], [[latest]]))m4_dnl
-COPY --from=hectormolinero/tini:TINI_IMAGE_TAG --chown=root:root /usr/bin/tini /usr/bin/tini
+COPY --from=docker.io/hectormolinero/tini:TINI_IMAGE_TAG --chown=root:root /usr/bin/tini /usr/bin/tini
 
 # Copy Supercronic build
 m4_define([[SUPERCRONIC_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[latest-CROSS_ARCH]], [[latest]]))m4_dnl
-COPY --from=hectormolinero/supercronic:SUPERCRONIC_IMAGE_TAG --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
+COPY --from=docker.io/hectormolinero/supercronic:SUPERCRONIC_IMAGE_TAG --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
 
 # Copy LuaRocks packages
 COPY --from=build --chown=root:root /usr/local/lib/lua/ /usr/local/lib/lua/

@@ -8,32 +8,30 @@ GIT := $(shell command -v git 2>/dev/null)
 M4 := $(shell command -v m4 2>/dev/null)
 
 DISTDIR := ./dist
+VERSION_FILE = ./VERSION
+DOCKERFILE_TEMPLATE := ./Dockerfile.m4
 
+IMAGE_REGISTRY := docker.io
 IMAGE_NAMESPACE := hectormolinero
-IMAGE_NAME := hblock-resolver
-IMAGE_VERSION := v0
+IMAGE_PROJECT := hblock-resolver
+IMAGE_NAME := $(IMAGE_REGISTRY)/$(IMAGE_NAMESPACE)/$(IMAGE_PROJECT)
 
-# If git is available and the directory is a repository, use the latest tag as IMAGE_VERSION.
-ifeq ([$(notdir $(GIT))][$(wildcard .git/.)],[git][.git/.])
-	IMAGE_VERSION := $(shell '$(GIT)' describe --abbrev=0 --tags 2>/dev/null || printf '%s' '$(IMAGE_VERSION)')
+IMAGE_VERSION := v0
+ifneq ($(wildcard $(VERSION_FILE)),)
+	IMAGE_VERSION := $(shell cat '$(VERSION_FILE)')
 endif
 
-IMAGE_LATEST_TAG := $(IMAGE_NAMESPACE)/$(IMAGE_NAME):latest
-IMAGE_VERSION_TAG := $(IMAGE_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_VERSION)
-
 IMAGE_NATIVE_DOCKERFILE := $(DISTDIR)/Dockerfile
-IMAGE_NATIVE_TARBALL := $(DISTDIR)/$(IMAGE_NAME).tgz
+IMAGE_NATIVE_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).tgz
 
 IMAGE_AMD64_DOCKERFILE := $(DISTDIR)/Dockerfile.amd64
-IMAGE_AMD64_TARBALL := $(DISTDIR)/$(IMAGE_NAME).amd64.tgz
+IMAGE_AMD64_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).amd64.tgz
 
 IMAGE_ARM32V7_DOCKERFILE := $(DISTDIR)/Dockerfile.arm32v7
-IMAGE_ARM32V7_TARBALL := $(DISTDIR)/$(IMAGE_NAME).arm32v7.tgz
+IMAGE_ARM32V7_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).arm32v7.tgz
 
 IMAGE_ARM64V8_DOCKERFILE := $(DISTDIR)/Dockerfile.arm64v8
-IMAGE_ARM64V8_TARBALL := $(DISTDIR)/$(IMAGE_NAME).arm64v8.tgz
-
-DOCKERFILE_TEMPLATE := ./Dockerfile.m4
+IMAGE_ARM64V8_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).arm64v8.tgz
 
 ##################################################
 ## "all" target
@@ -55,8 +53,8 @@ $(IMAGE_NATIVE_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		--prefix-builtins \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' build \
-		--tag '$(IMAGE_VERSION_TAG)' \
-		--tag '$(IMAGE_LATEST_TAG)' \
+		--tag '$(IMAGE_NAME):$(IMAGE_VERSION)' \
+		--tag '$(IMAGE_NAME):latest' \
 		--file '$@' ./
 
 .PHONY: build-cross-images
@@ -73,8 +71,8 @@ $(IMAGE_AMD64_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		-D CROSS_QEMU=/usr/bin/qemu-x86_64-static \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' build \
-		--tag '$(IMAGE_VERSION_TAG)-amd64' \
-		--tag '$(IMAGE_LATEST_TAG)-amd64' \
+		--tag '$(IMAGE_NAME):$(IMAGE_VERSION)-amd64' \
+		--tag '$(IMAGE_NAME):latest-amd64' \
 		--file '$@' ./
 
 .PHONY: build-arm32v7-image
@@ -88,8 +86,8 @@ $(IMAGE_ARM32V7_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		-D CROSS_QEMU=/usr/bin/qemu-arm-static \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' build \
-		--tag '$(IMAGE_VERSION_TAG)-arm32v7' \
-		--tag '$(IMAGE_LATEST_TAG)-arm32v7' \
+		--tag '$(IMAGE_NAME):$(IMAGE_VERSION)-arm32v7' \
+		--tag '$(IMAGE_NAME):latest-arm32v7' \
 		--build-arg KNOT_RESOLVER_CONFIG_TESTS=disabled \
 		--file '$@' ./
 
@@ -104,8 +102,8 @@ $(IMAGE_ARM64V8_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 		-D CROSS_QEMU=/usr/bin/qemu-aarch64-static \
 		'$(DOCKERFILE_TEMPLATE)' | cat --squeeze-blank > '$@'
 	'$(DOCKER)' build \
-		--tag '$(IMAGE_VERSION_TAG)-arm64v8' \
-		--tag '$(IMAGE_LATEST_TAG)-arm64v8' \
+		--tag '$(IMAGE_NAME):$(IMAGE_VERSION)-arm64v8' \
+		--tag '$(IMAGE_NAME):latest-arm64v8' \
 		--build-arg KNOT_RESOLVER_CONFIG_TESTS=disabled \
 		--file '$@' ./
 
@@ -121,7 +119,7 @@ endef
 save-native-image: $(IMAGE_NATIVE_TARBALL)
 
 $(IMAGE_NATIVE_TARBALL): $(IMAGE_NATIVE_DOCKERFILE)
-	$(call save_image,$(IMAGE_VERSION_TAG),$@)
+	$(call save_image,$(IMAGE_NAME):$(IMAGE_VERSION),$@)
 
 .PHONY: save-cross-images
 save-cross-images: save-amd64-image save-arm32v7-image save-arm64v8-image
@@ -130,19 +128,19 @@ save-cross-images: save-amd64-image save-arm32v7-image save-arm64v8-image
 save-amd64-image: $(IMAGE_AMD64_TARBALL)
 
 $(IMAGE_AMD64_TARBALL): $(IMAGE_AMD64_DOCKERFILE)
-	$(call save_image,$(IMAGE_VERSION_TAG)-amd64,$@)
+	$(call save_image,$(IMAGE_NAME):$(IMAGE_VERSION)-amd64,$@)
 
 .PHONY: save-arm32v7-image
 save-arm32v7-image: $(IMAGE_ARM32V7_TARBALL)
 
 $(IMAGE_ARM32V7_TARBALL): $(IMAGE_ARM32V7_DOCKERFILE)
-	$(call save_image,$(IMAGE_VERSION_TAG)-arm32v7,$@)
+	$(call save_image,$(IMAGE_NAME):$(IMAGE_VERSION)-arm32v7,$@)
 
 .PHONY: save-arm64v8-image
 save-arm64v8-image: $(IMAGE_ARM64V8_TARBALL)
 
 $(IMAGE_ARM64V8_TARBALL): $(IMAGE_ARM64V8_DOCKERFILE)
-	$(call save_image,$(IMAGE_VERSION_TAG)-arm64v8,$@)
+	$(call save_image,$(IMAGE_NAME):$(IMAGE_VERSION)-arm64v8,$@)
 
 ##################################################
 ## "load-*" targets
@@ -159,7 +157,7 @@ endef
 .PHONY: load-native-image
 load-native-image:
 	$(call load_image,$(IMAGE_NATIVE_TARBALL))
-	$(call tag_image,$(IMAGE_VERSION_TAG),$(IMAGE_LATEST_TAG))
+	$(call tag_image,$(IMAGE_NAME):$(IMAGE_VERSION),$(IMAGE_NAME):latest)
 
 .PHONY: load-cross-images
 load-cross-images: load-amd64-image load-arm32v7-image load-arm64v8-image
@@ -167,17 +165,17 @@ load-cross-images: load-amd64-image load-arm32v7-image load-arm64v8-image
 .PHONY: load-amd64-image
 load-amd64-image:
 	$(call load_image,$(IMAGE_AMD64_TARBALL))
-	$(call tag_image,$(IMAGE_VERSION_TAG)-amd64,$(IMAGE_LATEST_TAG)-amd64)
+	$(call tag_image,$(IMAGE_NAME):$(IMAGE_VERSION)-amd64,$(IMAGE_NAME):latest-amd64)
 
 .PHONY: load-arm32v7-image
 load-arm32v7-image:
 	$(call load_image,$(IMAGE_ARM32V7_TARBALL))
-	$(call tag_image,$(IMAGE_VERSION_TAG)-arm32v7,$(IMAGE_LATEST_TAG)-arm32v7)
+	$(call tag_image,$(IMAGE_NAME):$(IMAGE_VERSION)-arm32v7,$(IMAGE_NAME):latest-arm32v7)
 
 .PHONY: load-arm64v8-image
 load-arm64v8-image:
 	$(call load_image,$(IMAGE_ARM64V8_TARBALL))
-	$(call tag_image,$(IMAGE_VERSION_TAG)-arm64v8,$(IMAGE_LATEST_TAG)-arm64v8)
+	$(call tag_image,$(IMAGE_NAME):$(IMAGE_VERSION)-arm64v8,$(IMAGE_NAME):latest-arm64v8)
 
 ##################################################
 ## "push-*" targets
@@ -204,22 +202,22 @@ push-cross-images: push-amd64-image push-arm32v7-image push-arm64v8-image
 
 .PHONY: push-amd64-image
 push-amd64-image:
-	$(call push_image,$(IMAGE_VERSION_TAG)-amd64)
-	$(call push_image,$(IMAGE_LATEST_TAG)-amd64)
+	$(call push_image,$(IMAGE_NAME):$(IMAGE_VERSION)-amd64)
+	$(call push_image,$(IMAGE_NAME):latest-amd64)
 
 .PHONY: push-arm32v7-image
 push-arm32v7-image:
-	$(call push_image,$(IMAGE_VERSION_TAG)-arm32v7)
-	$(call push_image,$(IMAGE_LATEST_TAG)-arm32v7)
+	$(call push_image,$(IMAGE_NAME):$(IMAGE_VERSION)-arm32v7)
+	$(call push_image,$(IMAGE_NAME):latest-arm32v7)
 
 .PHONY: push-arm64v8-image
 push-arm64v8-image:
-	$(call push_image,$(IMAGE_VERSION_TAG)-arm64v8)
-	$(call push_image,$(IMAGE_LATEST_TAG)-arm64v8)
+	$(call push_image,$(IMAGE_NAME):$(IMAGE_VERSION)-arm64v8)
+	$(call push_image,$(IMAGE_NAME):latest-arm64v8)
 
 push-cross-manifest:
-	$(call push_cross_manifest,$(IMAGE_VERSION_TAG),$(IMAGE_VERSION_TAG))
-	$(call push_cross_manifest,$(IMAGE_LATEST_TAG),$(IMAGE_LATEST_TAG))
+	$(call push_cross_manifest,$(IMAGE_NAME):$(IMAGE_VERSION),$(IMAGE_NAME):$(IMAGE_VERSION))
+	$(call push_cross_manifest,$(IMAGE_NAME):latest,$(IMAGE_NAME):latest)
 
 ##################################################
 ## "binfmt-*" targets
@@ -227,11 +225,11 @@ push-cross-manifest:
 
 .PHONY: binfmt-register
 binfmt-register:
-	'$(DOCKER)' run --rm --privileged multiarch/qemu-user-static:register
+	'$(DOCKER)' run --rm --privileged docker.io/multiarch/qemu-user-static:register
 
 .PHONY: binfmt-reset
 binfmt-reset:
-	'$(DOCKER)' run --rm --privileged multiarch/qemu-user-static:register --reset
+	'$(DOCKER)' run --rm --privileged docker.io/multiarch/qemu-user-static:register --reset
 
 ##################################################
 ## "version" target
@@ -241,8 +239,8 @@ binfmt-reset:
 version:
 	@if printf -- '%s' '$(IMAGE_VERSION)' | grep -q '^v[0-9]\{1,\}$$'; then \
 		NEW_IMAGE_VERSION=$$(awk -v 'v=$(IMAGE_VERSION)' 'BEGIN {printf "v%.0f", substr(v,2)+1}'); \
-		printf -- '%s\n' "$${NEW_IMAGE_VERSION}" > ./VERSION; \
-		'$(GIT)' add ./VERSION; '$(GIT)' commit -m "$${NEW_IMAGE_VERSION}"; \
+		printf -- '%s\n' "$${NEW_IMAGE_VERSION}" > '$(VERSION_FILE)'; \
+		'$(GIT)' add '$(VERSION_FILE)'; '$(GIT)' commit -m "$${NEW_IMAGE_VERSION}"; \
 		'$(GIT)' tag -a "$${NEW_IMAGE_VERSION}" -m "$${NEW_IMAGE_VERSION}"; \
 	else \
 		>&2 printf -- 'Malformed version string: %s\n' '$(IMAGE_VERSION)'; \

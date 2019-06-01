@@ -3,30 +3,30 @@
 set -eu
 export LC_ALL=C
 
-DOCKER_IMAGE_NAMESPACE=hectormolinero
-DOCKER_IMAGE_NAME=hblock-resolver
-DOCKER_IMAGE_VERSION=latest
-DOCKER_IMAGE=${DOCKER_IMAGE_NAMESPACE}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VERSION}
-DOCKER_CONTAINER=${DOCKER_IMAGE_NAME}
-DOCKER_VOLUME=${DOCKER_CONTAINER}-data
+IMAGE_NAMESPACE=hectormolinero
+IMAGE_PROJECT=hblock-resolver
+IMAGE_TAG=latest
+IMAGE_NAME=${IMAGE_NAMESPACE}/${IMAGE_PROJECT}:${IMAGE_TAG}
+CONTAINER_NAME=${IMAGE_PROJECT}
+VOLUME_NAME=${CONTAINER_NAME}-data
 
 imageExists() { [ -n "$(docker images -q "$1")" ]; }
 containerExists() { docker ps -aqf name="$1" --format '{{.Names}}' | grep -Fxq "$1"; }
 containerIsRunning() { docker ps -qf name="$1" --format '{{.Names}}' | grep -Fxq "$1"; }
 
-if ! imageExists "${DOCKER_IMAGE}"; then
-	>&2 printf -- '%s\n' "${DOCKER_IMAGE} image doesn't exist!"
+if ! imageExists "${IMAGE_NAME}"; then
+	>&2 printf -- '%s\n' "\"${IMAGE_NAME}\" image doesn't exist!"
 	exit 1
 fi
 
-if containerIsRunning "${DOCKER_CONTAINER}"; then
-	printf -- '%s\n' "Stopping \"${DOCKER_CONTAINER}\" container..."
-	docker stop "${DOCKER_CONTAINER}" >/dev/null
+if containerIsRunning "${CONTAINER_NAME}"; then
+	printf -- '%s\n' "Stopping \"${CONTAINER_NAME}\" container..."
+	docker stop "${CONTAINER_NAME}" >/dev/null
 fi
 
-if containerExists "${DOCKER_CONTAINER}"; then
-	printf -- '%s\n' "Removing \"${DOCKER_CONTAINER}\" container..."
-	docker rm "${DOCKER_CONTAINER}" >/dev/null
+if containerExists "${CONTAINER_NAME}"; then
+	printf -- '%s\n' "Removing \"${CONTAINER_NAME}\" container..."
+	docker rm "${CONTAINER_NAME}" >/dev/null
 fi
 
 if [ -z "${HBLOCK_HEADER_FILE-}" ] && [ -f '/etc/hblock-resolver/hblock.d/header' ]; then
@@ -57,10 +57,10 @@ if [ -z "${KRESD_CONF_DIR-}" ] && [ -d '/etc/hblock-resolver/kresd.conf.d/' ]; t
 	KRESD_CONF_DIR='/etc/hblock-resolver/kresd.conf.d/'
 fi
 
-printf -- '%s\n' "Creating \"${DOCKER_CONTAINER}\" container..."
+printf -- '%s\n' "Creating \"${CONTAINER_NAME}\" container..."
 docker run --detach \
-	--name "${DOCKER_CONTAINER}" \
-	--hostname "${DOCKER_CONTAINER}.localhost" \
+	--name "${CONTAINER_NAME}" \
+	--hostname "${CONTAINER_NAME}" \
 	--restart on-failure:3 \
 	--log-opt max-size=32m \
 	--dns '1.1.1.1' --dns '1.0.0.1' \
@@ -68,7 +68,7 @@ docker run --detach \
 	--publish '127.0.0.1:53:53/tcp' \
 	--publish '127.0.0.1:853:853/tcp' \
 	--publish '127.0.0.1:8453:8453/tcp' \
-	--mount type=volume,src="${DOCKER_VOLUME}",dst='/var/lib/knot-resolver/' \
+	--mount type=volume,src="${VOLUME_NAME}",dst='/var/lib/knot-resolver/' \
 	${HBLOCK_HEADER_FILE+--mount type=bind,src="${HBLOCK_HEADER_FILE}",dst='/etc/hblock.d/header',ro} \
 	${HBLOCK_FOOTER_FILE+--mount type=bind,src="${HBLOCK_FOOTER_FILE}",dst='/etc/hblock.d/footer',ro} \
 	${HBLOCK_SOURCES_FILE+--mount type=bind,src="${HBLOCK_SOURCES_FILE}",dst='/etc/hblock.d/sources.list',ro} \
@@ -83,7 +83,7 @@ docker run --detach \
 			printf -- ' --mount type=bind,src=%s,dst=%s,ro' "${srcFile}" "${dstFile}"
 		done
 	)} \
-	"${DOCKER_IMAGE}" "$@" >/dev/null
+	"${IMAGE_NAME}" "$@" >/dev/null
 
 printf -- '%s\n\n' 'Done!'
-exec docker logs -f "${DOCKER_CONTAINER}"
+exec docker logs -f "${CONTAINER_NAME}"
