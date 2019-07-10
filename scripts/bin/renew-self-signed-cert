@@ -12,6 +12,12 @@ printf '%s\n' 'Checking self-signed certificate...'
 CRT_FILE=${KRESD_CERT_CRT_FILE}
 KEY_FILE=${KRESD_CERT_KEY_FILE}
 
+# Create RANDFILE if it does not exist
+RANDFILE=${RANDFILE-${HOME}/.rnd}
+if [ ! -f "${RANDFILE}" ]; then
+	dd if=/dev/urandom of="${RANDFILE}" bs=256 count=1 >/dev/null 2>&1
+fi
+
 # Generate private key if it does not exist
 if [ ! -f "${KEY_FILE}" ]; then
 	printf '%s\n' 'Generating private key...'
