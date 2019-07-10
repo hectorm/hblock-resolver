@@ -193,7 +193,7 @@ RUN groupadd \
 RUN useradd \
 		--uid "${KNOT_RESOLVER_USER_UID}" \
 		--gid "${KNOT_RESOLVER_USER_GID}" \
-		--shell="$(command -v bash)" \
+		--shell "$(command -v bash)" \
 		--home-dir /home/knot-resolver/ \
 		--create-home \
 		knot-resolver
