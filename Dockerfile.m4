@@ -94,7 +94,7 @@ RUN /usr/bin/kdig --version
 RUN /usr/bin/khost --version
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_TREEISH=v4.0.0
+ARG KNOT_RESOLVER_TREEISH=v4.1.0
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_UNIT_TESTS=enabled
 ARG KNOT_RESOLVER_CONFIG_TESTS=enabled
