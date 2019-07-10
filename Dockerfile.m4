@@ -71,7 +71,7 @@ RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 	&& rm -rf "${HOME}"/.cache/luarocks/
 
 # Build Knot DNS (only libknot and utilities)
-ARG KNOT_DNS_TREEISH=v2.8.1
+ARG KNOT_DNS_TREEISH=v2.8.2
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 WORKDIR /tmp/knot-dns/
 RUN git clone "${KNOT_DNS_REMOTE}" ./
