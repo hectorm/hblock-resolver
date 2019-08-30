@@ -1,4 +1,4 @@
-image: "docker:stable"
+image: "docker.io/docker:stable"
 
 services:
   - "docker:dind"

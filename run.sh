@@ -3,10 +3,11 @@
 set -eu
 export LC_ALL=C
 
+IMAGE_REGISTRY=docker.io
 IMAGE_NAMESPACE=hectormolinero
 IMAGE_PROJECT=hblock-resolver
 IMAGE_TAG=latest
-IMAGE_NAME=${IMAGE_NAMESPACE:?}/${IMAGE_PROJECT:?}:${IMAGE_TAG:?}
+IMAGE_NAME=${IMAGE_REGISTRY:?}/${IMAGE_NAMESPACE:?}/${IMAGE_PROJECT:?}:${IMAGE_TAG:?}
 CONTAINER_NAME=${IMAGE_PROJECT:?}
 VOLUME_NAME=${CONTAINER_NAME:?}-data
 
@@ -14,7 +15,7 @@ imageExists() { [ -n "$(docker images -q "$1")" ]; }
 containerExists() { docker ps -aqf name="$1" --format '{{.Names}}' | grep -Fxq "$1"; }
 containerIsRunning() { docker ps -qf name="$1" --format '{{.Names}}' | grep -Fxq "$1"; }
 
-if ! imageExists "${IMAGE_NAME:?}"; then
+if ! imageExists "${IMAGE_NAME:?}" && ! imageExists "${IMAGE_NAME#docker.io/}"; then
 	>&2 printf -- '%s\n' "\"${IMAGE_NAME:?}\" image doesn't exist!"
 	exit 1
 fi
