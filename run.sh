@@ -67,10 +67,10 @@ printf -- '%s\n' "Creating \"${CONTAINER_NAME:?}\" container..."
 	--restart on-failure:3 \
 	--log-opt max-size=32m \
 	--dns '1.1.1.1' --dns '1.0.0.1' \
-	--publish '127.0.0.1:53:53/udp' \
-	--publish '127.0.0.1:53:53/tcp' \
-	--publish '127.0.0.1:853:853/tcp' \
-	--publish '127.0.0.1:8453:8453/tcp' \
+	--publish '127.0.0.153:53:53/udp' \
+	--publish '127.0.0.153:53:53/tcp' \
+	--publish '127.0.0.153:853:853/tcp' \
+	--publish '127.0.0.153:8453:8453/tcp' \
 	--mount type=volume,src="${VOLUME_NAME:?}",dst='/var/lib/knot-resolver/' \
 	${HBLOCK_HEADER_FILE+--mount type=bind,src="${HBLOCK_HEADER_FILE:?}",dst='/etc/hblock.d/header',ro} \
 	${HBLOCK_FOOTER_FILE+--mount type=bind,src="${HBLOCK_FOOTER_FILE:?}",dst='/etc/hblock.d/footer',ro} \
