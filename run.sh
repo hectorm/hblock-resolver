@@ -3,6 +3,8 @@
 set -eu
 export LC_ALL=C
 
+DOCKER=$(command -v docker 2>/dev/null)
+
 IMAGE_REGISTRY=docker.io
 IMAGE_NAMESPACE=hectormolinero
 IMAGE_PROJECT=hblock-resolver
@@ -11,9 +13,9 @@ IMAGE_NAME=${IMAGE_REGISTRY:?}/${IMAGE_NAMESPACE:?}/${IMAGE_PROJECT:?}:${IMAGE_T
 CONTAINER_NAME=${IMAGE_PROJECT:?}
 VOLUME_NAME=${CONTAINER_NAME:?}-data
 
-imageExists() { [ -n "$(docker images -q "$1")" ]; }
-containerExists() { docker ps -aqf name="$1" --format '{{.Names}}' | grep -Fxq "$1"; }
-containerIsRunning() { docker ps -qf name="$1" --format '{{.Names}}' | grep -Fxq "$1"; }
+imageExists() { [ -n "$("${DOCKER:?}" images -q "${1:?}")" ]; }
+containerExists() { "${DOCKER:?}" ps -aqf name="${1:?}" --format '{{.Names}}' | grep -Fxq "${1:?}"; }
+containerIsRunning() { "${DOCKER:?}" ps -qf name="${1:?}" --format '{{.Names}}' | grep -Fxq "${1:?}"; }
 
 if ! imageExists "${IMAGE_NAME:?}" && ! imageExists "${IMAGE_NAME#docker.io/}"; then
 	>&2 printf -- '%s\n' "\"${IMAGE_NAME:?}\" image doesn't exist!"
@@ -22,12 +24,12 @@ fi
 
 if containerIsRunning "${CONTAINER_NAME:?}"; then
 	printf -- '%s\n' "Stopping \"${CONTAINER_NAME:?}\" container..."
-	docker stop "${CONTAINER_NAME:?}" >/dev/null
+	"${DOCKER:?}" stop "${CONTAINER_NAME:?}" >/dev/null
 fi
 
 if containerExists "${CONTAINER_NAME:?}"; then
 	printf -- '%s\n' "Removing \"${CONTAINER_NAME:?}\" container..."
-	docker rm "${CONTAINER_NAME:?}" >/dev/null
+	"${DOCKER:?}" rm "${CONTAINER_NAME:?}" >/dev/null
 fi
 
 if [ -z "${HBLOCK_HEADER_FILE-}" ] && [ -f '/etc/hblock-resolver/hblock.d/header' ]; then
@@ -59,7 +61,7 @@ if [ -z "${KRESD_CONF_DIR-}" ] && [ -d '/etc/hblock-resolver/kresd.conf.d/' ]; t
 fi
 
 printf -- '%s\n' "Creating \"${CONTAINER_NAME:?}\" container..."
-docker run --detach \
+"${DOCKER:?}" run --detach \
 	--name "${CONTAINER_NAME:?}" \
 	--hostname "${CONTAINER_NAME:?}" \
 	--restart on-failure:3 \
@@ -87,4 +89,4 @@ docker run --detach \
 	"${IMAGE_NAME:?}" "$@" >/dev/null
 
 printf -- '%s\n\n' 'Done!'
-exec docker logs -f "${CONTAINER_NAME:?}"
+exec "${DOCKER:?}" logs -f "${CONTAINER_NAME:?}"
