@@ -260,9 +260,9 @@ FROM base AS test
 
 # Perform a test run
 RUN printf '%s\n' 'Starting services...' \
-	&& (nohup docker-foreground-cmd &) \
+	&& (nohup container-foreground-cmd &) \
 	&& TIMEOUT_DURATION=120s \
-	&& TIMEOUT_COMMAND='until docker-healthcheck-cmd; do sleep 5; done' \
+	&& TIMEOUT_COMMAND='until container-healthcheck-cmd; do sleep 5; done' \
 	&& timeout "${TIMEOUT_DURATION:?}" sh -eu -c "${TIMEOUT_COMMAND:?}"
 ]])
 
@@ -280,7 +280,7 @@ EXPOSE 443/tcp 853/tcp
 EXPOSE 8453/tcp
 
 HEALTHCHECK --start-period=60s --interval=30s --timeout=5s --retries=3 \
-CMD ["/usr/local/bin/docker-healthcheck-cmd"]
+CMD ["/usr/local/bin/container-healthcheck-cmd"]
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["/usr/local/bin/docker-foreground-cmd"]
+CMD ["/usr/local/bin/container-foreground-cmd"]
