@@ -1,26 +1,20 @@
-https://{$CERT_DOMAIN}:443 {
-	tls {$CERT_EMAIL} {
-		ca https://{$CERT_CA_SERVER}/directory
-		dns {$CERT_DNSPROVIDER}
+https://{$TLS_DOMAIN}:443 {
+	tls {$TLS_EMAIL} {
+		ca https://{$TLS_CASERVER}/directory
+		dns {$TLS_DNSPROVIDER}
 	}
-	proxy / https://hblock-resolver:443 {
-		insecure_skip_verify
-		transparent
-	}
-	log / stdout
-	errors stderr
-}
 
-https://{$CERT_DOMAIN}:8453 {
-	tls {$CERT_EMAIL} {
-		ca https://{$CERT_CA_SERVER}/directory
-		dns {$CERT_DNSPROVIDER}
-	}
 	proxy / https://hblock-resolver:8453 {
 		insecure_skip_verify
 		transparent
 		websocket
 	}
+
+	proxy /doh https://hblock-resolver:443 {
+		insecure_skip_verify
+		transparent
+	}
+
 	log / stdout
 	errors stderr
 }
