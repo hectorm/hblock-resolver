@@ -22,16 +22,16 @@ ifneq ($(wildcard $(VERSION_FILE)),)
 endif
 
 IMAGE_NATIVE_DOCKERFILE := $(DISTDIR)/Dockerfile
-IMAGE_NATIVE_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).tgz
+IMAGE_NATIVE_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).txz
 
 IMAGE_AMD64_DOCKERFILE := $(DISTDIR)/Dockerfile.amd64
-IMAGE_AMD64_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).amd64.tgz
+IMAGE_AMD64_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).amd64.txz
 
 IMAGE_ARM32V7_DOCKERFILE := $(DISTDIR)/Dockerfile.arm32v7
-IMAGE_ARM32V7_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).arm32v7.tgz
+IMAGE_ARM32V7_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).arm32v7.txz
 
 IMAGE_ARM64V8_DOCKERFILE := $(DISTDIR)/Dockerfile.arm64v8
-IMAGE_ARM64V8_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).arm64v8.tgz
+IMAGE_ARM64V8_TARBALL := $(DISTDIR)/$(IMAGE_PROJECT).arm64v8.txz
 
 ##################################################
 ## "all" target
@@ -110,7 +110,7 @@ $(IMAGE_ARM64V8_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 ##################################################
 
 define save_image
-	'$(DOCKER)' save '$(1)' | gzip -n > '$(2)'
+	'$(DOCKER)' save '$(1)' | xz -T0 > '$(2)'
 endef
 
 .PHONY: save-native-image
