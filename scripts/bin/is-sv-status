@@ -2,6 +2,6 @@
 
 SERVICE=${1:?}
 STATUS=${2:?}
-STATUS_FILE=~/service/${SERVICE}/supervise/stat
+STATUS_FILE=~/service/${SERVICE:?}/supervise/stat
 
-[ -f "${STATUS_FILE}" ] && [ "$(cat "${STATUS_FILE}")" = "${STATUS}" ]
+[ -f "${STATUS_FILE:?}" ] && [ "$(cat "${STATUS_FILE:?}")" = "${STATUS:?}" ]

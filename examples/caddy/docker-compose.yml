@@ -24,7 +24,7 @@ services:
     entrypoint: /bin/sh
     command: |
       -eu -c ' \
-        until [ -f "$${KRESD_CERT_CRT_FILE}" ]; do echo "Waiting for Caddy..."; sleep 3; done;
+        until [ -f "$${KRESD_CERT_CRT_FILE:?}" ]; do echo "Waiting for Caddy..."; sleep 3; done;
         exec tini docker-foreground-cmd
       ;'
     depends_on:

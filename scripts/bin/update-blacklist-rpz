@@ -6,7 +6,7 @@ printf '%s\n' 'Downloading blacklist zone...'
 
 # Generate blacklist zone
 hblock \
-	--output "${KRESD_BLACKLIST_RPZ_FILE}" \
+	--output "${KRESD_BLACKLIST_RPZ_FILE:?}" \
 	--template '\1 CNAME \2' \
 	--redirection '.' \
 	--comment '' \

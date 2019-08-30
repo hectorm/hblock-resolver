@@ -3,44 +3,44 @@
 set -eu
 
 # Do nothing if the certificate is not managed
-if [ "${KRESD_CERT_MANAGED}" != 'true' ]; then
+if [ "${KRESD_CERT_MANAGED:?}" != 'true' ]; then
 	exit 0
 fi
 
 printf '%s\n' 'Checking self-signed certificate...'
 
-CRT_FILE=${KRESD_CERT_CRT_FILE}
-KEY_FILE=${KRESD_CERT_KEY_FILE}
+CRT_FILE=${KRESD_CERT_CRT_FILE:?}
+KEY_FILE=${KRESD_CERT_KEY_FILE:?}
 
 # Create RANDFILE if it does not exist
-RANDFILE=${RANDFILE-${HOME}/.rnd}
-if [ ! -f "${RANDFILE}" ]; then
-	dd if=/dev/urandom of="${RANDFILE}" bs=256 count=1 >/dev/null 2>&1
+RANDFILE=${RANDFILE-${HOME:?}/.rnd}
+if [ ! -f "${RANDFILE:?}" ]; then
+	dd if=/dev/urandom of="${RANDFILE:?}" bs=256 count=1 >/dev/null 2>&1
 fi
 
 # Generate private key if it does not exist
-if [ ! -f "${KEY_FILE}" ]; then
+if [ ! -f "${KEY_FILE:?}" ]; then
 	printf '%s\n' 'Generating private key...'
 
 	(umask 077 \
-		&& mkdir -p "$(dirname "${KEY_FILE}")" \
-		&& rm -f "${CRT_FILE}" "${KEY_FILE}" \
-		&& openssl ecparam -genkey -name prime256v1 -out "${KEY_FILE}" \
+		&& mkdir -p "$(dirname "${KEY_FILE:?}")" \
+		&& rm -f "${CRT_FILE:?}" "${KEY_FILE:?}" \
+		&& openssl ecparam -genkey -name prime256v1 -out "${KEY_FILE:?}" \
 	) >/dev/null
 fi
 
 # Generate self-signed certificate if it does not exist or will expire soon
-if [ ! -f "${CRT_FILE}" ] || ! openssl x509 -checkend 604800 -noout -in "${CRT_FILE}"; then
+if [ ! -f "${CRT_FILE:?}" ] || ! openssl x509 -checkend 604800 -noout -in "${CRT_FILE:?}"; then
 	printf '%s\n' 'Generating self-signed certificate...'
 
 	(umask 022 \
-		&& mkdir -p "$(dirname "${CRT_FILE}")" \
-		&& rm -f "${CRT_FILE}" \
+		&& mkdir -p "$(dirname "${CRT_FILE:?}")" \
+		&& rm -f "${CRT_FILE:?}" \
 		&& SUBJ="/CN=$(uname -n)" \
 		&& CSR_FILE=$(mktemp --dry-run) \
-		&& openssl req -new -sha256 -subj "${SUBJ}" -key "${KEY_FILE}" -out "${CSR_FILE}" \
-		&& openssl x509 -req -sha256 -days 90 -signkey "${KEY_FILE}" -in "${CSR_FILE}" -out "${CRT_FILE}" \
-		&& openssl x509 -in "${CRT_FILE}" -text -noout \
-		&& rm -f "${CSR_FILE}"
+		&& openssl req -new -sha256 -subj "${SUBJ:?}" -key "${KEY_FILE:?}" -out "${CSR_FILE:?}" \
+		&& openssl x509 -req -sha256 -days 90 -signkey "${KEY_FILE:?}" -in "${CSR_FILE:?}" -out "${CRT_FILE:?}" \
+		&& openssl x509 -in "${CRT_FILE:?}" -text -noout \
+		&& rm -f "${CSR_FILE:?}"
 	) >/dev/null
 fi

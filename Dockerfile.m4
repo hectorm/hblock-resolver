@@ -58,24 +58,24 @@ RUN pip3 install --no-cache-dir \
 
 # Install LuaRocks packages
 RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
-	&& LIBDIRS="${LIBDIRS-} CRYPTO_LIBDIR=/usr/lib/${HOST_MULTIARCH}" \
-	&& LIBDIRS="${LIBDIRS-} OPENSSL_LIBDIR=/usr/lib/${HOST_MULTIARCH}" \
-	&& luarocks install basexx ${LIBDIRS} \
-	&& luarocks install cqueues ${LIBDIRS} \
+	&& LIBDIRS="${LIBDIRS-} CRYPTO_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
+	&& LIBDIRS="${LIBDIRS-} OPENSSL_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
+	&& luarocks install basexx ${LIBDIRS:?} \
+	&& luarocks install cqueues ${LIBDIRS:?} \
 	# Master branch fixes issue #145 (TODO: return to a stable version)
-	&& luarocks install https://raw.githubusercontent.com/daurnimator/lua-http/master/http-scm-0.rockspec ${LIBDIRS} \
-	&& luarocks install luafilesystem ${LIBDIRS} \
-	&& luarocks install luasec ${LIBDIRS} \
-	&& luarocks install luasocket ${LIBDIRS} \
-	&& luarocks install mmdblua ${LIBDIRS} \
-	&& rm -rf "${HOME}"/.cache/luarocks/
+	&& luarocks install https://raw.githubusercontent.com/daurnimator/lua-http/master/http-scm-0.rockspec ${LIBDIRS:?} \
+	&& luarocks install luafilesystem ${LIBDIRS:?} \
+	&& luarocks install luasec ${LIBDIRS:?} \
+	&& luarocks install luasocket ${LIBDIRS:?} \
+	&& luarocks install mmdblua ${LIBDIRS:?} \
+	&& rm -rf "${HOME:?}"/.cache/luarocks/
 
 # Build Knot DNS (only libknot and utilities)
 ARG KNOT_DNS_TREEISH=v2.8.3
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 WORKDIR /tmp/knot-dns/
-RUN git clone "${KNOT_DNS_REMOTE}" ./
-RUN git checkout "${KNOT_DNS_TREEISH}"
+RUN git clone "${KNOT_DNS_REMOTE:?}" ./
+RUN git checkout "${KNOT_DNS_TREEISH:?}"
 RUN git submodule update --init --recursive
 RUN ./autogen.sh
 RUN ./configure \
@@ -100,8 +100,8 @@ ARG KNOT_RESOLVER_UNIT_TESTS=enabled
 ARG KNOT_RESOLVER_CONFIG_TESTS=disabled
 ARG KNOT_RESOLVER_EXTRA_TESTS=disabled
 WORKDIR /tmp/knot-resolver/
-RUN git clone "${KNOT_RESOLVER_REMOTE}" ./
-RUN git checkout "${KNOT_RESOLVER_TREEISH}"
+RUN git clone "${KNOT_RESOLVER_REMOTE:?}" ./
+RUN git checkout "${KNOT_RESOLVER_TREEISH:?}"
 RUN git submodule update --init --recursive
 RUN pip3 install --user -r ./tests/pytests/requirements.txt
 RUN pip3 install --user -r ./tests/integration/deckard/requirements.txt
@@ -116,16 +116,16 @@ RUN meson ./build \
 		-D managed_ta=disabled \
 		-D root_hints=/usr/share/dns/root.hints \
 		-D keyfile_default=/usr/share/dns/root.key \
-		-D unit_tests="${KNOT_RESOLVER_UNIT_TESTS}" \
-		-D config_tests="${KNOT_RESOLVER_CONFIG_TESTS}" \
-		-D extra_tests="${KNOT_RESOLVER_EXTRA_TESTS}"
+		-D unit_tests="${KNOT_RESOLVER_UNIT_TESTS:?}" \
+		-D config_tests="${KNOT_RESOLVER_CONFIG_TESTS:?}" \
+		-D extra_tests="${KNOT_RESOLVER_EXTRA_TESTS:?}"
 RUN ninja -C ./build
 RUN ninja -C ./build install
 RUN ARGS='--timeout-multiplier=4 --print-errorlogs'; \
-	[ "${KNOT_RESOLVER_UNIT_TESTS}"   = enabled ] && ARGS="${ARGS} --suite unit"; \
-	[ "${KNOT_RESOLVER_CONFIG_TESTS}" = enabled ] && ARGS="${ARGS} --suite config"; \
-	[ "${KNOT_RESOLVER_EXTRA_TESTS}"  = enabled ] && ARGS="${ARGS} --suite pytests --suite integration"; \
-	meson test -C ./build ${ARGS}
+	[ "${KNOT_RESOLVER_UNIT_TESTS:?}"   = enabled ] && ARGS="${ARGS:?} --suite unit"; \
+	[ "${KNOT_RESOLVER_CONFIG_TESTS:?}" = enabled ] && ARGS="${ARGS:?} --suite config"; \
+	[ "${KNOT_RESOLVER_EXTRA_TESTS:?}"  = enabled ] && ARGS="${ARGS:?} --suite pytests --suite integration"; \
+	meson test -C ./build ${ARGS:?}
 RUN file /usr/sbin/kresd
 RUN file /usr/sbin/kresc
 RUN /usr/sbin/kresd --version
@@ -134,8 +134,8 @@ RUN /usr/sbin/kresd --version
 ARG HBLOCK_TREEISH=v2.1.1
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 WORKDIR /tmp/hblock/
-RUN git clone "${HBLOCK_REMOTE}" ./
-RUN git checkout "${HBLOCK_TREEISH}"
+RUN git clone "${HBLOCK_REMOTE:?}" ./
+RUN git checkout "${HBLOCK_TREEISH:?}"
 RUN git submodule update --init --recursive
 RUN make install PREFIX=/usr
 RUN /usr/bin/hblock --version
@@ -188,11 +188,11 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 ARG KNOT_RESOLVER_USER_UID=1000
 ARG KNOT_RESOLVER_USER_GID=1000
 RUN groupadd \
-		--gid "${KNOT_RESOLVER_USER_GID}" \
+		--gid "${KNOT_RESOLVER_USER_GID:?}" \
 		knot-resolver
 RUN useradd \
-		--uid "${KNOT_RESOLVER_USER_UID}" \
-		--gid "${KNOT_RESOLVER_USER_GID}" \
+		--uid "${KNOT_RESOLVER_USER_UID:?}" \
+		--gid "${KNOT_RESOLVER_USER_GID:?}" \
 		--shell "$(command -v bash)" \
 		--home-dir /home/knot-resolver/ \
 		--create-home \
@@ -263,7 +263,7 @@ RUN printf '%s\n' 'Starting services...' \
 	&& (nohup docker-foreground-cmd &) \
 	&& TIMEOUT_DURATION=120s \
 	&& TIMEOUT_COMMAND='until docker-healthcheck-cmd; do sleep 5; done' \
-	&& timeout "${TIMEOUT_DURATION}" sh -eu -c "${TIMEOUT_COMMAND}"
+	&& timeout "${TIMEOUT_DURATION:?}" sh -eu -c "${TIMEOUT_COMMAND:?}"
 ]])
 
 ##################################################

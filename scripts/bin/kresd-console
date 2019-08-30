@@ -2,8 +2,8 @@
 
 if is-sv-status kresd run; then
 	KRESD_PIDFILE=~/service/kresd/supervise/pid
-	KRESD_TTY=~/tty/"$(cat "${KRESD_PIDFILE}")"
-	kresc "${KRESD_TTY}"
+	KRESD_TTY=~/tty/"$(cat "${KRESD_PIDFILE:?}")"
+	kresc "${KRESD_TTY:?}"
 else
 	>&2 printf '%s\n' 'kresd is not running'
 	exit 1

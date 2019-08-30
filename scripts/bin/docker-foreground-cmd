@@ -3,12 +3,12 @@
 set -eu
 
 # Generate self-signed certificate if it does not exist
-if [ ! -f "${KRESD_CERT_CRT_FILE}" ] || [ ! -f "${KRESD_CERT_KEY_FILE}" ]; then
+if [ ! -f "${KRESD_CERT_CRT_FILE:?}" ] || [ ! -f "${KRESD_CERT_KEY_FILE:?}" ]; then
 	renew-self-signed-cert
 fi
 
 # Download blacklist zone if it does not exist
-if [ ! -f "${KRESD_BLACKLIST_RPZ_FILE}" ]; then
+if [ ! -f "${KRESD_BLACKLIST_RPZ_FILE:?}" ]; then
 	update-blacklist-rpz
 fi
 
