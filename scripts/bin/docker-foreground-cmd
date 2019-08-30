@@ -2,9 +2,6 @@
 
 set -eu
 
-# Dump environment variables
-export-env >> ~/.profile
-
 # Generate self-signed certificate if it does not exist
 if [ ! -f "${KRESD_CERT_CRT_FILE}" ] || [ ! -f "${KRESD_CERT_KEY_FILE}" ]; then
 	renew-self-signed-cert
