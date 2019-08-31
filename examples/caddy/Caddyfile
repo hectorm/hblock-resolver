@@ -1,4 +1,5 @@
 https://{$TLS_DOMAIN}:443 {
+	tls {$TLS}
 	tls {$TLS_EMAIL} {
 		ca https://{$TLS_CASERVER}/directory
 		dns {$TLS_DNSPROVIDER}
