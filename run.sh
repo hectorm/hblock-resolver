@@ -14,8 +14,8 @@ CONTAINER_NAME=${IMAGE_PROJECT:?}
 VOLUME_NAME=${CONTAINER_NAME:?}-data
 
 imageExists() { [ -n "$("${DOCKER:?}" images -q "${1:?}")" ]; }
-containerExists() { "${DOCKER:?}" ps -aqf name="${1:?}" --format '{{.Names}}' | grep -Fxq "${1:?}"; }
-containerIsRunning() { "${DOCKER:?}" ps -qf name="${1:?}" --format '{{.Names}}' | grep -Fxq "${1:?}"; }
+containerExists() { "${DOCKER:?}" ps -af name="${1:?}" --format '{{.Names}}' | grep -Fxq "${1:?}"; }
+containerIsRunning() { "${DOCKER:?}" ps -f name="${1:?}" --format '{{.Names}}' | grep -Fxq "${1:?}"; }
 
 if ! imageExists "${IMAGE_NAME:?}" && ! imageExists "${IMAGE_NAME#docker.io/}"; then
 	>&2 printf -- '%s\n' "\"${IMAGE_NAME:?}\" image doesn't exist!"
