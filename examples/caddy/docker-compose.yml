@@ -3,7 +3,7 @@ version: "3.7"
 services:
 
   hblock-resolver:
-    image: "hectormolinero/hblock-resolver:latest"
+    image: "docker.io/hectormolinero/hblock-resolver:latest"
     restart: "on-failure:3"
     networks:
       - "hblock-resolver"
@@ -31,7 +31,7 @@ services:
       - "caddy"
 
   caddy:
-    image: "hectormolinero/caddy:latest"
+    image: "docker.io/hectormolinero/caddy:latest"
     restart: on-failure:3
     networks:
       - "hblock-resolver"
