@@ -1,3 +1,7 @@
+http://{$TLS_DOMAIN}:80 {
+	redir / https://{host}{uri} 301
+}
+
 https://{$TLS_DOMAIN}:443 {
 	tls {$TLS}
 	tls {$TLS_EMAIL} {
@@ -14,6 +18,11 @@ https://{$TLS_DOMAIN}:443 {
 	proxy /doh https://hblock-resolver:443 {
 		insecure_skip_verify
 		transparent
+	}
+
+	proxy /grafana http://grafana:3000 {
+		transparent
+		websocket
 	}
 
 	log / stdout
