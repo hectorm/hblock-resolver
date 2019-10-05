@@ -39,7 +39,7 @@ if [ ! -f "${CRT_FILE:?}" ] || ! openssl x509 -checkend 604800 -noout -in "${CRT
 		&& SUBJ="/CN=$(uname -n)" \
 		&& CSR_FILE=$(mktemp --dry-run) \
 		&& openssl req -new -sha256 -subj "${SUBJ:?}" -key "${KEY_FILE:?}" -out "${CSR_FILE:?}" \
-		&& openssl x509 -req -sha256 -days 90 -signkey "${KEY_FILE:?}" -in "${CSR_FILE:?}" -out "${CRT_FILE:?}" \
+		&& openssl x509 -req -sha256 -days 90 -signkey "${KEY_FILE:?}" -in "${CSR_FILE:?}" -out "${CRT_FILE:?}" 2>/dev/null \
 		&& openssl x509 -in "${CRT_FILE:?}" -text -noout \
 		&& rm -f "${CSR_FILE:?}"
 	) >/dev/null

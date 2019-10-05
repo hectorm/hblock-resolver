@@ -2,9 +2,15 @@
 
 set -eu
 
-# Generate self-signed certificate if it does not exist
-if [ ! -f "${KRESD_CERT_CRT_FILE:?}" ] || [ ! -f "${KRESD_CERT_KEY_FILE:?}" ]; then
+if [ "${KRESD_CERT_MANAGED:?}" = 'true' ]; then
+	# Generate self-signed certificate if it does not exist
 	renew-self-signed-cert
+else
+	# Wait until the certificate exists
+	until [ -f "${KRESD_CERT_CRT_FILE:?}" ] && [ -f "${KRESD_CERT_KEY_FILE:?}" ]; do
+		printf '%s\n' 'Checking certificate availability...'
+		sleep 3
+	done
 fi
 
 # Download blacklist zone if it does not exist
