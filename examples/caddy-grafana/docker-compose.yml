@@ -67,6 +67,7 @@ services:
       GF_SECURITY_SECRET_KEY: "${GRAFANA_SECRET_KEY}"
       GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
       GF_SECURITY_COOKIE_SECURE: "true"
+      GF_INSTALL_PLUGINS: "grafana-piechart-panel,grafana-simple-json-datasource"
     depends_on:
       - "influxdb"
 
@@ -82,6 +83,8 @@ services:
       INFLUXDB_GRAPHITE_ENABLED: "true"
       INFLUXDB_GRAPHITE_DATABASE: "graphite"
       INFLUXDB_GRAPHITE_PROTOCOL: "udp"
+      INFLUXDB_DATA_QUERY_LOG_ENABLED: "false"
+      INFLUXDB_HTTP_LOG_ENABLED: "false"
 
 networks:
 

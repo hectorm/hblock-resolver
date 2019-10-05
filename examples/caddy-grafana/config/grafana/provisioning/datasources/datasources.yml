@@ -1,11 +1,11 @@
 apiVersion: 1
 
 deleteDatasources:
-  - name: "hblock-resolver"
+  - name: "hblock-resolver-influxdb"
     orgId: 1
 
 datasources:
-  - name: "hblock-resolver"
+  - name: "hblock-resolver-influxdb"
     orgId: 1
     type: "influxdb"
     url: "http://influxdb:8086"

@@ -1,5 +1,8 @@
 http://{$TLS_DOMAIN}:80 {
 	redir / https://{host}{uri} 301
+
+	log / /dev/null
+	errors stderr
 }
 
 https://{$TLS_DOMAIN}:443 {
@@ -25,6 +28,6 @@ https://{$TLS_DOMAIN}:443 {
 		websocket
 	}
 
-	log / stdout
+	log / /dev/null
 	errors stderr
 }
