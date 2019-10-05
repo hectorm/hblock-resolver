@@ -53,8 +53,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
-RUN pip3 install --no-cache-dir \
-		meson
+RUN pip3 install --no-cache-dir meson
 
 # Install LuaRocks packages
 RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
@@ -63,7 +62,9 @@ RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 	&& luarocks install basexx ${LIBDIRS:?} \
 	&& luarocks install cqueues ${LIBDIRS:?} \
 	# Master branch fixes issue #145 (TODO: return to a stable version)
-	&& luarocks install https://raw.githubusercontent.com/daurnimator/lua-http/master/http-scm-0.rockspec ${LIBDIRS:?} \
+	&& LUA_HTTP_TREEISH=47225d081318e65d5d832e2dd99ff0880d56b5c6 \
+	&& LUA_HTTP_ROCKSPEC=https://raw.githubusercontent.com/daurnimator/lua-http/${LUA_HTTP_TREEISH:?}/http-scm-0.rockspec \
+	&& luarocks install "${LUA_HTTP_ROCKSPEC:?}" ${LIBDIRS:?} \
 	&& luarocks install luafilesystem ${LIBDIRS:?} \
 	&& luarocks install luasec ${LIBDIRS:?} \
 	&& luarocks install luasocket ${LIBDIRS:?} \
