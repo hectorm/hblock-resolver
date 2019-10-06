@@ -88,7 +88,6 @@ $(IMAGE_ARM32V7_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 	'$(DOCKER)' build \
 		--tag '$(IMAGE_NAME):$(IMAGE_VERSION)-arm32v7' \
 		--tag '$(IMAGE_NAME):latest-arm32v7' \
- 		--build-arg KNOT_RESOLVER_CONFIG_TESTS=disabled \
 		--file '$@' ./
 
 .PHONY: build-arm64v8-image
@@ -104,7 +103,6 @@ $(IMAGE_ARM64V8_DOCKERFILE): $(DOCKERFILE_TEMPLATE)
 	'$(DOCKER)' build \
 		--tag '$(IMAGE_NAME):$(IMAGE_VERSION)-arm64v8' \
 		--tag '$(IMAGE_NAME):latest-arm64v8' \
- 		--build-arg KNOT_RESOLVER_CONFIG_TESTS=disabled \
 		--file '$@' ./
 
 ##################################################
