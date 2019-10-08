@@ -37,7 +37,7 @@ services:
       - "127.0.0.153:53:53/tcp"
       - "127.0.0.153:853:853/tcp"
     volumes:
-      - "./config/kresd/graphite.conf:/etc/knot-resolver/kresd.conf.d/090-graphite.conf:ro"
+      - "./config/kresd/graphite.conf:/etc/knot-resolver/kresd.conf.d/030-module-graphite.conf:ro"
       - "hblock-resolver-data:/var/lib/knot-resolver/"
       - "caddy-data:/var/lib/caddy/:ro"
     entrypoint: "/bin/sh"
