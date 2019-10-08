@@ -19,4 +19,4 @@ if [ ! -f "${KRESD_BLACKLIST_RPZ_FILE:?}" ]; then
 fi
 
 # Run runit
-exec runsvdir -P ~/service/
+exec runsvdir -P "${HOME:?}"/service/

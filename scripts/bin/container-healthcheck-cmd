@@ -14,6 +14,12 @@ if ! is-sv-status kresd run; then
 	exit 1
 fi
 
+# kres-cache-gc daemon must be running
+if ! is-sv-status kres-cache-gc run; then
+	>&2 printf '%s\n' 'kres-cache-gc daemon is not running'
+	exit 1
+fi
+
 # DNS server must resolve localhost A record
 if [ "$(kdig @127.0.0.1 -p 53 +short +time=1 +retry=0 localhost A)" != 127.0.0.1 ]; then
 	>&2 printf '%s\n' 'DNS server returned an unexpected result'

@@ -2,6 +2,6 @@
 
 set -eu
 
-cd ~/
+cd "${HOME:?}"
 exec 2>&1
 exec kresd --forks=1 --config=/etc/knot-resolver/kresd.conf

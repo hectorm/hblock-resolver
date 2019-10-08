@@ -4,4 +4,4 @@ set -eu
 
 cd "${HOME:?}"
 exec 2>&1
-exec supercronic /etc/crontab
+exec kres-cache-gc -c "${HOME:?}" -d 1000

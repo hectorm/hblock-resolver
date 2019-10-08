@@ -223,6 +223,7 @@ COPY --from=build --chown=root:root /usr/lib/libkres.* /usr/lib/
 COPY --from=build --chown=root:root /usr/lib/knot-resolver/ /usr/lib/knot-resolver/
 COPY --from=build --chown=root:root /usr/sbin/kresd /usr/sbin/kresd
 COPY --from=build --chown=root:root /usr/sbin/kresc /usr/sbin/kresc
+COPY --from=build --chown=root:root /usr/sbin/kres-cache-gc /usr/sbin/kres-cache-gc
 
 # Copy hBlock installation
 COPY --from=build --chown=root:root /usr/bin/hblock /usr/bin/hblock
