@@ -231,9 +231,9 @@ COPY --from=build --chown=root:root /usr/bin/hblock /usr/bin/hblock
 # Add capabilities to the kresd binary
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
 
-# Create data directory
-WORKDIR /var/lib/knot-resolver/
-RUN chown knot-resolver:knot-resolver /var/lib/knot-resolver/
+# Create data and cache directories
+RUN mkdir /var/lib/knot-resolver/ /var/cache/knot-resolver/
+RUN chown knot-resolver:knot-resolver /var/lib/knot-resolver/ /var/cache/knot-resolver/
 
 # Copy kresd config
 COPY --chown=root:root config/knot-resolver/ /etc/knot-resolver/
