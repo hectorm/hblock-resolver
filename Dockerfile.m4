@@ -149,12 +149,16 @@ m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:18.04]], [[FROM dock
 m4_ifdef([[CROSS_QEMU]], [[COPY --from=docker.io/hectormolinero/qemu-user-static:latest CROSS_QEMU CROSS_QEMU]])
 
 # Environment
-ENV KRESD_NIC=
-ENV KRESD_VERBOSE=false
+ENV KRESD_DNS1_IP=1.1.1.1@853
+ENV KRESD_DNS1_HOSTNAME=cloudflare-dns.com
+ENV KRESD_DNS2_IP=1.0.0.1@853
+ENV KRESD_DNS2_HOSTNAME=cloudflare-dns.com
 ENV KRESD_CERT_MANAGED=true
 ENV KRESD_CERT_CRT_FILE=/var/lib/knot-resolver/ssl/server.crt
 ENV KRESD_CERT_KEY_FILE=/var/lib/knot-resolver/ssl/server.key
 ENV KRESD_BLACKLIST_RPZ_FILE=/var/lib/knot-resolver/hblock.rpz
+ENV KRESD_NIC=
+ENV KRESD_VERBOSE=false
 
 # Install system packages
 RUN export DEBIAN_FRONTEND=noninteractive \
