@@ -37,7 +37,7 @@ services:
       - "127.0.0.153:53:53/tcp"
       - "127.0.0.153:853:853/tcp"
     volumes:
-      - "./config/kresd/graphite.conf:/etc/knot-resolver/kresd.conf.d/050-module-graphite.conf:ro"
+      - "./config/hblock-resolver/kresd.conf.d/050-module-graphite.conf:/etc/knot-resolver/kresd.conf.d/050-module-graphite.conf:ro"
       - "hblock-resolver-data:/var/lib/knot-resolver/"
       - "caddy-data:/var/lib/caddy/:ro"
     entrypoint: "/bin/sh"
@@ -64,8 +64,8 @@ services:
     environment:
       GF_SERVER_ROOT_URL: "https://${TLS_DOMAIN}/grafana"
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
-      GF_SECURITY_SECRET_KEY: "${GRAFANA_SECRET_KEY}"
       GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
+      GF_SECURITY_SECRET_KEY: "${GRAFANA_SECRET_KEY}"
       GF_SECURITY_COOKIE_SECURE: "true"
       GF_INSTALL_PLUGINS: "grafana-piechart-panel,grafana-simple-json-datasource"
     depends_on:
