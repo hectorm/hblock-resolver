@@ -1,0 +1,6 @@
+{
+	"files.associations": {
+		"**/kresd.conf": "lua",
+		"**/kresd.conf.d/*.conf": "lua"
+	}
+}
