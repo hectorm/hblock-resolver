@@ -285,7 +285,7 @@ EXPOSE 443/tcp 853/tcp
 # Web interface
 EXPOSE 8453/tcp
 
-HEALTHCHECK --start-period=60s --interval=30s --timeout=5s --retries=3 \
+HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=1 \
 CMD ["/usr/local/bin/container-healthcheck-cmd"]
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
