@@ -306,7 +306,6 @@ COPY --chown=knot-resolver:knot-resolver scripts/service/ /home/knot-resolver/se
 # Drop root privileges
 USER knot-resolver:knot-resolver
 
-m4_ifdef([[CROSS_ARCH]], [[]], [[
 ##################################################
 ## "test" stage
 ##################################################
@@ -316,10 +315,9 @@ FROM base AS test
 # Perform a test run
 RUN printf '%s\n' 'Starting services...' \
 	&& (nohup container-foreground-cmd &) \
-	&& TIMEOUT_DURATION=120s \
-	&& TIMEOUT_COMMAND='until container-healthcheck-cmd; do sleep 5; done' \
+	&& TIMEOUT_DURATION=240s \
+	&& TIMEOUT_COMMAND='until container-healthcheck-cmd; do sleep 1; done' \
 	&& timeout "${TIMEOUT_DURATION:?}" sh -eu -c "${TIMEOUT_COMMAND:?}"
-]])
 
 ##################################################
 ## "main" stage
