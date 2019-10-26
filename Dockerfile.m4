@@ -32,15 +32,12 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libidn2-dev \
 		libjansson-dev \
 		liblmdb-dev \
-		libluajit-5.1-dev \
 		libssl-dev \
 		libsystemd-dev \
 		libtool \
 		libunistring-dev \
 		liburcu-dev \
 		libuv1-dev \
-		luajit \
-		luarocks \
 		ninja-build \
 		pkgconf \
 		python3 \
@@ -49,31 +46,78 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		python3-setuptools \
 		python3-wheel \
 		tzdata \
+		unzip \
 		xxd \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Install Python packages
 RUN pip3 install --no-cache-dir meson
 
+# Build LuaJIT
+ARG LUAJIT_TREEISH=v2.1-20190912
+ARG LUAJIT_REMOTE=https://github.com/openresty/luajit2.git
+RUN mkdir /tmp/luajit/
+WORKDIR /tmp/luajit/
+RUN git clone "${LUAJIT_REMOTE:?}" ./
+RUN git checkout "${LUAJIT_TREEISH:?}"
+RUN git submodule update --init --recursive
+RUN ARCH=$(uname -m); \
+	LUAJIT_XCFLAGS='-DLUAJIT_NUMMODE=2'; \
+	if [ "${ARCH:?}" = 'x86_64' ]; then \
+		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_ENABLE_GC64"; \
+	elif [ "${ARCH:?}" = 'aarch64' ] || [ "${ARCH:?}" = 'armv7l' ]; then \
+		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_USE_SYSMALLOC"; \
+	fi; \
+	make -j"$(nproc)" XCFLAGS="${LUAJIT_XCFLAGS:?}"
+RUN make install PREFIX=/usr
+RUN ln -sf /usr/bin/luajit-2.1.0-beta3 /usr/bin/luajit
+RUN file -L /usr/bin/luajit
+RUN luajit -v
+
+# Build LuaRocks
+ARG LUAROCKS_TREEISH=v3.2.1
+ARG LUAROCKS_REMOTE=https://github.com/luarocks/luarocks.git
+RUN mkdir /tmp/luarocks/
+WORKDIR /tmp/luarocks/
+RUN git clone "${LUAROCKS_REMOTE:?}" ./
+RUN git checkout "${LUAROCKS_TREEISH:?}"
+RUN git submodule update --init --recursive
+RUN ./configure \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--rocks-tree=/usr/local \
+		--lua-version=5.1 \
+		--with-lua=/usr \
+		--with-lua-bin=/usr/bin \
+		--with-lua-lib=/usr/lib \
+		--with-lua-include=/usr/include/luajit-2.1 \
+		--with-lua-interpreter=luajit
+RUN make build -j"$(nproc)"
+RUN make install
+RUN file /usr/bin/luarocks
+RUN luarocks --version
+
 # Install LuaRocks packages
 RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 	&& LIBDIRS="${LIBDIRS-} CRYPTO_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
 	&& LIBDIRS="${LIBDIRS-} OPENSSL_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
-	&& luarocks install basexx ${LIBDIRS:?} \
-	&& luarocks install cqueues ${LIBDIRS:?} \
+	&& luarocks_system_install() { luarocks install --tree system "${1:?}" ${LIBDIRS:?}; } \
+	&& luarocks_system_install basexx \
+	&& luarocks_system_install cqueues \
 	# Master branch fixes issue #145 (TODO: return to a stable version)
 	&& LUA_HTTP_TREEISH=47225d081318e65d5d832e2dd99ff0880d56b5c6 \
 	&& LUA_HTTP_ROCKSPEC=https://raw.githubusercontent.com/daurnimator/lua-http/${LUA_HTTP_TREEISH:?}/http-scm-0.rockspec \
-	&& luarocks install "${LUA_HTTP_ROCKSPEC:?}" ${LIBDIRS:?} \
-	&& luarocks install luafilesystem ${LIBDIRS:?} \
-	&& luarocks install luasec ${LIBDIRS:?} \
-	&& luarocks install luasocket ${LIBDIRS:?} \
-	&& luarocks install mmdblua ${LIBDIRS:?} \
+	&& luarocks_system_install "${LUA_HTTP_ROCKSPEC:?}" \
+	&& luarocks_system_install luafilesystem \
+	&& luarocks_system_install luasec \
+	&& luarocks_system_install luasocket \
+	&& luarocks_system_install mmdblua \
 	&& rm -rf "${HOME:?}"/.cache/luarocks/
 
 # Build Knot DNS (only libknot and utilities)
 ARG KNOT_DNS_TREEISH=v2.8.4
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
+RUN mkdir /tmp/knot-dns/
 WORKDIR /tmp/knot-dns/
 RUN git clone "${KNOT_DNS_REMOTE:?}" ./
 RUN git checkout "${KNOT_DNS_TREEISH:?}"
@@ -100,6 +144,7 @@ ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_UNIT_TESTS=enabled
 ARG KNOT_RESOLVER_CONFIG_TESTS=disabled
 ARG KNOT_RESOLVER_EXTRA_TESTS=disabled
+RUN mkdir /tmp/knot-resolver/
 WORKDIR /tmp/knot-resolver/
 RUN git clone "${KNOT_RESOLVER_REMOTE:?}" ./
 RUN git checkout "${KNOT_RESOLVER_TREEISH:?}"
@@ -134,6 +179,7 @@ RUN /usr/sbin/kresd --version
 # Download hBlock
 ARG HBLOCK_TREEISH=v2.1.2
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
+RUN mkdir /tmp/hblock/
 WORKDIR /tmp/hblock/
 RUN git clone "${HBLOCK_REMOTE:?}" ./
 RUN git checkout "${HBLOCK_TREEISH:?}"
@@ -171,7 +217,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libunistring2 \
 		liburcu6 \
 		libuv1 \
-		luajit \
 		openssl \
 		runit \
 		tzdata \
@@ -211,25 +256,29 @@ COPY --from=docker.io/hectormolinero/tini:TINI_IMAGE_TAG --chown=root:root /usr/
 m4_define([[SUPERCRONIC_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[latest-CROSS_ARCH]], [[latest]]))m4_dnl
 COPY --from=docker.io/hectormolinero/supercronic:SUPERCRONIC_IMAGE_TAG --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
 
-# Copy LuaRocks packages
+# Copy LuaJIT build
+COPY --from=build --chown=root:root /usr/lib/libluajit-* /usr/lib/
+COPY --from=build --chown=root:root /usr/bin/luajit /usr/bin/luajit
+
+# Copy Lua packages
 COPY --from=build --chown=root:root /usr/local/lib/lua/ /usr/local/lib/lua/
 COPY --from=build --chown=root:root /usr/local/share/lua/ /usr/local/share/lua/
 
-# Copy Knot DNS installation
+# Copy Knot DNS build
 COPY --from=build --chown=root:root /usr/lib/libdnssec.* /usr/lib/
 COPY --from=build --chown=root:root /usr/lib/libknot.* /usr/lib/
 COPY --from=build --chown=root:root /usr/lib/libzscanner.* /usr/lib/
 COPY --from=build --chown=root:root /usr/bin/kdig /usr/bin/kdig
 COPY --from=build --chown=root:root /usr/bin/khost /usr/bin/khost
 
-# Copy Knot Resolver installation
+# Copy Knot Resolver build
 COPY --from=build --chown=root:root /usr/lib/libkres.* /usr/lib/
 COPY --from=build --chown=root:root /usr/lib/knot-resolver/ /usr/lib/knot-resolver/
 COPY --from=build --chown=root:root /usr/sbin/kresd /usr/sbin/kresd
 COPY --from=build --chown=root:root /usr/sbin/kresc /usr/sbin/kresc
 COPY --from=build --chown=root:root /usr/sbin/kres-cache-gc /usr/sbin/kres-cache-gc
 
-# Copy hBlock installation
+# Copy hBlock build
 COPY --from=build --chown=root:root /usr/bin/hblock /usr/bin/hblock
 
 # Add capabilities to the kresd binary
