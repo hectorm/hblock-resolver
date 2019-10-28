@@ -282,6 +282,7 @@ COPY --from=build --chown=root:root /usr/sbin/kres-cache-gc /usr/sbin/kres-cache
 COPY --from=build --chown=root:root /usr/bin/hblock /usr/bin/hblock
 
 # Add capabilities to the kresd binary
+m4_ifdef([[CROSS_QEMU]], [[RUN setcap cap_net_bind_service=+ep CROSS_QEMU]])
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
 
 # Create data and cache directories
