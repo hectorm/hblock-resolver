@@ -89,10 +89,10 @@ RUN ARCH=$(uname -m); \
 	LUAJIT_XCFLAGS='-DLUAJIT_NUMMODE=2'; \
 	if [ "${ARCH:?}" = 'x86_64' ]; then \
 		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_ENABLE_GC64"; \
-	elif [ "${ARCH:?}" = 'aarch64' ] || [ "${ARCH:?}" = 'armv7l' ]; then \
+	elif [ "${ARCH:?}" = 'armv7l' ]; then \
 		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_USE_SYSMALLOC"; \
 	fi; \
-	make -j"$(nproc)" XCFLAGS="${LUAJIT_XCFLAGS:?}"
+	make -j"$(nproc)" amalg XCFLAGS="${LUAJIT_XCFLAGS?}"
 RUN make install PREFIX=/usr
 RUN ln -sf /usr/bin/luajit-2.1.0-beta3 /usr/bin/luajit
 RUN file -L /usr/bin/luajit
