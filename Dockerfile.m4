@@ -53,6 +53,30 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 # Install Python packages
 RUN pip3 install --no-cache-dir meson
 
+# Build Knot DNS (only libknot and utilities)
+ARG KNOT_DNS_TREEISH=v2.8.4
+ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
+RUN mkdir /tmp/knot-dns/
+WORKDIR /tmp/knot-dns/
+RUN git clone "${KNOT_DNS_REMOTE:?}" ./
+RUN git checkout "${KNOT_DNS_TREEISH:?}"
+RUN git submodule update --init --recursive
+RUN ./autogen.sh
+RUN ./configure \
+		--prefix=/usr \
+		--enable-utilities \
+		--enable-fastparser \
+		--disable-daemon \
+		--disable-modules \
+		--disable-dnstap \
+		--disable-documentation
+RUN make -j"$(nproc)"
+RUN make install
+RUN file /usr/bin/kdig
+RUN file /usr/bin/khost
+RUN /usr/bin/kdig --version
+RUN /usr/bin/khost --version
+
 # Build LuaJIT
 ARG LUAJIT_TREEISH=v2.1-20190912
 ARG LUAJIT_REMOTE=https://github.com/openresty/luajit2.git
@@ -113,30 +137,6 @@ RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 	&& luarocks_system_install luasocket \
 	&& luarocks_system_install mmdblua \
 	&& rm -rf "${HOME:?}"/.cache/luarocks/
-
-# Build Knot DNS (only libknot and utilities)
-ARG KNOT_DNS_TREEISH=v2.8.4
-ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
-RUN mkdir /tmp/knot-dns/
-WORKDIR /tmp/knot-dns/
-RUN git clone "${KNOT_DNS_REMOTE:?}" ./
-RUN git checkout "${KNOT_DNS_TREEISH:?}"
-RUN git submodule update --init --recursive
-RUN ./autogen.sh
-RUN ./configure \
-		--prefix=/usr \
-		--enable-utilities \
-		--enable-fastparser \
-		--disable-daemon \
-		--disable-modules \
-		--disable-dnstap \
-		--disable-documentation
-RUN make -j"$(nproc)"
-RUN make install
-RUN file /usr/bin/kdig
-RUN file /usr/bin/khost
-RUN /usr/bin/kdig --version
-RUN /usr/bin/khost --version
 
 # Build Knot Resolver
 ARG KNOT_RESOLVER_TREEISH=v4.2.2
