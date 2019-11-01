@@ -94,7 +94,6 @@ RUN ARCH=$(uname -m); \
 	fi; \
 	make -j"$(nproc)" amalg XCFLAGS="${LUAJIT_XCFLAGS?}"
 RUN make install PREFIX=/usr
-RUN ln -sf /usr/bin/luajit-2.1.0-beta3 /usr/bin/luajit
 RUN file -L /usr/bin/luajit
 RUN luajit -v
 
