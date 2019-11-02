@@ -47,8 +47,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		python3-wheel \
 		tzdata \
 		unzip \
-		xxd \
-	&& rm -rf /var/lib/apt/lists/*
+		xxd
 
 # Install Python packages
 RUN pip3 install --no-cache-dir meson
