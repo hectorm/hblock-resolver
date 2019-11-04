@@ -32,6 +32,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libidn2-dev \
 		libjansson-dev \
 		liblmdb-dev \
+		libpsl-dev \
 		libssl-dev \
 		libsystemd-dev \
 		libtool \
@@ -120,21 +121,40 @@ RUN file /usr/bin/luarocks
 RUN luarocks --version
 
 # Install LuaRocks packages
-RUN HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
+RUN METAROCKSPEC=/tmp/metapackage-scm-0.rockspec \
+	&& printf '%s\n' \
+		'rockspec_format = "3.0"' \
+		'package = "metapackage"' \
+		'version = "scm-0"' \
+		'source = { url = "" }' \
+		'dependencies = {' \
+		'  "lua == 5.1",' \
+		'  "basexx == 0.4.1-1",' \
+		'  "binaryheap == 0.4-1",' \
+		'  "bit32 == 5.3.0-1",' \
+		'  "compat53 == 0.7-1",' \
+		'  "cqueues == 20190813.51-0 ",' \
+		'  "fifo == 0.2-0",' \
+		'  "lpeg == 1.0.2-1",' \
+		'  "lpeg_patterns == 0.5-0",' \
+		'  "luafilesystem == 1.7.0-2",' \
+		'  "luaossl == 20190731-0",' \
+		'  "luasocket == 3.0rc1-2",' \
+		'  "luasec == 0.9-1",' \
+		'  "mmdblua == 0.2-0",' \
+		'  "psl == 0.3-0",' \
+		'--"http == 0.3-0",' \
+		'}' > "${METAROCKSPEC:?}" \
+	&& HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 	&& LIBDIRS="${LIBDIRS-} CRYPTO_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
 	&& LIBDIRS="${LIBDIRS-} OPENSSL_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
-	&& luarocks_system_install() { luarocks install --tree system "${1:?}" ${LIBDIRS:?}; } \
-	&& luarocks_system_install basexx \
-	&& luarocks_system_install cqueues \
-	# Master branch fixes issue #145 (TODO: return to a stable version)
-	&& LUA_HTTP_TREEISH=47225d081318e65d5d832e2dd99ff0880d56b5c6 \
-	&& LUA_HTTP_ROCKSPEC=https://raw.githubusercontent.com/daurnimator/lua-http/${LUA_HTTP_TREEISH:?}/http-scm-0.rockspec \
-	&& luarocks_system_install "${LUA_HTTP_ROCKSPEC:?}" \
-	&& luarocks_system_install luafilesystem \
-	&& luarocks_system_install luasec \
-	&& luarocks_system_install luasocket \
-	&& luarocks_system_install mmdblua \
-	&& rm -rf "${HOME:?}"/.cache/luarocks/
+	&& luarocks install --tree=system --only-deps "${METAROCKSPEC:?}" ${LIBDIRS:?}
+
+# Install lua-http
+# (master branch fixes issue #145 | TODO: return to a stable version)
+ARG LUA_HTTP_TREEISH=47225d081318e65d5d832e2dd99ff0880d56b5c6
+ARG LUA_HTTP_ROCKSPEC=https://raw.githubusercontent.com/daurnimator/lua-http/${LUA_HTTP_TREEISH}/http-scm-0.rockspec
+RUN luarocks install --tree=system --deps-mode=none "${LUA_HTTP_ROCKSPEC:?}"
 
 # Build Knot Resolver
 ARG KNOT_RESOLVER_TREEISH=v4.2.2
@@ -209,6 +229,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libidn2-0 \
 		libjansson4 \
 		liblmdb0 \
+		libpsl5 \
 		libssl1.1 \
 		libstdc++6 \
 		libsystemd0 \
