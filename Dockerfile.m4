@@ -77,23 +77,23 @@ RUN file /usr/bin/khost
 RUN /usr/bin/kdig --version
 RUN /usr/bin/khost --version
 
-# Build LuaJIT
-ARG LUAJIT_TREEISH=v2.1-20190912
-ARG LUAJIT_REMOTE=https://github.com/openresty/luajit2.git
-RUN mkdir /tmp/luajit/
-WORKDIR /tmp/luajit/
-RUN git clone "${LUAJIT_REMOTE:?}" ./
-RUN git checkout "${LUAJIT_TREEISH:?}"
+# Build Moonjit
+ARG MOONJIT_TREEISH=2.1.2
+ARG MOONJIT_REMOTE=https://github.com/moonjit/moonjit.git
+RUN mkdir /tmp/moonjit/
+WORKDIR /tmp/moonjit/
+RUN git clone "${MOONJIT_REMOTE:?}" ./
+RUN git checkout "${MOONJIT_TREEISH:?}"
 RUN git submodule update --init --recursive
 RUN ARCH=$(uname -m); \
-	LUAJIT_XCFLAGS='-DLUAJIT_NUMMODE=2'; \
+	LUAJIT_XCFLAGS=''; \
 	if [ "${ARCH:?}" = 'x86_64' ]; then \
 		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_ENABLE_GC64"; \
 	elif [ "${ARCH:?}" = 'armv7l' ]; then \
 		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_USE_SYSMALLOC"; \
 	fi; \
 	make -j"$(nproc)" amalg XCFLAGS="${LUAJIT_XCFLAGS?}"
-RUN make install PREFIX=/usr
+RUN make install PREFIX=/usr INSTALL_TNAME=luajit
 RUN file -L /usr/bin/luajit
 RUN luajit -v
 
@@ -282,7 +282,7 @@ COPY --from=docker.io/hectormolinero/tini:TINI_IMAGE_TAG --chown=root:root /usr/
 m4_define([[SUPERCRONIC_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[latest-CROSS_ARCH]], [[latest]]))m4_dnl
 COPY --from=docker.io/hectormolinero/supercronic:SUPERCRONIC_IMAGE_TAG --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
 
-# Copy LuaJIT build
+# Copy Moonjit build
 COPY --from=build --chown=root:root /usr/lib/libluajit-* /usr/lib/
 COPY --from=build --chown=root:root /usr/bin/luajit /usr/bin/luajit
 
