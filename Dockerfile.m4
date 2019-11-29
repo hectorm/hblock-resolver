@@ -239,7 +239,14 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		openssl \
 		runit \
 		tzdata \
-	&& rm -rf /var/lib/apt/lists/*
+	&& apt-get clean \
+	&& rm -rf \
+		/var/lib/apt/lists/* \
+		/var/cache/ldconfig/aux-cache \
+		/var/log/apt/* \
+		/var/log/alternatives.log \
+		/var/log/bootstrap.log \
+		/var/log/dpkg.log
 
 # Environment
 ENV KRESD_DNS1_IP=1.1.1.1@853
