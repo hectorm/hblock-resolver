@@ -1,4 +1,5 @@
-[![Pipeline Status](https://gitlab.com/hectorm/hblock-resolver/badges/master/pipeline.svg)](https://gitlab.com/hectorm/hblock-resolver/pipelines)
+[![Docker pulls](https://img.shields.io/docker/pulls/hectormolinero/hblock-resolver.svg)](https://hub.docker.com/r/hectormolinero/hblock-resolver)
+[![Pipeline status](https://gitlab.com/hectorm/hblock-resolver/badges/master/pipeline.svg)](https://gitlab.com/hectorm/hblock-resolver/pipelines)
 [![License](https://img.shields.io/github/license/hectorm/hblock-resolver.svg)](LICENSE.md)
 
 ***
