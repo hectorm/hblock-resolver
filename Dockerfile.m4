@@ -150,8 +150,7 @@ RUN METAROCKSPEC=/tmp/metapackage-scm-0.rockspec \
 	&& LIBDIRS="${LIBDIRS-} OPENSSL_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
 	&& luarocks install --tree=system --only-deps "${METAROCKSPEC:?}" ${LIBDIRS:?}
 
-# Install lua-http
-# (master branch fixes issue #145 | TODO: return to a stable version)
+# Install lua-http (master branch fixes #145)
 ARG LUA_HTTP_TREEISH=47225d081318e65d5d832e2dd99ff0880d56b5c6
 ARG LUA_HTTP_ROCKSPEC=https://raw.githubusercontent.com/daurnimator/lua-http/${LUA_HTTP_TREEISH}/http-scm-0.rockspec
 RUN luarocks install --tree=system --deps-mode=none "${LUA_HTTP_ROCKSPEC:?}"
@@ -169,7 +168,7 @@ RUN git checkout "${KNOT_RESOLVER_TREEISH:?}"
 RUN git submodule update --init --recursive
 RUN pip3 install --user -r ./tests/pytests/requirements.txt
 RUN pip3 install --user -r ./tests/integration/deckard/requirements.txt
-RUN meson ./build \
+RUN meson ./build/ \
 		--prefix=/usr \
 		--libdir=/usr/lib \
 		--sysconfdir=/etc \
@@ -183,13 +182,13 @@ RUN meson ./build \
 		-D unit_tests="${KNOT_RESOLVER_UNIT_TESTS:?}" \
 		-D config_tests="${KNOT_RESOLVER_CONFIG_TESTS:?}" \
 		-D extra_tests="${KNOT_RESOLVER_EXTRA_TESTS:?}"
-RUN ninja -C ./build
-RUN ninja -C ./build install
+RUN ninja -C ./build/
+RUN ninja -C ./build/ install
 RUN ARGS='--timeout-multiplier=4 --print-errorlogs'; \
 	[ "${KNOT_RESOLVER_UNIT_TESTS:?}"   = enabled ] && ARGS="${ARGS:?} --suite unit"; \
 	[ "${KNOT_RESOLVER_CONFIG_TESTS:?}" = enabled ] && ARGS="${ARGS:?} --suite config"; \
 	[ "${KNOT_RESOLVER_EXTRA_TESTS:?}"  = enabled ] && ARGS="${ARGS:?} --suite pytests --suite integration"; \
-	meson test -C ./build ${ARGS:?}
+	meson test -C ./build/ ${ARGS:?}
 RUN file /usr/sbin/kresd
 RUN file /usr/sbin/kresc
 RUN /usr/sbin/kresd --version
