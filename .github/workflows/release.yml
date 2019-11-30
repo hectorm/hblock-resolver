@@ -1,0 +1,28 @@
+name: 'Release build'
+
+on:
+  push:
+    tags: ['v[0-9]+']
+
+jobs:
+
+  build-cross-images:
+    name: 'Build ${{matrix.arch}} image'
+    runs-on: 'ubuntu-18.04'
+    strategy:
+      matrix:
+        arch: ['amd64', 'arm64v8', 'arm32v7']
+    steps:
+      - name: 'Checkout project'
+        uses: 'actions/checkout@v1'
+      - name: 'Build image'
+        env:
+          ARCH: '${{matrix.arch}}'
+        run: |
+          make binfmt-register
+          make "build-${ARCH:?}-image" "save-${ARCH:?}-image"
+      - name: 'Upload artifacts'
+        uses: 'actions/upload-artifact@v1'
+        with:
+          name: 'dist-${{matrix.arch}}'
+          path: './dist/'
