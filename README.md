@@ -1,5 +1,5 @@
 [![Docker pulls](https://img.shields.io/docker/pulls/hectormolinero/hblock-resolver?label=Docker%20pulls)](https://hub.docker.com/r/hectormolinero/hblock-resolver)
-[![GitHub CI](https://img.shields.io/github/workflow/status/hectorm/hblock-resolver/Development%20build?label=GitHub%20CI)](https://github.com/hectorm/hblock-resolver/actions)
+[![GitHub CI](https://img.shields.io/github/workflow/status/hectorm/hblock-resolver/Development%20build?label=GitHub%20CI)](https://github.com/hectorm/hblock-resolver/commits)
 [![GitLab CI](https://img.shields.io/gitlab/pipeline/hectorm/hblock-resolver/master?label=GitLab%20CI)](https://gitlab.com/hectorm/hblock-resolver/pipelines)
 [![License](https://img.shields.io/github/license/hectorm/hblock-resolver?label=License)](LICENSE.md)
 
