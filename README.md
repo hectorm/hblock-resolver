@@ -41,6 +41,15 @@ Hostname of the DNS-over-TLS server to which the queries will be forwarded
 Certificate hash of the DNS-over-TLS server to which the queries will be forwarded
 ([key-pinned authentication docs](https://knot-resolver.readthedocs.io/en/stable/modules.html#key-pinned-authentication)).
 
+#### `KRESD_WATCHDOG_QNAME` (default: `cloudflare.com.`)
+Query name to check the health status of kresd.
+
+#### `KRESD_WATCHDOG_QTYPE` (default: `A`)
+Query type to check the health status of kresd.
+
+#### `KRESD_WATCHDOG_INTERVAL` (default: `10000`)
+Interval to check the health status of kresd.
+
 #### `KRESD_CERT_MANAGED` (default: `true`)
 If equals `true`, a self-signed certificate will be generated. You can provide your own certificate with these options:
 ```
