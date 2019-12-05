@@ -21,8 +21,3 @@ jobs:
         run: |
           make binfmt-register
           make "build-${ARCH:?}-image" "save-${ARCH:?}-image"
-      - name: 'Upload artifacts'
-        uses: 'actions/upload-artifact@v1'
-        with:
-          name: 'dist-${{matrix.arch}}'
-          path: './dist/'
