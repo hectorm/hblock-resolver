@@ -94,7 +94,7 @@ RUN ARCH=$(uname -m); \
 	fi; \
 	make -j"$(nproc)" amalg XCFLAGS="${LUAJIT_XCFLAGS?}"
 RUN make install PREFIX=/usr INSTALL_TNAME=luajit
-RUN file -L /usr/bin/luajit
+RUN file /usr/bin/luajit
 RUN luajit -v
 
 # Build LuaRocks
@@ -286,7 +286,6 @@ COPY --from=docker.io/hectormolinero/supercronic:SUPERCRONIC_IMAGE_TAG --chown=r
 
 # Copy Moonjit build
 COPY --from=build --chown=root:root /usr/lib/libluajit-* /usr/lib/
-COPY --from=build --chown=root:root /usr/bin/luajit /usr/bin/luajit
 
 # Copy Lua packages
 COPY --from=build --chown=root:root /usr/local/lib/lua/ /usr/local/lib/lua/
