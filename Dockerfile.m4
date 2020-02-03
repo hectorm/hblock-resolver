@@ -139,8 +139,6 @@ RUN METAROCKSPEC=/tmp/metapackage-scm-0.rockspec \
 		'  "lpeg_patterns == 0.5-0",' \
 		'  "luafilesystem == 1.7.0-2",' \
 		'  "luaossl == 20190731-0",' \
-		'  "luasocket == 3.0rc1-2",' \
-		'  "luasec == 0.9-1",' \
 		'  "mmdblua == 0.2-0",' \
 		'  "psl == 0.3-0",' \
 		'--"http == 0.3-0",' \
