@@ -98,7 +98,7 @@ RUN file /usr/bin/luajit
 RUN luajit -v
 
 # Build LuaRocks
-ARG LUAROCKS_TREEISH=v3.2.1
+ARG LUAROCKS_TREEISH=v3.3.0
 ARG LUAROCKS_REMOTE=https://github.com/luarocks/luarocks.git
 RUN mkdir /tmp/luarocks/
 WORKDIR /tmp/luarocks/
@@ -121,32 +121,30 @@ RUN file /usr/bin/luarocks
 RUN luarocks --version
 
 # Install LuaRocks packages
-RUN METAROCKSPEC=/tmp/metapackage-scm-0.rockspec \
-	&& printf '%s\n' \
-		'rockspec_format = "3.0"' \
-		'package = "metapackage"' \
-		'version = "scm-0"' \
-		'source = { url = "" }' \
-		'dependencies = {' \
-		'  "lua == 5.1",' \
-		'  "basexx == 0.4.1-1",' \
-		'  "binaryheap == 0.4-1",' \
-		'  "bit32 == 5.3.0-1",' \
-		'  "compat53 == 0.7-1",' \
-		'  "cqueues == 20190813.51-0 ",' \
-		'  "fifo == 0.2-0",' \
-		'  "lpeg == 1.0.2-1",' \
-		'  "lpeg_patterns == 0.5-0",' \
-		'  "luafilesystem == 1.7.0-2",' \
-		'  "luaossl == 20190731-0",' \
-		'  "mmdblua == 0.2-0",' \
-		'  "psl == 0.3-0",' \
-		'--"http == 0.3-0",' \
-		'}' > "${METAROCKSPEC:?}" \
+RUN mkdir /tmp/rocks/
+WORKDIR /tmp/rocks/
+RUN luarocks init --lua-versions=5.1 metapackage
+RUN ROCKS=$(printf '%s="%s",' \
+		basexx        0.4.1-1 \
+		binaryheap    0.4-1 \
+		bit32         5.3.0-1 \
+		compat53      0.7-1 \
+		cqueues       20190813.51-0 \
+		fifo          0.2-0 \
+		#http         0.3-0 \
+		lpeg          1.0.2-1 \
+		lpeg_patterns 0.5-0 \
+		lua           5.1-1 \
+		luafilesystem 1.7.0-2 \
+		luaossl       20190731-0 \
+		mmdblua       0.2-0 \
+		psl           0.3-0 \
+	) \
+	&& printf 'return {dependencies = {%s}}' "${ROCKS:?}" > ./luarocks.lock \
 	&& HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
 	&& LIBDIRS="${LIBDIRS-} CRYPTO_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
 	&& LIBDIRS="${LIBDIRS-} OPENSSL_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
-	&& luarocks install --tree=system --only-deps "${METAROCKSPEC:?}" ${LIBDIRS:?}
+	&& luarocks install --tree=system --only-deps ./*.rockspec ${LIBDIRS:?}
 
 # Install lua-http (master branch fixes #145)
 ARG LUA_HTTP_TREEISH=47225d081318e65d5d832e2dd99ff0880d56b5c6
