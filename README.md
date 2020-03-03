@@ -35,11 +35,11 @@ IP (and optionally port) of the DNS-over-TLS server to which the queries will be
 
 #### `KRESD_DNS{1..4}_HOSTNAME` (default: `cloudflare-dns.com`)
 Hostname of the DNS-over-TLS server to which the queries will be forwarded
-([CA+hostname authentication docs](https://knot-resolver.readthedocs.io/en/stable/modules.html#ca-hostname-authentication)).
+([CA+hostname authentication docs](https://knot-resolver.readthedocs.io/en/stable/modules-policy.html#ca-hostname-authentication)).
 
 #### `KRESD_DNS{1..4}_PIN_SHA256` (default: empty)
 Certificate hash of the DNS-over-TLS server to which the queries will be forwarded
-([key-pinned authentication docs](https://knot-resolver.readthedocs.io/en/stable/modules.html#key-pinned-authentication)).
+([key-pinned authentication docs](https://knot-resolver.readthedocs.io/en/stable/modules-policy.html#key-pinned-authentication)).
 
 #### `KRESD_WATCHDOG_QNAME` (default: `cloudflare.com.`)
 Query name to check the health status of kresd.
@@ -63,7 +63,7 @@ If equals `true`, a self-signed certificate will be generated. You can provide y
 #### `KRESD_NIC` (default: empty)
 If defined, kresd will only listen on the specified interface. Some users observed a considerable, close to 100%, performance gain in Docker
 containers when they bound the daemon to a single interface:ip address pair
-([dynamic configuration docs](https://knot-resolver.readthedocs.io/en/latest/daemon.html?highlight=docker#dynamic-configuration),
+([dynamic configuration docs](https://knot-resolver.readthedocs.io/en/latest/daemon-scripting.html?highlight=docker#lua-scripts),
 [CZ-NIC/knot-resolver#32](https://github.com/CZ-NIC/knot-resolver/pull/32)).
 
 #### `KRESD_VERBOSE` (default: `false`)
