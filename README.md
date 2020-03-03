@@ -48,7 +48,7 @@ Query name to check the health status of kresd.
 Query type to check the health status of kresd.
 
 #### `KRESD_WATCHDOG_INTERVAL` (default: `10000`)
-Interval to check the health status of kresd.
+Interval in seconds to check the health status of kresd.
 
 #### `KRESD_CERT_MANAGED` (default: `true`)
 If equals `true`, a self-signed certificate will be generated. You can provide your own certificate with these options:
