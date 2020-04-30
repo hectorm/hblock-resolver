@@ -135,7 +135,7 @@ RUN ROCKS=$(printf '%s="%s",' \
 		lpeg          1.0.2-1 \
 		lpeg_patterns 0.5-0 \
 		lua           5.1-1 \
-		luafilesystem 1.7.0-2 \
+		luafilesystem 1.8.0-1 \
 		luaossl       20190731-0 \
 		mmdblua       0.2-0 \
 		psl           0.3-0 \
