@@ -22,6 +22,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		gawk \
 		git \
 		libaugeas-dev \
+		libcap-ng-dev \
 		libcmocka-dev \
 		libedit-dev \
 		libffi-dev \
@@ -212,6 +213,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		curl \
 		dns-root-data \
 		gzip \
+		libcap-ng0 \
 		libcap2-bin \
 		libedit2 \
 		libgcc1 \
