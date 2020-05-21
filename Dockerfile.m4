@@ -17,8 +17,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		ca-certificates \
 		cmake \
 		curl \
-		debhelper \
-		dh-systemd \
 		dns-root-data \
 		file \
 		gawk \
@@ -47,8 +45,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		python3-setuptools \
 		python3-wheel \
 		tzdata \
-		unzip \
-		xxd
+		unzip
 
 # Install Python packages
 RUN pip3 install --no-cache-dir meson
@@ -213,7 +210,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get install -y --no-install-recommends \
 		ca-certificates \
 		curl \
-		diffutils \
 		dns-root-data \
 		gzip \
 		libcap2-bin \
