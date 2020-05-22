@@ -311,19 +311,19 @@ RUN mkdir /var/lib/knot-resolver/ /var/cache/knot-resolver/
 RUN chown knot-resolver:knot-resolver /var/lib/knot-resolver/ /var/cache/knot-resolver/
 
 # Copy kresd config
-COPY --chown=root:root config/knot-resolver/ /etc/knot-resolver/
+COPY --chown=root:root ./config/knot-resolver/ /etc/knot-resolver/
 
 # Copy hBlock config
-COPY --chown=root:root config/hblock.d/ /etc/hblock.d/
+COPY --chown=root:root ./config/hblock.d/ /etc/hblock.d/
 
 # Copy crontab
-COPY --chown=root:root config/crontab /etc/crontab
+COPY --chown=root:root ./config/crontab /etc/crontab
 
 # Copy scripts
-COPY --chown=root:root scripts/bin/ /usr/local/bin/
+COPY --chown=root:root ./scripts/bin/ /usr/local/bin/
 
 # Copy services
-COPY --chown=knot-resolver:knot-resolver scripts/service/ /home/knot-resolver/service/
+COPY --chown=knot-resolver:knot-resolver ./scripts/service/ /home/knot-resolver/service/
 
 # Drop root privileges
 USER knot-resolver:knot-resolver
