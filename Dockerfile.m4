@@ -150,7 +150,7 @@ ARG LUA_HTTP_ROCKSPEC=https://raw.githubusercontent.com/daurnimator/lua-http/${L
 RUN luarocks install --tree=system --deps-mode=none "${LUA_HTTP_ROCKSPEC:?}"
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_TREEISH=6552d471a4b7f56efc1bad42800b1ac1e86b1b65
+ARG KNOT_RESOLVER_TREEISH=v5.1.2
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_UNIT_TESTS=enabled
 ARG KNOT_RESOLVER_CONFIG_TESTS=disabled
