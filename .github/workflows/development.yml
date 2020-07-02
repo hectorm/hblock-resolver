@@ -16,4 +16,4 @@ jobs:
         uses: 'actions/checkout@v1'
       - name: 'Build image'
         run: |
-          make build-native-image save-native-image
+          make IMAGE_BUILD_OPTS="--pull" build-native-image save-native-image

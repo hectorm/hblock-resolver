@@ -20,4 +20,4 @@ jobs:
           ARCH: '${{matrix.arch}}'
         run: |
           make binfmt-register
-          make "build-${ARCH:?}-image" "save-${ARCH:?}-image"
+          make IMAGE_BUILD_OPTS="--pull" "build-${ARCH:?}-image" "save-${ARCH:?}-image"
