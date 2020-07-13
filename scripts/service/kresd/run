@@ -3,5 +3,6 @@
 set -eu
 
 cd /var/cache/knot-resolver
+
 exec 2>&1
 exec kresd --noninteractive --config=/etc/knot-resolver/kresd.conf "${PWD:?}"

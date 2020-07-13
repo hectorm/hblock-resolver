@@ -3,5 +3,9 @@
 set -eu
 
 cd /var/cache/knot-resolver
+
+# Wait until "data.mdb" exists before starting the garbage collector
+timeout 30 sh -euc "until [ -e '${PWD:?}'/data.mdb ]; do sleep 1; done"
+
 exec 2>&1
 exec kres-cache-gc -c "${PWD:?}" -d 1000
