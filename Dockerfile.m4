@@ -127,7 +127,7 @@ RUN ROCKS=$(printf '%s="%s",' \
 		binaryheap    0.4-1 \
 		bit32         5.3.5-1 \
 		compat53      0.8-1 \
-		cqueues       20200603.51-0 \
+		cqueues       20200726.51-0 \
 		fifo          0.2-0 \
 		#http         0.3-0 \
 		lpeg          1.0.2-1 \
