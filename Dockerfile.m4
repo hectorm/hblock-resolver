@@ -15,7 +15,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		automake \
 		build-essential \
 		ca-certificates \
-		cmake \
 		curl \
 		dns-root-data \
 		file \
