@@ -84,7 +84,7 @@ RUN git checkout "${MOONJIT_TREEISH:?}"
 RUN git submodule update --init --recursive
 RUN ARCH=$(uname -m); \
 	LUAJIT_XCFLAGS=''; \
-	if [ "${ARCH:?}" = 'x86_64' ]; then \
+	if [ "${ARCH:?}" = 'x86_64' ] || [ "${ARCH:?}" = 'aarch64' ]; then \
 		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_ENABLE_GC64"; \
 	elif [ "${ARCH:?}" = 'armv7l' ]; then \
 		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_USE_SYSMALLOC"; \
