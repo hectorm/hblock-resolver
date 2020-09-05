@@ -51,7 +51,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 RUN pip3 install --no-cache-dir meson
 
 # Build Knot DNS (only libknot and utilities)
-ARG KNOT_DNS_TREEISH=v2.9.5
+ARG KNOT_DNS_TREEISH=v2.9.6
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 RUN mkdir /tmp/knot-dns/
 WORKDIR /tmp/knot-dns/
