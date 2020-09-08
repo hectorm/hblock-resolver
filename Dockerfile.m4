@@ -144,7 +144,7 @@ RUN ROCKS=$(printf '["%s"]="%s",' \
 	&& luarocks install --tree=system --only-deps ./*.rockspec ${LIBDIRS:?}
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_TREEISH=v5.1.2
+ARG KNOT_RESOLVER_TREEISH=v5.1.3
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
 ARG KNOT_RESOLVER_UNIT_TESTS=enabled
 ARG KNOT_RESOLVER_CONFIG_TESTS=disabled
