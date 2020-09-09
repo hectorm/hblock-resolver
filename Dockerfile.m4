@@ -30,6 +30,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libidn2-dev \
 		libjansson-dev \
 		liblmdb-dev \
+		libnghttp2-dev \
 		libpsl-dev \
 		libssl-dev \
 		libsystemd-dev \
@@ -51,7 +52,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 RUN pip3 install --no-cache-dir meson
 
 # Build Knot DNS (only libknot and utilities)
-ARG KNOT_DNS_TREEISH=v2.9.6
+ARG KNOT_DNS_TREEISH=v3.0.0
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 RUN mkdir /tmp/knot-dns/
 WORKDIR /tmp/knot-dns/
@@ -216,6 +217,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libidn2-0 \
 		libjansson4 \
 		liblmdb0 \
+		libnghttp2-14 \
 		libpsl5 \
 		libssl1.1 \
 		libstdc++6 \
