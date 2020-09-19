@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eu
+
 if is-sv-status kresd run; then
 	KRESD_PIDFILE=${HOME:?}/service/kresd/supervise/pid
 	KRESD_TTY=/var/cache/knot-resolver/control/$(cat "${KRESD_PIDFILE:?}")
