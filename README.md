@@ -15,11 +15,10 @@ A Docker image of [Knot Resolver](https://www.knot-resolver.cz) configured to au
 ```sh
 docker run --detach \
   --name hblock-resolver \
-  --restart on-failure:3 \
-  --publish 127.0.0.1:53:53/udp \
-  --publish 127.0.0.1:53:53/tcp \
-  --publish 127.0.0.1:853:853/tcp \
-  --publish 127.0.0.1:8453:8453/tcp \
+  --publish 127.0.0.153:53:53/udp \
+  --publish 127.0.0.153:53:53/tcp \
+  --publish 127.0.0.153:853:853/tcp \
+  --publish 127.0.0.153:8453:8453/tcp \
   --mount type=volume,src=hblock-resolver-data,dst=/var/lib/knot-resolver/ \
   hectormolinero/hblock-resolver:latest
 ```
