@@ -225,6 +225,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libuv1 \
 		openssl \
 		runit \
+		snooze \
 		tini \
 		tzdata \
 	&& apt-get clean \
@@ -258,10 +259,6 @@ ENV KRESD_VERBOSE=false
 
 # Create users and groups
 RUN useradd -u "${KRESD_UID:?}" -g 0 -s "$(command -v bash)" -Md "${KRESD_CACHE_DIR:?}" knot-resolver
-
-# Copy Supercronic build
-m4_define([[SUPERCRONIC_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[latest-CROSS_ARCH]], [[latest]]))m4_dnl
-COPY --from=docker.io/hectormolinero/supercronic:SUPERCRONIC_IMAGE_TAG --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
 
 # Copy Moonjit build
 COPY --from=build --chown=root:root /usr/lib/libluajit-* /usr/lib/
@@ -315,10 +312,6 @@ RUN find /usr/local/bin/ -type f -not -perm 0755 -exec chmod 0755 '{}' ';'
 COPY --chown=root:root ./scripts/service/ /service/
 RUN find /service/ -type d -not -perm 0775 -exec chmod 0775 '{}' ';'
 RUN find /service/ -type f -not -perm 0775 -exec chmod 0775 '{}' ';'
-
-# Copy crontab
-COPY --chown=root:root ./config/crontab /etc/crontab
-RUN chmod 0644 /etc/crontab
 
 # Drop root privileges
 USER knot-resolver:root

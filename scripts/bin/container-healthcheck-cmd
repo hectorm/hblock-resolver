@@ -14,9 +14,15 @@ if ! is-sv-status kres-cache-gc run; then
 	exit 1
 fi
 
-# supercronic service must be running
-if ! is-sv-status supercronic run; then
-	>&2 printf '%s\n' 'supercronic service is not running'
+# renew-self-signed-cert service must be running
+if ! is-sv-status renew-self-signed-cert run; then
+	>&2 printf '%s\n' 'renew-self-signed-cert service is not running'
+	exit 1
+fi
+
+# update-blacklist-rpz service must be running
+if ! is-sv-status update-blacklist-rpz run; then
+	>&2 printf '%s\n' 'update-blacklist-rpz service is not running'
 	exit 1
 fi
 
