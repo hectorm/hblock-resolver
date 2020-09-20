@@ -238,6 +238,11 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		/var/log/dpkg.log
 
 # Environment
+ENV SVDIR=/service/
+ENV KRESD_UID=1000
+ENV KRESD_DATA_DIR=/var/lib/knot-resolver/
+ENV KRESD_CACHE_DIR=/var/cache/knot-resolver/
+ENV KRESD_CONF_DIR=/etc/knot-resolver/
 ENV KRESD_DNS1_IP=1.1.1.1@853
 ENV KRESD_DNS1_HOSTNAME=cloudflare-dns.com
 ENV KRESD_DNS2_IP=1.0.0.1@853
@@ -246,25 +251,14 @@ ENV KRESD_WATCHDOG_QNAME=cloudflare.com.
 ENV KRESD_WATCHDOG_QTYPE=A
 ENV KRESD_WATCHDOG_INTERVAL=10000
 ENV KRESD_CERT_MANAGED=true
-ENV KRESD_CERT_CRT_FILE=/var/lib/knot-resolver/ssl/server.crt
-ENV KRESD_CERT_KEY_FILE=/var/lib/knot-resolver/ssl/server.key
-ENV KRESD_BLACKLIST_RPZ_FILE=/var/lib/knot-resolver/hblock.rpz
+ENV KRESD_CERT_KEY_FILE=${KRESD_DATA_DIR}/ssl/server.key
+ENV KRESD_CERT_CRT_FILE=${KRESD_DATA_DIR}/ssl/server.crt
+ENV KRESD_BLACKLIST_RPZ_FILE=${KRESD_DATA_DIR}/hblock.rpz
 ENV KRESD_NIC=
 ENV KRESD_VERBOSE=false
 
 # Create users and groups
-ARG KNOT_RESOLVER_USER_UID=1000
-ARG KNOT_RESOLVER_USER_GID=1000
-RUN groupadd \
-		--gid "${KNOT_RESOLVER_USER_GID:?}" \
-		knot-resolver
-RUN useradd \
-		--uid "${KNOT_RESOLVER_USER_UID:?}" \
-		--gid "${KNOT_RESOLVER_USER_GID:?}" \
-		--shell "$(command -v bash)" \
-		--home-dir /home/knot-resolver/ \
-		--create-home \
-		knot-resolver
+RUN useradd -u "${KRESD_UID:?}" -g 0 -s "$(command -v bash)" -Md "${KRESD_CACHE_DIR:?}" knot-resolver
 
 # Copy Tini build
 m4_define([[TINI_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[latest-CROSS_ARCH]], [[latest]]))m4_dnl
@@ -306,26 +300,36 @@ m4_ifdef([[CROSS_QEMU]], [[RUN setcap cap_net_bind_service=+ep CROSS_QEMU]])
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
 
 # Create data and cache directories
-RUN mkdir /var/lib/knot-resolver/ /var/cache/knot-resolver/
-RUN chown knot-resolver:knot-resolver /var/lib/knot-resolver/ /var/cache/knot-resolver/
+RUN mkdir "${KRESD_DATA_DIR:?}" "${KRESD_CACHE_DIR:?}"
+RUN chown knot-resolver:root "${KRESD_DATA_DIR:?}" "${KRESD_CACHE_DIR:?}"
+RUN chmod 0775 "${KRESD_DATA_DIR:?}" "${KRESD_CACHE_DIR:?}"
 
 # Copy kresd config
 COPY --chown=root:root ./config/knot-resolver/ /etc/knot-resolver/
+RUN find /etc/knot-resolver/ -type d -not -perm 0755 -exec chmod 0755 '{}' ';'
+RUN find /etc/knot-resolver/ -type f -not -perm 0644 -exec chmod 0644 '{}' ';'
 
 # Copy hBlock config
 COPY --chown=root:root ./config/hblock.d/ /etc/hblock.d/
-
-# Copy crontab
-COPY --chown=root:root ./config/crontab /etc/crontab
+RUN find /etc/hblock.d/ -type d -not -perm 0755 -exec chmod 0755 '{}' ';'
+RUN find /etc/hblock.d/ -type f -not -perm 0644 -exec chmod 0644 '{}' ';'
 
 # Copy scripts
 COPY --chown=root:root ./scripts/bin/ /usr/local/bin/
+RUN find /usr/local/bin/ -type d -not -perm 0755 -exec chmod 0755 '{}' ';'
+RUN find /usr/local/bin/ -type f -not -perm 0755 -exec chmod 0755 '{}' ';'
 
 # Copy services
-COPY --chown=knot-resolver:knot-resolver ./scripts/service/ /home/knot-resolver/service/
+COPY --chown=root:root ./scripts/service/ /service/
+RUN find /service/ -type d -not -perm 0775 -exec chmod 0775 '{}' ';'
+RUN find /service/ -type f -not -perm 0775 -exec chmod 0775 '{}' ';'
+
+# Copy crontab
+COPY --chown=root:root ./config/crontab /etc/crontab
+RUN chmod 0644 /etc/crontab
 
 # Drop root privileges
-USER knot-resolver:knot-resolver
+USER knot-resolver:root
 
 ##################################################
 ## "test" stage

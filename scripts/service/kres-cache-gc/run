@@ -2,7 +2,7 @@
 
 set -eu
 
-cd /var/cache/knot-resolver
+cd "${KRESD_CACHE_DIR:?}"
 
 # Wait until "data.mdb" exists before starting the garbage collector
 timeout 30 sh -euc "until [ -e '${PWD:?}'/data.mdb ]; do sleep 1; done"

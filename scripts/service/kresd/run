@@ -2,7 +2,7 @@
 
 set -eu
 
-cd /var/cache/knot-resolver
+cd "${KRESD_CACHE_DIR:?}"
 
 exec 2>&1
-exec kresd --noninteractive --config=/etc/knot-resolver/kresd.conf "${PWD:?}"
+exec kresd --noninteractive --config="${KRESD_CONF_DIR:?}"/kresd.conf "${PWD:?}"

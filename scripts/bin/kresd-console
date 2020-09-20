@@ -3,8 +3,8 @@
 set -eu
 
 if is-sv-status kresd run; then
-	KRESD_PIDFILE=${HOME:?}/service/kresd/supervise/pid
-	KRESD_TTY=/var/cache/knot-resolver/control/$(cat "${KRESD_PIDFILE:?}")
+	KRESD_PIDFILE=${SVDIR:?}/kresd/supervise/pid
+	KRESD_TTY=${KRESD_CACHE_DIR:?}/control/$(cat "${KRESD_PIDFILE:?}")
 	kresc "${KRESD_TTY:?}"
 else
 	>&2 printf '%s\n' 'kresd is not running'

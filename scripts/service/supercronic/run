@@ -2,7 +2,7 @@
 
 set -eu
 
-cd "${HOME:?}"
+cd "${KRESD_CACHE_DIR:?}"
 
 exec 2>&1
 exec supercronic /etc/crontab

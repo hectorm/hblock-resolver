@@ -2,6 +2,9 @@
 
 set -eu
 
+# Set default umask
+umask 0002
+
 if [ "${KRESD_CERT_MANAGED:?}" = 'true' ]; then
 	# Generate self-signed certificate if it does not exist
 	renew-self-signed-cert
@@ -19,4 +22,4 @@ if [ ! -f "${KRESD_BLACKLIST_RPZ_FILE:?}" ]; then
 fi
 
 # Run runit
-exec runsvdir -P "${HOME:?}"/service/
+exec runsvdir -P "${SVDIR:?}"

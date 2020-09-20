@@ -4,6 +4,6 @@ set -eu
 
 SERVICE=${1:?}
 STATUS=${2:?}
-STATUS_FILE=${HOME:?}/service/${SERVICE:?}/supervise/stat
+STATUS_FILE=${SVDIR:?}/${SERVICE:?}/supervise/stat
 
 [ -f "${STATUS_FILE:?}" ] && [ "$(cat "${STATUS_FILE:?}")" = "${STATUS:?}" ]
