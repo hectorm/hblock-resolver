@@ -4,7 +4,7 @@ m4_changequote([[, ]])
 ## "build" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:18.04]], [[FROM docker.io/ubuntu:18.04]]) AS build
+m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:20.04]], [[FROM docker.io/ubuntu:20.04]]) AS build
 m4_ifdef([[CROSS_QEMU]], [[COPY --from=docker.io/hectormolinero/qemu-user-static:latest CROSS_QEMU CROSS_QEMU]])
 
 # Install system packages
@@ -38,6 +38,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libunistring-dev \
 		liburcu-dev \
 		libuv1-dev \
+		meson \
 		ninja-build \
 		pkgconf \
 		python3 \
@@ -47,9 +48,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		python3-wheel \
 		tzdata \
 		unzip
-
-# Install Python packages
-RUN pip3 install --no-cache-dir meson
 
 # Build Knot DNS (only libknot and utilities)
 ARG KNOT_DNS_TREEISH=v3.0.0
@@ -197,7 +195,7 @@ RUN /usr/bin/hblock --version
 ## "base" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:18.04]], [[FROM docker.io/ubuntu:18.04]]) AS base
+m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:20.04]], [[FROM docker.io/ubuntu:20.04]]) AS base
 m4_ifdef([[CROSS_QEMU]], [[COPY --from=docker.io/hectormolinero/qemu-user-static:latest CROSS_QEMU CROSS_QEMU]])
 
 # Install system packages
@@ -227,6 +225,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libuv1 \
 		openssl \
 		runit \
+		tini \
 		tzdata \
 	&& apt-get clean \
 	&& rm -rf \
@@ -260,10 +259,6 @@ ENV KRESD_VERBOSE=false
 # Create users and groups
 RUN useradd -u "${KRESD_UID:?}" -g 0 -s "$(command -v bash)" -Md "${KRESD_CACHE_DIR:?}" knot-resolver
 
-# Copy Tini build
-m4_define([[TINI_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[latest-CROSS_ARCH]], [[latest]]))m4_dnl
-COPY --from=docker.io/hectormolinero/tini:TINI_IMAGE_TAG --chown=root:root /usr/bin/tini /usr/bin/tini
-
 # Copy Supercronic build
 m4_define([[SUPERCRONIC_IMAGE_TAG]], m4_ifdef([[CROSS_ARCH]], [[latest-CROSS_ARCH]], [[latest]]))m4_dnl
 COPY --from=docker.io/hectormolinero/supercronic:SUPERCRONIC_IMAGE_TAG --chown=root:root /usr/bin/supercronic /usr/bin/supercronic
@@ -291,9 +286,6 @@ COPY --from=build --chown=root:root /usr/sbin/kres-cache-gc /usr/sbin/kres-cache
 
 # Copy hBlock build
 COPY --from=build --chown=root:root /usr/bin/hblock /usr/bin/hblock
-
-# Remove RANDFILE variable from openssl.cnf
-RUN sed -i '/^RANDFILE/d' /etc/ssl/openssl.cnf
 
 # Add capabilities to the kresd binary
 m4_ifdef([[CROSS_QEMU]], [[RUN setcap cap_net_bind_service=+ep CROSS_QEMU]])
