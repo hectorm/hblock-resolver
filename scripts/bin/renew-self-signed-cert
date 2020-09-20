@@ -9,38 +9,27 @@ fi
 
 printf '%s\n' 'Checking self-signed certificate...'
 
-CRT_FILE=${KRESD_CERT_CRT_FILE:?}
 KEY_FILE=${KRESD_CERT_KEY_FILE:?}
-
-# Create RANDFILE if it does not exist
-RANDFILE=${RANDFILE-${HOME:?}/.rnd}
-if [ ! -f "${RANDFILE:?}" ]; then
-	dd if=/dev/urandom of="${RANDFILE:?}" bs=256 count=1 >/dev/null 2>&1
-fi
+CRT_FILE=${KRESD_CERT_CRT_FILE:?}
 
 # Generate private key if it does not exist
 if [ ! -f "${KEY_FILE:?}" ]; then
 	printf '%s\n' 'Generating private key...'
 
-	(umask 077 \
-		&& mkdir -p "$(dirname "${KEY_FILE:?}")" \
-		&& rm -f "${CRT_FILE:?}" "${KEY_FILE:?}" \
-		&& openssl ecparam -genkey -name prime256v1 -out "${KEY_FILE:?}" \
-	) >/dev/null
+	mkdir -p "$(dirname "${KEY_FILE:?}")"
+	rm -f "${KEY_FILE:?}" "${CRT_FILE:?}"
+
+	openssl ecparam -genkey -name prime256v1 > "${KEY_FILE:?}"
+	openssl ecparam -in "${KEY_FILE:?}" -check -text -noout
 fi
 
-# Generate self-signed certificate if it does not exist or will expire soon
+# Generate certificate if it does not exist or will expire soon
 if [ ! -f "${CRT_FILE:?}" ] || ! openssl x509 -checkend 604800 -noout -in "${CRT_FILE:?}"; then
-	printf '%s\n' 'Generating self-signed certificate...'
+	printf '%s\n' 'Generating certificate...'
 
-	(umask 022 \
-		&& mkdir -p "$(dirname "${CRT_FILE:?}")" \
-		&& rm -f "${CRT_FILE:?}" \
-		&& SUBJ="/CN=$(uname -n)" \
-		&& CSR_FILE=$(mktemp --dry-run) \
-		&& openssl req -new -sha256 -subj "${SUBJ:?}" -key "${KEY_FILE:?}" -out "${CSR_FILE:?}" \
-		&& openssl x509 -req -sha256 -days 90 -signkey "${KEY_FILE:?}" -in "${CSR_FILE:?}" -out "${CRT_FILE:?}" 2>/dev/null \
-		&& openssl x509 -in "${CRT_FILE:?}" -text -noout \
-		&& rm -f "${CSR_FILE:?}"
-	) >/dev/null
+	mkdir -p "$(dirname "${CRT_FILE:?}")"
+	rm -f "${CRT_FILE:?}"
+
+	openssl req -x509 -subj "/CN=$(uname -n)" -days 90 -key "${KEY_FILE:?}" > "${CRT_FILE:?}"
+	openssl x509 -in "${CRT_FILE:?}" -fingerprint -noout
 fi

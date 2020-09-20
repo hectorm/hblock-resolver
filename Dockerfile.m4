@@ -298,6 +298,9 @@ COPY --from=build --chown=root:root /usr/sbin/kres-cache-gc /usr/sbin/kres-cache
 # Copy hBlock build
 COPY --from=build --chown=root:root /usr/bin/hblock /usr/bin/hblock
 
+# Remove RANDFILE variable from openssl.cnf
+RUN sed -i '/^RANDFILE/d' /etc/ssl/openssl.cnf
+
 # Add capabilities to the kresd binary
 m4_ifdef([[CROSS_QEMU]], [[RUN setcap cap_net_bind_service=+ep CROSS_QEMU]])
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
