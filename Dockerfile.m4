@@ -41,11 +41,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		meson \
 		ninja-build \
 		pkgconf \
-		python3 \
-		python3-dev \
-		python3-pip \
-		python3-setuptools \
-		python3-wheel \
 		tzdata \
 		unzip
 
@@ -145,16 +140,11 @@ RUN ROCKS=$(printf '["%s"]="%s",' \
 # Build Knot Resolver
 ARG KNOT_RESOLVER_TREEISH=v5.1.3
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
-ARG KNOT_RESOLVER_UNIT_TESTS=enabled
-ARG KNOT_RESOLVER_CONFIG_TESTS=disabled
-ARG KNOT_RESOLVER_EXTRA_TESTS=disabled
 RUN mkdir /tmp/knot-resolver/
 WORKDIR /tmp/knot-resolver/
 RUN git clone "${KNOT_RESOLVER_REMOTE:?}" ./
 RUN git checkout "${KNOT_RESOLVER_TREEISH:?}"
 RUN git submodule update --init --recursive
-RUN pip3 install --user -r ./tests/pytests/requirements.txt
-RUN pip3 install --user -r ./tests/integration/deckard/requirements.txt
 RUN meson ./build/ \
 		--prefix=/usr \
 		--libdir=/usr/lib \
@@ -166,16 +156,14 @@ RUN meson ./build/ \
 		-D managed_ta=disabled \
 		-D root_hints=/usr/share/dns/root.hints \
 		-D keyfile_default=/usr/share/dns/root.key \
-		-D unit_tests="${KNOT_RESOLVER_UNIT_TESTS:?}" \
-		-D config_tests="${KNOT_RESOLVER_CONFIG_TESTS:?}" \
-		-D extra_tests="${KNOT_RESOLVER_EXTRA_TESTS:?}"
+		-D unit_tests=enabled \
+		-D config_tests=enabled \
+		-D extra_tests=disabled
 RUN ninja -C ./build/
 RUN ninja -C ./build/ install
-RUN ARGS='--timeout-multiplier=4 --print-errorlogs'; \
-	[ "${KNOT_RESOLVER_UNIT_TESTS:?}"   = enabled ] && ARGS="${ARGS:?} --suite unit"; \
-	[ "${KNOT_RESOLVER_CONFIG_TESTS:?}" = enabled ] && ARGS="${ARGS:?} --suite config"; \
-	[ "${KNOT_RESOLVER_EXTRA_TESTS:?}"  = enabled ] && ARGS="${ARGS:?} --suite pytests --suite integration"; \
-	meson test -C ./build/ ${ARGS:?}
+RUN meson test -C ./build/ --print-errorlogs --suite unit
+# In QEMU arm these tests always fail, we make an exception
+RUN meson test -C ./build/ --print-errorlogs --suite config --no-suite snowflake || [ "$(uname -m)" = armv7l ]
 RUN file /usr/sbin/kresd
 RUN file /usr/sbin/kresc
 RUN /usr/sbin/kresd --version
