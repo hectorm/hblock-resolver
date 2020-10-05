@@ -68,22 +68,16 @@ RUN file /usr/bin/khost
 RUN /usr/bin/kdig --version
 RUN /usr/bin/khost --version
 
-# Build Moonjit
-ARG MOONJIT_TREEISH=2.1.2
-ARG MOONJIT_REMOTE=https://github.com/moonjit/moonjit.git
-RUN mkdir /tmp/moonjit/
-WORKDIR /tmp/moonjit/
-RUN git clone "${MOONJIT_REMOTE:?}" ./
-RUN git checkout "${MOONJIT_TREEISH:?}"
+# Build LuaJIT
+ARG LUAJIT_TREEISH=e9af1abec542e6f9851ff2368e7f196b6382a44c
+ARG LUAJIT_REMOTE=https://github.com/LuaJIT/LuaJIT.git
+RUN mkdir /tmp/luajit/
+WORKDIR /tmp/luajit/
+RUN git clone "${LUAJIT_REMOTE:?}" ./
+RUN git checkout "${LUAJIT_TREEISH:?}"
 RUN git submodule update --init --recursive
-RUN ARCH=$(uname -m); \
-	LUAJIT_XCFLAGS=''; \
-	if [ "${ARCH:?}" = 'x86_64' ] || [ "${ARCH:?}" = 'aarch64' ]; then \
-		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_ENABLE_GC64"; \
-	elif [ "${ARCH:?}" = 'armv7l' ]; then \
-		LUAJIT_XCFLAGS="${LUAJIT_XCFLAGS-} -DLUAJIT_USE_SYSMALLOC"; \
-	fi; \
-	make -j"$(nproc)" amalg XCFLAGS="${LUAJIT_XCFLAGS?}"
+RUN [ "$(getconf LONG_BIT)" != 32 ] || XCFLAGS='-DLUAJIT_USE_SYSMALLOC'; \
+	make -j"$(nproc)" amalg XCFLAGS="${XCFLAGS-}"
 RUN make install PREFIX=/usr INSTALL_TNAME=luajit
 RUN file /usr/bin/luajit
 RUN luajit -v
@@ -248,7 +242,7 @@ ENV KRESD_VERBOSE=false
 # Create users and groups
 RUN useradd -u "${KRESD_UID:?}" -g 0 -s "$(command -v bash)" -Md "${KRESD_CACHE_DIR:?}" knot-resolver
 
-# Copy Moonjit build
+# Copy LuaJIT build
 COPY --from=build --chown=root:root /usr/lib/libluajit-* /usr/lib/
 
 # Copy Lua packages
