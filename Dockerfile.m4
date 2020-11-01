@@ -112,7 +112,7 @@ RUN luarocks init --lua-versions=5.1 metapackage
 RUN ROCKS=$(printf '["%s"]="%s",' \
 		basexx            0.4.1-1 \
 		binaryheap        0.4-1 \
-		bit32             5.3.5-1 \
+		bit32             5.3.5.1-1 \
 		compat53          0.8-1 \
 		cqueues           20200726.51-0 \
 		fifo              0.2-0 \
