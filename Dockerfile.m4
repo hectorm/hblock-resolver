@@ -163,7 +163,7 @@ RUN file /usr/sbin/kresc
 RUN /usr/sbin/kresd --version
 
 # Download hBlock
-ARG HBLOCK_TREEISH=v2.1.7
+ARG HBLOCK_TREEISH=v3.0.0
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 RUN mkdir /tmp/hblock/
 WORKDIR /tmp/hblock/
@@ -281,9 +281,9 @@ RUN find /etc/knot-resolver/ -type d -not -perm 0755 -exec chmod 0755 '{}' ';'
 RUN find /etc/knot-resolver/ -type f -not -perm 0644 -exec chmod 0644 '{}' ';'
 
 # Copy hBlock config
-COPY --chown=root:root ./config/hblock.d/ /etc/hblock.d/
-RUN find /etc/hblock.d/ -type d -not -perm 0755 -exec chmod 0755 '{}' ';'
-RUN find /etc/hblock.d/ -type f -not -perm 0644 -exec chmod 0644 '{}' ';'
+COPY --chown=root:root ./config/hblock/ /etc/hblock/
+RUN find /etc/hblock/ -type d -not -perm 0755 -exec chmod 0755 '{}' ';'
+RUN find /etc/hblock/ -type f -not -perm 0644 -exec chmod 0644 '{}' ';'
 
 # Copy scripts
 COPY --chown=root:root ./scripts/bin/ /usr/local/bin/
