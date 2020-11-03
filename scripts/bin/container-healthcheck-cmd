@@ -20,9 +20,9 @@ if ! is-sv-status renew-self-signed-cert run; then
 	exit 1
 fi
 
-# update-blacklist-rpz service must be running
-if ! is-sv-status update-blacklist-rpz run; then
-	>&2 printf '%s\n' 'update-blacklist-rpz service is not running'
+# update-denylist-rpz service must be running
+if ! is-sv-status update-denylist-rpz run; then
+	>&2 printf '%s\n' 'update-denylist-rpz service is not running'
 	exit 1
 fi
 

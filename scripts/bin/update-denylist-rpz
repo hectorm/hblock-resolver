@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -eu
+
+printf '%s\n' 'Downloading denylist zone...'
+
+# Generate denylist zone
+hblock \
+	--output "${KRESD_DENYLIST_RPZ_FILE:?}" \
+	--template '%D CNAME %R' \
+	--redirection '.' \
+	--comment ';' \
+	--quiet
