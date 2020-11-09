@@ -28,6 +28,9 @@ different attacks, such as [DNS amplification attacks](https://www.cloudflare.co
 
 ## Environment variables
 
+#### `KRESD_CACHE_SIZE` (default: `25`)
+Maximum cache size in megabytes.
+
 #### `KRESD_DNS{1..4}_IP` (default: `1.1.1.1@853` and `1.0.0.1@853`)
 IP (and optionally port) of the DNS-over-TLS server to which the queries will be forwarded
 ([alternative DoT servers](https://dnsprivacy.org/wiki/display/DP/DNS+Privacy+Public+Resolvers#DNSPrivacyPublicResolvers-DNS-over-TLS(DoT))).

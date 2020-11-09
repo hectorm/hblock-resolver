@@ -222,9 +222,10 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 # Environment
 ENV SVDIR=/service/
 ENV KRESD_UID=1000
+ENV KRESD_CONF_DIR=/etc/knot-resolver/
 ENV KRESD_DATA_DIR=/var/lib/knot-resolver/
 ENV KRESD_CACHE_DIR=/var/cache/knot-resolver/
-ENV KRESD_CONF_DIR=/etc/knot-resolver/
+ENV KRESD_CACHE_SIZE=25
 ENV KRESD_DNS1_IP=1.1.1.1@853
 ENV KRESD_DNS1_HOSTNAME=cloudflare-dns.com
 ENV KRESD_DNS2_IP=1.0.0.1@853
