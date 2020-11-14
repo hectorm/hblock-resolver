@@ -170,7 +170,7 @@ WORKDIR /tmp/hblock/
 RUN git clone "${HBLOCK_REMOTE:?}" ./
 RUN git checkout "${HBLOCK_TREEISH:?}"
 RUN git submodule update --init --recursive
-RUN make install PREFIX=/usr
+RUN make install prefix=/usr
 RUN /usr/bin/hblock --version
 
 ##################################################
