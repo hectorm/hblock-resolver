@@ -40,6 +40,7 @@ printf -- '%s\n' "Creating \"${CONTAINER_NAME:?}\" container..."
 	--log-opt max-size=32m \
 	--publish '127.0.0.153:53:53/udp' \
 	--publish '127.0.0.153:53:53/tcp' \
+	--publish '127.0.0.153:443:443/tcp' \
 	--publish '127.0.0.153:853:853/tcp' \
 	--publish '127.0.0.153:8453:8453/tcp' \
 	--mount type=volume,src="${VOLUME_NAME:?}",dst='/var/lib/knot-resolver/' \

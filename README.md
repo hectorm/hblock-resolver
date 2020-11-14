@@ -17,6 +17,7 @@ docker run --detach \
   --name hblock-resolver \
   --publish 127.0.0.153:53:53/udp \
   --publish 127.0.0.153:53:53/tcp \
+  --publish 127.0.0.153:443:443/tcp \
   --publish 127.0.0.153:853:853/tcp \
   --publish 127.0.0.153:8453:8453/tcp \
   --mount type=volume,src=hblock-resolver-data,dst=/var/lib/knot-resolver/ \

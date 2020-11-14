@@ -39,7 +39,7 @@ if [ "$(kdig @127.0.0.1 -p 853 +tls +short +timeout=1 +retry=0 localhost A)" != 
 fi
 
 # DNS (over HTTPS) server must resolve localhost A record
-if [ "$(kdig @127.0.0.1 +https=/doh +short +timeout=1 +retry=0 localhost A)" != '127.0.0.1' ]; then
+if [ "$(kdig @127.0.0.1 -p 443 +https +short +timeout=1 +retry=0 localhost A)" != '127.0.0.1' ]; then
 	>&2 printf '%s\n' 'DNS (over HTTPS) server returned an unexpected result'
 	exit 1
 fi
