@@ -3,7 +3,7 @@ version: "3.7"
 services:
 
   caddy:
-    image: "docker.io/hectormolinero/caddy:latest"
+    image: "docker.io/hectormolinero/caddy2:latest"
     restart: "on-failure:3"
     hostname: "caddy"
     networks:
@@ -11,19 +11,16 @@ services:
     ports:
       - "127.0.0.153:80:80/tcp"
       - "127.0.0.153:443:443/tcp"
+      - "127.0.0.153:853:853/tcp"
     volumes:
-      - "./config/caddy/Caddyfile:/etc/caddy/Caddyfile:ro"
+      - "./config/caddy/Caddyfile.cue:/etc/caddy/Caddyfile.cue:ro"
       - "caddy-data:/var/lib/caddy/"
     environment:
-      TLS: "${TLS}"
       TLS_DOMAIN: "${TLS_DOMAIN}"
       TLS_EMAIL: "${TLS_EMAIL}"
-      TLS_CASERVER: "${TLS_CASERVER}"
-      TLS_DNSPROVIDER: "${TLS_DNSPROVIDER}"
-      CLOUDFLARE_EMAIL: "${CLOUDFLARE_EMAIL}"
-      CLOUDFLARE_API_KEY: "${CLOUDFLARE_API_KEY}"
-    depends_on:
-      - "hblock-resolver"
+      TLS_MODULE: "${TLS_MODULE}"
+      TLS_CA: "${TLS_CA}"
+    command: ["run", "--config", "/etc/caddy/Caddyfile.cue", "--adapter", "cue"]
 
   hblock-resolver:
     image: "docker.io/hectormolinero/hblock-resolver:latest"
@@ -34,19 +31,8 @@ services:
     ports:
       - "127.0.0.153:53:53/udp"
       - "127.0.0.153:53:53/tcp"
-      - "127.0.0.153:853:853/tcp"
     volumes:
       - "hblock-resolver-data:/var/lib/knot-resolver/"
-      - "caddy-data:/var/lib/caddy/:ro"
-    entrypoint: "/bin/sh"
-    command: |
-      -eu -c "
-        if [ '${TLS}' = on ]; then
-          export KRESD_CERT_MANAGED=false
-          export KRESD_CERT_CRT_FILE=/var/lib/caddy/acme/${TLS_CASERVER:?}/sites/${TLS_DOMAIN:?}/${TLS_DOMAIN:?}.crt
-          export KRESD_CERT_KEY_FILE=/var/lib/caddy/acme/${TLS_CASERVER:?}/sites/${TLS_DOMAIN:?}/${TLS_DOMAIN:?}.key
-        fi
-        exec tini container-foreground-cmd"
 
 networks:
 

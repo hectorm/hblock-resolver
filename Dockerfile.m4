@@ -318,11 +318,13 @@ RUN printf '%s\n' 'Starting services...' \
 
 FROM base AS main
 
-# DNS over UDP & TCP
+# DNS endpoint
 EXPOSE 53/udp 53/tcp
-# DNS over HTTPS & TLS
-EXPOSE 443/tcp 853/tcp
-# Web interface
+# DNS-over-HTTPS endpoint
+EXPOSE 443/tcp
+# DNS-over-TLS endpoint
+EXPOSE 853/tcp
+# Web management endpoint
 EXPOSE 8453/tcp
 
 HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=1 \
