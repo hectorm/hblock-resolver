@@ -19,230 +19,267 @@
   "links": [],
   "panels": [
     {
-      "cacheTimeout": null,
-      "columns": [],
-      "datasource": "hblock-resolver-influxdb",
-      "fontSize": "100%",
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "hblock-resolver-flux",
+      "decimals": 0,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 6,
+        "h": 9,
+        "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 1,
-      "interval": "5s",
-      "links": [],
-      "options": {},
-      "pageSize": null,
-      "showHeader": true,
-      "sort": {
-        "col": null,
-        "desc": false
-      },
-      "styles": [
-        {
-          "alias": "",
-          "pattern": "Time",
-          "type": "hidden"
-        },
-        {
-          "alias": "",
-          "decimals": 0,
-          "pattern": "Value",
-          "type": "number",
-          "unit": "locale"
-        }
-      ],
-      "targets": [
-        {
-          "alias": "Total",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(*) FROM (SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.total\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null))",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        },
-        {
-          "alias": "Internal",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(*) FROM (SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.internal\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null))",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        },
-        {
-          "alias": "UDP",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(*) FROM (SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.udp\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null))",
-          "rawQuery": true,
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        },
-        {
-          "alias": "TCP",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(*) FROM (SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.tcp\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null))",
-          "rawQuery": true,
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        },
-        {
-          "alias": "DoT",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(*) FROM (SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.dot\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null))",
-          "rawQuery": true,
-          "refId": "E",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        },
-        {
-          "alias": "DoH",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(*) FROM (SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.doh\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null))",
-          "rawQuery": true,
-          "refId": "F",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Request counters",
-      "transform": "timeseries_to_rows",
-      "type": "table"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "hblock-resolver-influxdb",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 18,
-        "x": 6,
-        "y": 0
-      },
+      "hiddenSeries": false,
       "id": 2,
-      "interval": "5s",
       "legend": {
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
         "show": true,
-        "total": false,
-        "values": false
+        "total": true,
+        "values": true
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 1,
-      "nullPointMode": "connected",
+      "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Total",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.total\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.request.internal\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"Internal\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "Internal",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.internal\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.request.udp\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"UDP\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "B",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "UDP",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.udp\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.request.tcp\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"TCP\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "C",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "TCP",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.tcp\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.request.dot\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"DoT\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "D",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "DoT",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.dot\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.request.doh\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"DoH\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "E",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "DoH",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.request.doh\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.request.xdp\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"XDP\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "F",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         }
       ],
@@ -250,7 +287,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Requests",
+      "title": "Request sources",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -290,132 +327,123 @@
       }
     },
     {
-      "columns": [],
-      "datasource": "hblock-resolver-influxdb",
-      "fontSize": "100%",
-      "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 0,
-        "y": 8
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "hblock-resolver-flux",
+      "decimals": 0,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
       },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "hiddenSeries": false,
       "id": 3,
-      "interval": "5s",
-      "options": {},
-      "pageSize": null,
-      "showHeader": true,
-      "sort": {
-        "col": null,
-        "desc": false
-      },
-      "styles": [
-        {
-          "alias": "",
-          "pattern": "Time",
-          "type": "hidden"
-        },
-        {
-          "alias": "",
-          "decimals": 0,
-          "pattern": "Value",
-          "type": "number",
-          "unit": "locale"
-        }
-      ],
-      "targets": [
-        {
-          "alias": "Total",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(*) FROM (SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.total\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null))",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        },
-        {
-          "alias": "Cached",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(*) FROM (SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.cached\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null))",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Answer counters",
-      "transform": "timeseries_to_rows",
-      "type": "table"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "hblock-resolver-influxdb",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 18,
-        "x": 6,
-        "y": 8
-      },
-      "id": 4,
-      "interval": "5s",
       "legend": {
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
         "show": true,
-        "total": false,
-        "values": false
+        "total": true,
+        "values": true
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 1,
-      "nullPointMode": "connected",
+      "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Total",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.total\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.cached\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"Cached\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "Cached",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.cached\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "total = from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.total\")\n    |> difference(nonNegative: true)\n    |> drop(columns: [\"_measurement\"])\n\ncached = from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.cached\")\n    |> difference(nonNegative: true)\n    |> drop(columns: [\"_measurement\"])\n\njoin(tables:{total: total, cached: cached}, on:[\"_time\"])\n    |> map(fn: (r) => ({ r with _value: r._value_total - r._value_cached}))\n    |> set(key: \"_field\", value: \"Uncached\")",
           "refId": "B",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         }
       ],
@@ -423,7 +451,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Answers",
+      "title": "Cached/Uncached answers",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -464,90 +492,194 @@
     },
     {
       "aliasColors": {},
-      "bars": false,
+      "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "hblock-resolver-influxdb",
-      "fill": 1,
+      "datasource": "hblock-resolver-flux",
+      "decimals": 0,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 9,
+        "w": 24,
         "x": 0,
-        "y": 15
+        "y": 18
       },
-      "id": 5,
-      "interval": "5s",
+      "hiddenSeries": false,
+      "id": 4,
       "legend": {
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
         "show": true,
-        "total": false,
-        "values": false
+        "total": true,
+        "values": true
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 1,
-      "nullPointMode": "connected",
+      "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
-          "alias": "NOERROR",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.noerror\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.noerror\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"NOERROR\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "NODATA",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.nodata\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.nodata\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"NODATA\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "B",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "NXDOMAIN",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.nxdomain\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.nxdomain\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"NXDOMAIN\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "C",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "SERVFAIL",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.servfail\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.servfail\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"SERVFAIL\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "D",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         }
       ],
@@ -555,7 +687,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Answers categorized by RCODE",
+      "title": "Answer RCODEs",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -596,150 +728,374 @@
     },
     {
       "aliasColors": {},
-      "bars": false,
+      "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "hblock-resolver-influxdb",
-      "fill": 1,
+      "datasource": "hblock-resolver-flux",
+      "decimals": 0,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 15
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 27
       },
-      "id": 6,
-      "interval": "5s",
+      "hiddenSeries": false,
+      "id": 5,
       "legend": {
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
         "show": true,
-        "total": false,
-        "values": false
+        "total": true,
+        "values": true
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 1,
-      "nullPointMode": "connected",
+      "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
-          "alias": "1ms",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.1ms\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.1ms\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"1ms\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "10ms",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.10ms\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.10ms\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"10ms\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "B",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "50ms",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.50ms\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.50ms\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"50ms\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "C",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "100ms",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.100ms\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.100ms\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"100ms\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "D",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "250ms",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.250ms\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.250ms\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"250ms\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "E",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "500ms",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.500ms\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.500ms\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"500ms\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "F",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "1000ms",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.1000ms\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.1000ms\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"1000ms\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "G",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "1500ms",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.1500ms\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.1500ms\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"1500ms\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "H",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "Slow",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.slow\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.slow\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"Slow\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "I",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         }
       ],
@@ -788,138 +1144,302 @@
     },
     {
       "aliasColors": {},
-      "bars": false,
+      "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "hblock-resolver-influxdb",
-      "fill": 1,
+      "datasource": "hblock-resolver-flux",
+      "decimals": 0,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 9,
+        "w": 24,
         "x": 0,
-        "y": 23
+        "y": 36
       },
-      "id": 7,
-      "interval": "5s",
+      "hiddenSeries": false,
+      "id": 6,
       "legend": {
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
         "show": true,
-        "total": false,
-        "values": false
+        "total": true,
+        "values": true
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 1,
-      "nullPointMode": "connected",
+      "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.3.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
-          "alias": "AA",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.aa\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.aa\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"AA\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "A",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "TC",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.tc\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.tc\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"TC\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "B",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "RA",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.ra\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.ra\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"RA\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "C",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "RD",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.rd\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.rd\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"RD\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "D",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "AD",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.ad\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.ad\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"AD\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "E",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "CD",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.cd\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.do\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"DO\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "F",
           "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         },
         {
-          "alias": "DO",
-          "groupBy": [],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.do\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
+          "query": "from(bucket: v.bucket)\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n    |> filter(fn: (r) => r._measurement == \"kresd.answer.edns0\")\n    |> difference(nonNegative: true)\n    |> set(key: \"_field\", value: \"EDNS0\")\n    |> drop(columns: [\"_measurement\"])",
           "refId": "G",
           "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        },
-        {
-          "alias": "EDNS0",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.answer.edns0\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
-          "refId": "H",
-          "resultFormat": "time_series",
-          "select": [],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
           "tags": []
         }
       ],
@@ -965,118 +1485,9 @@
         "align": false,
         "alignLevel": null
       }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "hblock-resolver-influxdb",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 23
-      },
-      "id": 8,
-      "interval": "5s",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "connected",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "alias": "ENDS",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.query.edns\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        },
-        {
-          "alias": "DNSSEC",
-          "groupBy": [],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT NON_NEGATIVE_DERIVATIVE(FIRST(\"value\")) FROM \"kresd.query.dnssec\" WHERE $timeFilter GROUP BY TIME($__interval) FILL(null)",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Query flags",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
     }
   ],
-  "refresh": "5s",
-  "schemaVersion": 20,
+  "schemaVersion": 26,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1086,20 +1497,7 @@
     "from": "now-1h",
     "to": "now"
   },
-  "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
-    ]
-  },
+  "timepicker": {},
   "timezone": "",
   "title": "hBlock Resolver metrics",
   "uid": null,
