@@ -32,10 +32,7 @@ services:
       - "127.0.0.153:53:53/udp"
       - "127.0.0.153:53:53/tcp"
     volumes:
-      - "./config/hblock-resolver/kresd.conf.d/050-module-graphite.conf:/etc/knot-resolver/kresd.conf.d/050-module-graphite.conf:ro"
       - "hblock-resolver-data:/var/lib/knot-resolver/"
-    depends_on:
-      - "influxdb"
 
   grafana:
     image: "docker.io/grafana/grafana:latest"
@@ -58,24 +55,19 @@ services:
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
     depends_on:
-      - "influxdb"
+      - "prometheus"
 
-  influxdb:
-    image: "docker.io/influxdb:1.8"
+  prometheus:
+    image: "docker.io/prom/prometheus:latest"
     restart: "on-failure:3"
-    hostname: "influxdb"
+    hostname: "prometheus"
     networks:
       - "hblock-resolver"
     volumes:
-      - "influxdb-data:/var/lib/influxdb/"
-    environment:
-      INFLUXDB_DATA_QUERY_LOG_ENABLED: "false"
-      INFLUXDB_HTTP_FLUX_ENABLED: "true"
-      INFLUXDB_HTTP_LOG_ENABLED: "false"
-      INFLUXDB_GRAPHITE_ENABLED: "true"
-      INFLUXDB_GRAPHITE_DATABASE: "graphite"
-      INFLUXDB_GRAPHITE_PROTOCOL: "tcp"
-      INFLUXDB_REPORTING_DISABLED: "true"
+      - "./config/prometheus/:/etc/prometheus/:ro"
+      - "prometheus-data:/prometheus/"
+    depends_on:
+      - "hblock-resolver"
 
 networks:
 
@@ -86,4 +78,4 @@ volumes:
   caddy-data:
   hblock-resolver-data:
   grafana-data:
-  influxdb-data:
+  prometheus-data:
