@@ -70,7 +70,8 @@
           "expr": "sum(increase(answer_total[$__range]))",
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ],
       "timeFrom": null,
@@ -130,7 +131,8 @@
           "expr": "sum(increase(answer_blocked[$__range]))",
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ],
       "timeFrom": null,
@@ -189,7 +191,8 @@
           "expr": "sum(increase(answer_blocked[$__range])) / sum(increase(answer_total[$__range]))",
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "A",
+          "instant": true
         }
       ],
       "timeFrom": null,
@@ -247,40 +250,46 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(idelta(request_internal[$__range]))",
+          "expr": "sum(irate(request_internal[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "Internal",
-          "refId": "A"
+          "refId": "A",
+          "instant": false
         },
         {
-          "expr": "sum(idelta(request_udp[$__range]))",
+          "expr": "sum(irate(request_udp[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "UDP",
-          "refId": "B"
+          "refId": "B",
+          "instant": false
         },
         {
-          "expr": "sum(idelta(request_tcp[$__range]))",
+          "expr": "sum(irate(request_tcp[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "TCP",
-          "refId": "C"
+          "refId": "C",
+          "instant": false
         },
         {
-          "expr": "sum(idelta(request_dot[$__range]))",
+          "expr": "sum(irate(request_dot[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "DoT",
-          "refId": "D"
+          "refId": "D",
+          "instant": false
         },
         {
-          "expr": "sum(idelta(request_doh[$__range]))",
+          "expr": "sum(irate(request_doh[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "DoH",
-          "refId": "E"
+          "refId": "E",
+          "instant": false
         },
         {
-          "expr": "sum(idelta(request_xdp[$__range]))",
+          "expr": "sum(irate(request_xdp[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "XDP",
-          "refId": "F"
+          "refId": "F",
+          "instant": false
         }
       ],
       "thresholds": [],
@@ -376,16 +385,18 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(idelta(answer_cached[$__range]))",
+          "expr": "sum(irate(answer_cached[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "Cached",
-          "refId": "A"
+          "refId": "A",
+          "instant": false
         },
         {
-          "expr": "sum(idelta(answer_total[$__range])) - sum(idelta(answer_cached[$__range]))",
+          "expr": "sum(irate(answer_total[$__rate_interval]) * $__interval_ms / 1000) - sum(irate(answer_cached[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "Uncached",
-          "refId": "B"
+          "refId": "B",
+          "instant": false
         }
       ],
       "thresholds": [],
@@ -481,28 +492,32 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(idelta(answer_noerror[$__range]))",
+          "expr": "sum(irate(answer_noerror[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "NOERROR",
-          "refId": "A"
+          "refId": "A",
+          "instant": false
         },
         {
-          "expr": "sum(idelta(answer_nodata[$__range]))",
+          "expr": "sum(irate(answer_nodata[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "NODATA",
-          "refId": "B"
+          "refId": "B",
+          "instant": false
         },
         {
-          "expr": "sum(idelta(answer_nxdomain[$__range]))",
+          "expr": "sum(irate(answer_nxdomain[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "NXDOMAIN",
-          "refId": "C"
+          "refId": "C",
+          "instant": false
         },
         {
-          "expr": "sum(idelta(answer_servfail[$__range]))",
+          "expr": "sum(irate(answer_servfail[$__rate_interval]) * $__interval_ms / 1000)",
           "interval": "",
           "legendFormat": "SERVFAIL",
-          "refId": "D"
+          "refId": "D",
+          "instant": false
         }
       ],
       "thresholds": [],
@@ -587,11 +602,12 @@
       "reverseYBuckets": false,
       "targets": [
         {
-          "expr": "sum(increase(latency_bucket[$__interval])) by (le)",
+          "expr": "sum(increase(latency_bucket[$__rate_interval])) by (le)",
           "format": "heatmap",
           "interval": "",
           "legendFormat": "{{le}}",
-          "refId": "A"
+          "refId": "A",
+          "instant": false
         }
       ],
       "timeFrom": null,
