@@ -50,7 +50,7 @@ Query name to check the health status of kresd.
 #### `KRESD_WATCHDOG_QTYPE` (default: `A`)
 Query type to check the health status of kresd.
 
-#### `KRESD_WATCHDOG_INTERVAL` (default: `10000`)
+#### `KRESD_WATCHDOG_INTERVAL` (default: `10`)
 Interval in seconds to check the health status of kresd.
 
 #### `KRESD_CERT_MANAGED` (default: `true`)
