@@ -3,9 +3,9 @@
 set -eu
 
 if is-sv-status kresd run; then
-	KRESD_PIDFILE=${SVDIR:?}/kresd/supervise/pid
-	KRESD_TTY=${KRESD_CACHE_DIR:?}/control/$(cat "${KRESD_PIDFILE:?}")
-	kresc "${KRESD_TTY:?}"
+	KRESD_PID=$(cat "${SVDIR:?}"/kresd/supervise/pid)
+	KRESD_SOCKET=${KRESD_CACHE_DIR:?}/control/${KRESD_PID:?}
+	kresc "${KRESD_SOCKET:?}"
 else
 	>&2 printf '%s\n' 'kresd is not running'
 	exit 1

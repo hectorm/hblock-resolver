@@ -5,6 +5,14 @@ set -eu
 # Set default umask
 umask 0002
 
+# Remove leftover files
+for d in "${SVDIR:?}"/*/supervise/; do
+	[ -d "${d:?}" ] && rm -rf "${d:?}"
+done
+for s in "${KRESD_CACHE_DIR:?}"/control/*; do
+	[ -S "${s:?}" ] && rm -f "${s:?}"
+done
+
 if [ "${KRESD_CERT_MANAGED:?}" = 'true' ]; then
 	# Generate self-signed certificate if it does not exist
 	renew-self-signed-cert
