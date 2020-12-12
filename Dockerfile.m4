@@ -120,6 +120,7 @@ RUN ROCKS=$(printf '["%s"]="%s",' \
 		lpeg              1.0.2-1 \
 		lpeg_patterns     0.5-0 \
 		lua               5.1-1 \
+		lua-lru           1.0-1 \
 		luafilesystem     1.8.0-1 \
 		luaossl           20200709-0 \
 		mmdblua           0.2-0 \
