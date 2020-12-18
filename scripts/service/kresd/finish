@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-for s in "${KRESD_CACHE_DIR:?}"/control/*; do
-	[ -S "${s:?}" ] && rm -f "${s:?}"
-done
