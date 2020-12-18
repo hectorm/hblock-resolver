@@ -3,13 +3,14 @@ admin: {
 }
 
 logging: logs: {
-  default: {
-    exclude: ["http.log.access.main"]
-  }
+  default: exclude: ["http.log.access.main"]
   main: {
     include: ["http.log.access.main"]
-    encoder: { field: "common_log", format: "single_field" }
-    writer: { output: "stdout" }
+    writer: output: "stdout"
+    encoder: {
+      format: "formatted"
+      template: #"{common_log} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}""#
+    }
   }
 }
 
@@ -43,8 +44,8 @@ apps: {
               handler: "reverse_proxy"
               upstreams: [{ dial: "hblock-resolver:8453" }]
               transport: {
-                protocol: "http",
-                tls: { insecure_skip_verify: true }
+                protocol: "http"
+                tls: insecure_skip_verify: true
               }
             }]
           },
@@ -56,8 +57,8 @@ apps: {
               upstreams: [{ dial: "hblock-resolver:443" }]
               transport: {
                 protocol: "http"
-                tls: { insecure_skip_verify: true }
-                keep_alive: { enabled: false }
+                tls: insecure_skip_verify: true
+                keep_alive: enabled: false
               }
             }]
           }]
@@ -65,7 +66,7 @@ apps: {
       }]
       automatic_https: disable_redirects: true
       tls_connection_policies: [{
-        match: { sni: ["{$TLS_DOMAIN}", ""] }
+        match: sni: ["{$TLS_DOMAIN}", ""]
         default_sni: "{$TLS_DOMAIN}"
       }]
       logs: default_logger_name: "main"
@@ -73,21 +74,21 @@ apps: {
   }
   layer4: servers: {
     main_dot: {
-      listen: [":853"],
+      listen: [":853"]
       routes: [{
         // DNS-over-TLS endpoint
         match: [{ tls: { } }]
         handle: [{
           handler: "tls"
           connection_policies: [{
-            match: { sni: ["{$TLS_DOMAIN}", ""] }
+            match: sni: ["{$TLS_DOMAIN}", ""]
             default_sni: "{$TLS_DOMAIN}"
           }]
         }, {
           handler: "proxy"
           upstreams: [{
             dial: ["hblock-resolver:853"]
-            tls: { insecure_skip_verify: true }
+            tls: insecure_skip_verify: true
           }]
         }]
       }]
