@@ -69,7 +69,7 @@ RUN /usr/bin/kdig --version
 RUN /usr/bin/khost --version
 
 # Build LuaJIT
-ARG LUAJIT_TREEISH=351bb43a07eace6a5f67de7954c154566c06f2ca
+ARG LUAJIT_TREEISH=65378759f38bb946e40f31799992434effd01bba
 ARG LUAJIT_REMOTE=https://github.com/LuaJIT/LuaJIT.git
 RUN mkdir /tmp/luajit/
 WORKDIR /tmp/luajit/
@@ -241,7 +241,7 @@ ENV KRESD_DENYLIST_RPZ_FILE=${KRESD_DATA_DIR}/hblock.rpz
 ENV KRESD_NIC=
 ENV KRESD_VERBOSE=false
 
-# Create users and groups
+# Create unprivileged user
 RUN useradd -u "${KRESD_UID:?}" -g 0 -s "$(command -v bash)" -Md "${KRESD_CACHE_DIR:?}" knot-resolver
 
 # Copy LuaJIT build
