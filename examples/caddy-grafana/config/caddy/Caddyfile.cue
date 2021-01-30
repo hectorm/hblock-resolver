@@ -38,18 +38,6 @@ apps: {
         handle: [{
           handler: "subroute"
           routes: [{
-            // Web management endpoint
-            match: [{ not: [{ path: ["/dns-query*"] }, { path: ["/grafana*"] }] }]
-            handle: [{
-              handler: "reverse_proxy"
-              upstreams: [{ dial: "hblock-resolver:8453" }]
-              transport: {
-                protocol: "http"
-                tls: insecure_skip_verify: true
-              }
-            }]
-          },
-          {
             // DNS-over-HTTPS endpoint
             match: [{ path: ["/dns-query*"] }]
             handle: [{
@@ -61,8 +49,7 @@ apps: {
                 keep_alive: enabled: false
               }
             }]
-          },
-          {
+          }, {
             // Grafana endpoint
             match: [{ path: ["/grafana*"] }]
             handle: [{
@@ -70,6 +57,17 @@ apps: {
               upstreams: [{ dial: "grafana:3000" }]
               transport: {
                 protocol: "http"
+              }
+            }]
+          }, {
+            // Web management endpoint
+            match: [{ path: ["/*"] }]
+            handle: [{
+              handler: "reverse_proxy"
+              upstreams: [{ dial: "hblock-resolver:8453" }]
+              transport: {
+                protocol: "http"
+                tls: insecure_skip_verify: true
               }
             }]
           }]
@@ -107,13 +105,13 @@ apps: {
   }
   tls: automation: policies: [{
     subjects: ["{$TLS_DOMAIN}"]
-    issuer: {
+    issuers: [{
       module: "{$TLS_MODULE}"
       ca: "{$TLS_CA}"
       if "{$TLS_MODULE}" == "acme" {
         email: "{$TLS_EMAIL}"
       }
-    }
+    }]
   }]
   pki: certificate_authorities: local: {
     install_trust: false
