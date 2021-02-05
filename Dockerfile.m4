@@ -110,21 +110,21 @@ RUN mkdir /tmp/rocks/
 WORKDIR /tmp/rocks/
 RUN luarocks init --lua-versions=5.1 metapackage
 RUN ROCKS=$(printf '["%s"]="%s",' \
-		basexx            0.4.1-1 \
-		binaryheap        0.4-1 \
-		bit32             5.3.5.1-1 \
-		compat53          0.8-1 \
-		cqueues           20200726.51-0 \
-		fifo              0.2-0 \
-		hectorm-fork-http 0.3.1-0 \
-		lpeg              1.0.2-1 \
-		lpeg_patterns     0.5-0 \
-		lua               5.1-1 \
-		lua-lru           1.0-1 \
-		luafilesystem     1.8.0-1 \
-		luaossl           20200709-0 \
-		mmdblua           0.2-0 \
-		psl               0.3-0 \
+		basexx        0.4.1-1 \
+		binaryheap    0.4-1 \
+		bit32         5.3.5.1-1 \
+		compat53      0.8-1 \
+		cqueues       20200726.51-0 \
+		fifo          0.2-0 \
+		http          0.4-0 \
+		lpeg          1.0.2-1 \
+		lpeg_patterns 0.5-0 \
+		lua           5.1-1 \
+		lua-lru       1.0-1 \
+		luafilesystem 1.8.0-1 \
+		luaossl       20200709-0 \
+		mmdblua       0.2-0 \
+		psl           0.3-0 \
 	) \
 	&& printf 'return {dependencies = {%s}}' "${ROCKS:?}" > ./luarocks.lock \
 	&& HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
