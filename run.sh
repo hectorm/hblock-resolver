@@ -38,6 +38,7 @@ printf -- '%s\n' "Creating \"${CONTAINER_NAME:?}\" container..."
 	--hostname "${CONTAINER_NAME:?}" \
 	--restart on-failure:3 \
 	--log-opt max-size=32m \
+	--user "$(shuf -i100000-200000 -n1)" \
 	--publish '127.0.0.153:53:53/udp' \
 	--publish '127.0.0.153:53:53/tcp' \
 	--publish '127.0.0.153:443:443/tcp' \
