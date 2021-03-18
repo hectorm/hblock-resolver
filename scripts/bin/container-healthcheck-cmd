@@ -14,15 +14,15 @@ if ! is-sv-status kres-cache-gc run; then
 	exit 1
 fi
 
-# renew-self-signed-cert service must be running
-if ! is-sv-status renew-self-signed-cert run; then
-	>&2 printf '%s\n' 'renew-self-signed-cert service is not running'
+# kres-cert-updater service must be running
+if ! is-sv-status kres-cert-updater run; then
+	>&2 printf '%s\n' 'kres-cert-updater service is not running'
 	exit 1
 fi
 
-# update-denylist-rpz service must be running
-if ! is-sv-status update-denylist-rpz run; then
-	>&2 printf '%s\n' 'update-denylist-rpz service is not running'
+# kres-blocklist-updater service must be running
+if ! is-sv-status kres-blocklist-updater run; then
+	>&2 printf '%s\n' 'kres-blocklist-updater service is not running'
 	exit 1
 fi
 

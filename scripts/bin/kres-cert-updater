@@ -9,11 +9,11 @@ fi
 
 printf '%s\n' 'Checking self-signed certificate...'
 
-KEY_FILE=${KRESD_CERT_KEY_FILE:?}
-CRT_FILE=${KRESD_CERT_CRT_FILE:?}
+KEY_FILE="${KRESD_DATA_DIR:?}"/ssl/server.key
+CRT_FILE="${KRESD_DATA_DIR:?}"/ssl/server.crt
 
 # Generate private key if it does not exist
-if [ ! -f "${KEY_FILE:?}" ]; then
+if [ ! -e "${KEY_FILE:?}" ]; then
 	printf '%s\n' 'Generating private key...'
 
 	mkdir -p "$(dirname "${KEY_FILE:?}")"
@@ -24,7 +24,7 @@ if [ ! -f "${KEY_FILE:?}" ]; then
 fi
 
 # Generate certificate if it does not exist or will expire soon
-if [ ! -f "${CRT_FILE:?}" ] || ! openssl x509 -checkend 604800 -noout -in "${CRT_FILE:?}"; then
+if [ ! -e "${CRT_FILE:?}" ] || ! openssl x509 -checkend 604800 -noout -in "${CRT_FILE:?}"; then
 	printf '%s\n' 'Generating certificate...'
 
 	mkdir -p "$(dirname "${CRT_FILE:?}")"

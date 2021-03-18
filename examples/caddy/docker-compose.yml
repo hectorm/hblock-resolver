@@ -41,4 +41,5 @@ networks:
 volumes:
 
   caddy-data:
+
   hblock-resolver-data:

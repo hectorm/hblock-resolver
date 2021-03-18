@@ -1,3 +1,10 @@
+#!/bin/sh
+# shellcheck disable=SC2034
+
+HBLOCK_OUTPUT_FILE="${KRESD_DATA_DIR:?}"/hblock/blocklist.rpz
+HBLOCK_SOURCES_FILE="${KRESD_DATA_DIR:?}"/hblock/sources.list
+HBLOCK_ALLOWLIST_FILE="${KRESD_DATA_DIR:?}"/hblock/allow.list
+HBLOCK_DENYLIST_FILE="${KRESD_DATA_DIR:?}"/hblock/deny.list
 HBLOCK_REDIRECTION='.'
 HBLOCK_TEMPLATE='%D CNAME %R'
 HBLOCK_COMMENT=';'
