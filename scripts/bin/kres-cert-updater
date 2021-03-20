@@ -7,14 +7,12 @@ if [ "${KRESD_CERT_MANAGED:?}" != 'true' ]; then
 	exit 0
 fi
 
-printf '%s\n' 'Checking self-signed certificate...'
-
 KEY_FILE="${KRESD_DATA_DIR:?}"/ssl/server.key
 CRT_FILE="${KRESD_DATA_DIR:?}"/ssl/server.crt
 
 # Generate private key if it does not exist
 if [ ! -e "${KEY_FILE:?}" ]; then
-	printf '%s\n' 'Generating private key...'
+	printf '%s\n' 'Generating TLS private key...'
 
 	mkdir -p "$(dirname "${KEY_FILE:?}")"
 	rm -f "${KEY_FILE:?}" "${CRT_FILE:?}"
@@ -25,11 +23,12 @@ fi
 
 # Generate certificate if it does not exist or will expire soon
 if [ ! -e "${CRT_FILE:?}" ] || ! openssl x509 -checkend 604800 -noout -in "${CRT_FILE:?}"; then
-	printf '%s\n' 'Generating certificate...'
+	printf '%s\n' 'Generating TLS certificate...'
 
 	mkdir -p "$(dirname "${CRT_FILE:?}")"
 	rm -f "${CRT_FILE:?}"
 
-	openssl req -x509 -subj "/CN=$(uname -n)" -days 90 -key "${KEY_FILE:?}" > "${CRT_FILE:?}"
+	FQDN=$(hostname --fqdn)
+	openssl req -x509 -subj "/CN=${FQDN:?}" -addext "subjectAltName=DNS:${FQDN:?}" -days 90 -key "${KEY_FILE:?}" > "${CRT_FILE:?}"
 	openssl x509 -in "${CRT_FILE:?}" -fingerprint -noout
 fi
