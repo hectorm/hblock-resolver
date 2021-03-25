@@ -21,11 +21,11 @@ docker run --detach \
   --publish 127.0.0.153:853:853/tcp \
   --publish 127.0.0.153:8453:8453/tcp \
   --mount type=volume,src=hblock-resolver-data,dst=/var/lib/knot-resolver/ \
-  hectormolinero/hblock-resolver:latest
+  docker.io/hectormolinero/hblock-resolver:latest
 ```
 
 > **Warning:** do not expose this service to the open internet. An open DNS resolver represents a significant threat and it can be used in a number of
-different attacks, such as [DNS amplification attacks](https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/).
+> different attacks, such as [DNS amplification attacks](https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/).
 
 ## Environment variables
 
@@ -57,8 +57,8 @@ Interval in seconds to check the health status of kresd.
 If equals `true`, a self-signed certificate will be generated. You can provide your own certificate with these options:
 ```
   --env KRESD_CERT_MANAGED=false \
-  --mount type=bind,src='/path/to/server.key',dst='/var/lib/knot-resolver/ssl/server.key',ro \
-  --mount type=bind,src='/path/to/server.crt',dst='/var/lib/knot-resolver/ssl/server.crt',ro \
+  --mount type=bind,src=/path/to/server.key,dst=/var/lib/knot-resolver/ssl/server.key,ro \
+  --mount type=bind,src=/path/to/server.crt,dst=/var/lib/knot-resolver/ssl/server.crt,ro \
 ```
 > **Note:** for a more advanced setup, look at the [following example](examples/caddy) with [Let's Encrypt](https://letsencrypt.org) and
 [Caddy](https://caddyserver.com/).
