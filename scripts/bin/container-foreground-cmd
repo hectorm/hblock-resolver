@@ -1,8 +1,6 @@
 #!/bin/sh
 
 set -eu
-
-# Set default umask
 umask 0002
 
 # Remove leftover files

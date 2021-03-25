@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -eu
+umask 0002
 
 # Do nothing if the certificate is not managed
 if [ "${KRESD_CERT_MANAGED:?}" != 'true' ]; then
