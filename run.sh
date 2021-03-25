@@ -11,7 +11,6 @@ IMAGE_PROJECT=hblock-resolver
 IMAGE_TAG=latest
 IMAGE_NAME=${IMAGE_REGISTRY:?}/${IMAGE_NAMESPACE:?}/${IMAGE_PROJECT:?}:${IMAGE_TAG:?}
 CONTAINER_NAME=${IMAGE_PROJECT:?}
-VOLUME_NAME=${CONTAINER_NAME:?}-data
 
 imageExists() { [ -n "$("${DOCKER:?}" images -q "${1:?}")" ]; }
 containerExists() { "${DOCKER:?}" ps -af name="${1:?}" --format '{{.Names}}' | grep -Fxq "${1:?}"; }
@@ -44,7 +43,8 @@ printf -- '%s\n' "Creating \"${CONTAINER_NAME:?}\" container..."
 	--publish '127.0.0.153:443:443/tcp' \
 	--publish '127.0.0.153:853:853/tcp' \
 	--publish '127.0.0.153:8453:8453/tcp' \
-	--mount type=volume,src="${VOLUME_NAME:?}",dst='/var/lib/knot-resolver/' \
+	--mount type=volume,src="${CONTAINER_NAME:?}-data",dst='/var/lib/knot-resolver/' \
+	--mount type=volume,src="${CONTAINER_NAME:?}-cache",dst='/var/cache/knot-resolver/' \
 	"${IMAGE_NAME:?}" "$@" >/dev/null
 
 printf -- '%s\n\n' 'Done!'
