@@ -29,7 +29,7 @@ docker run --detach \
 
 ## Environment variables
 
-#### `KRESD_CACHE_SIZE` (default: `25`)
+#### `KRESD_CACHE_SIZE` (default: `50`)
 Maximum cache size in megabytes.
 
 #### `KRESD_DNS{1..4}_IP` (default: `1.1.1.1@853` and `1.0.0.1@853`)
