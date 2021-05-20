@@ -164,7 +164,7 @@ RUN file /usr/sbin/kresc
 RUN /usr/sbin/kresd --version
 
 # Download hBlock
-ARG HBLOCK_TREEISH=v3.2.1
+ARG HBLOCK_TREEISH=v3.2.2
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 RUN mkdir /tmp/hblock/
 WORKDIR /tmp/hblock/
