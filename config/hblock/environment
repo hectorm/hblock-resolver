@@ -1,10 +1,24 @@
 #!/bin/sh
 # shellcheck disable=SC2034
 
+if [ ! -e "${KRESD_DATA_DIR:?}"/hblock/ ]; then
+	mkdir -p "${KRESD_DATA_DIR:?}"/hblock/
+fi
+
 HBLOCK_OUTPUT_FILE="${KRESD_DATA_DIR:?}"/hblock/blocklist.rpz
-HBLOCK_SOURCES_FILE="${KRESD_DATA_DIR:?}"/hblock/sources.list
-HBLOCK_ALLOWLIST_FILE="${KRESD_DATA_DIR:?}"/hblock/allow.list
-HBLOCK_DENYLIST_FILE="${KRESD_DATA_DIR:?}"/hblock/deny.list
+
+if [ -e "${KRESD_DATA_DIR:?}"/hblock/sources.list ]; then
+	HBLOCK_SOURCES_FILE="${KRESD_DATA_DIR:?}"/hblock/sources.list
+fi
+
+if [ -e "${KRESD_DATA_DIR:?}"/hblock/allow.list ]; then
+	HBLOCK_ALLOWLIST_FILE="${KRESD_DATA_DIR:?}"/hblock/allow.list
+fi
+
+if [ -e "${KRESD_DATA_DIR:?}"/hblock/deny.list ]; then
+	HBLOCK_DENYLIST_FILE="${KRESD_DATA_DIR:?}"/hblock/deny.list
+fi
+
 HBLOCK_REDIRECTION='.'
 HBLOCK_TEMPLATE='%D CNAME %R'
 HBLOCK_COMMENT=';'

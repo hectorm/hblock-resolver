@@ -1,8 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-cd "${KRESD_CACHE_DIR:?}"
-
-exec 2>&1
-exec snooze -v -H '5' -M '0' -R '3600' -- kres-blocklist-updater

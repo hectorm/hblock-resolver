@@ -21,9 +21,9 @@ if ! is-sv-status kres-cert-updater run; then
 	exit 1
 fi
 
-# kres-blocklist-updater service must be running
-if ! is-sv-status kres-blocklist-updater run; then
-	>&2 printf '%s\n' 'kres-blocklist-updater service is not running'
+# hblock service must be running
+if ! is-sv-status hblock run; then
+	>&2 printf '%s\n' 'hblock service is not running'
 	exit 1
 fi
 
