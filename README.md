@@ -72,8 +72,8 @@ containers when they bound the daemon to a single interface:ip address pair
 ([dynamic configuration docs](https://knot-resolver.readthedocs.io/en/latest/daemon-scripting.html?highlight=docker#lua-scripts),
 [CZ-NIC/knot-resolver#32](https://github.com/CZ-NIC/knot-resolver/pull/32)).
 
-#### `KRESD_VERBOSE` (default: `false`)
-If equals `true`, verbose logging will be enabled.
+#### `KRESD_LOG_LEVEL` (default: `notice`)
+Set the global logging level. The possible values are: `crit`, `err`, `warning`, `notice`, `info` or `debug`.
 
 ## Additional configuration
 

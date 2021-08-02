@@ -237,7 +237,7 @@ ENV KRESD_WATCHDOG_INTERVAL=10
 ENV KRESD_STATS_BLOCKED_COUNT=100
 ENV KRESD_CERT_MANAGED=true
 ENV KRESD_NIC=
-ENV KRESD_VERBOSE=false
+ENV KRESD_LOG_LEVEL=notice
 
 # Create unprivileged user
 RUN useradd -u "${KRESD_UID:?}" -g 0 -s "$(command -v bash)" -Md "${KRESD_CACHE_DIR:?}" knot-resolver
