@@ -45,7 +45,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		unzip
 
 # Build Knot DNS (only libknot and utilities)
-ARG KNOT_DNS_TREEISH=v3.0.8
+ARG KNOT_DNS_TREEISH=v3.1.0
 ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
 RUN mkdir /tmp/knot-dns/
 WORKDIR /tmp/knot-dns/
