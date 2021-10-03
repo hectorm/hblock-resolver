@@ -46,7 +46,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 
 # Build Knot DNS (only libknot and utilities)
 ARG KNOT_DNS_TREEISH=v3.1.2
-ARG KNOT_DNS_REMOTE=https://gitlab.labs.nic.cz/knot/knot-dns.git
+ARG KNOT_DNS_REMOTE=https://gitlab.nic.cz/knot/knot-dns.git
 RUN mkdir /tmp/knot-dns/
 WORKDIR /tmp/knot-dns/
 RUN git clone "${KNOT_DNS_REMOTE:?}" ./
@@ -134,7 +134,7 @@ RUN ROCKS=$(printf '["%s"]="%s",' \
 
 # Build Knot Resolver
 ARG KNOT_RESOLVER_TREEISH=v5.4.1
-ARG KNOT_RESOLVER_REMOTE=https://gitlab.labs.nic.cz/knot/knot-resolver.git
+ARG KNOT_RESOLVER_REMOTE=https://gitlab.nic.cz/knot/knot-resolver.git
 RUN mkdir /tmp/knot-resolver/
 WORKDIR /tmp/knot-resolver/
 RUN git clone "${KNOT_RESOLVER_REMOTE:?}" ./
@@ -157,7 +157,7 @@ RUN meson ./build/ \
 RUN ninja -C ./build/
 RUN ninja -C ./build/ install
 RUN meson test -C ./build/ --print-errorlogs --suite unit
-# In QEMU arm these tests always fail, we make an exception
+# Ignore failures in QEMU 32-bit ARM
 RUN meson test -C ./build/ --print-errorlogs --suite config --no-suite snowflake || [ "$(uname -m)" = armv7l ]
 RUN file /usr/sbin/kresd
 RUN file /usr/sbin/kresc
