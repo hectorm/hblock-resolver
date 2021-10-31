@@ -306,9 +306,9 @@ FROM base AS test
 
 # Perform a test run
 RUN printf '%s\n' 'Starting services...' \
-	&& (nohup container-foreground-cmd &) \
+	&& (nohup container-init &) \
 	&& TIMEOUT_DURATION=240s \
-	&& TIMEOUT_COMMAND='until container-healthcheck-cmd; do sleep 1; done' \
+	&& TIMEOUT_COMMAND='until container-healthcheck; do sleep 1; done' \
 	&& timeout "${TIMEOUT_DURATION:?}" sh -eu -c "${TIMEOUT_COMMAND:?}"
 
 ##################################################
@@ -326,8 +326,5 @@ EXPOSE 853/tcp
 # Web management endpoint
 EXPOSE 8453/tcp
 
-HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=1 \
-CMD ["/usr/local/bin/container-healthcheck-cmd"]
-
-ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["/usr/local/bin/container-foreground-cmd"]
+HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=1 CMD ["/usr/local/bin/container-healthcheck"]
+ENTRYPOINT ["/usr/local/bin/container-init"]
