@@ -298,6 +298,18 @@ RUN find /service/ -type f -not -perm 0775 -exec chmod 0775 '{}' ';'
 # Drop root privileges
 USER knot-resolver:root
 
+# DNS endpoint
+EXPOSE 53/udp 53/tcp
+# DNS-over-HTTPS endpoint
+EXPOSE 443/tcp
+# DNS-over-TLS endpoint
+EXPOSE 853/tcp
+# Web management endpoint
+EXPOSE 8453/tcp
+
+HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=1 CMD ["/usr/local/bin/container-healthcheck"]
+ENTRYPOINT ["/usr/local/bin/container-init"]
+
 ##################################################
 ## "test" stage
 ##################################################
@@ -316,15 +328,3 @@ RUN printf '%s\n' 'Starting services...' \
 ##################################################
 
 FROM base AS main
-
-# DNS endpoint
-EXPOSE 53/udp 53/tcp
-# DNS-over-HTTPS endpoint
-EXPOSE 443/tcp
-# DNS-over-TLS endpoint
-EXPOSE 853/tcp
-# Web management endpoint
-EXPOSE 8453/tcp
-
-HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=1 CMD ["/usr/local/bin/container-healthcheck"]
-ENTRYPOINT ["/usr/local/bin/container-init"]
