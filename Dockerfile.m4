@@ -42,7 +42,8 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		ninja-build \
 		pkgconf \
 		tzdata \
-		unzip
+		unzip \
+	&& rm -rf /var/lib/apt/lists/*
 
 # Build Knot DNS (only libknot and utilities)
 ARG KNOT_DNS_TREEISH=v3.1.5
@@ -321,7 +322,7 @@ RUN printf '%s\n' 'Starting services...' \
 	&& (nohup container-init &) \
 	&& TIMEOUT_DURATION=240s \
 	&& TIMEOUT_COMMAND='until container-healthcheck; do sleep 1; done' \
-	&& timeout "${TIMEOUT_DURATION:?}" sh -eu -c "${TIMEOUT_COMMAND:?}"
+	&& timeout "${TIMEOUT_DURATION:?}" sh -euc "${TIMEOUT_COMMAND:?}"
 
 ##################################################
 ## "main" stage
