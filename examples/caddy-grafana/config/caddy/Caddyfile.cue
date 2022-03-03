@@ -16,7 +16,7 @@ logging: logs: {
 
 apps: {
   http: servers: {
-    main_http: {
+    http: {
       listen: [":80"]
       routes: [{
         match: [{ host: ["{$TLS_DOMAIN}"] }]
@@ -31,7 +31,7 @@ apps: {
       automatic_https: disable: true
       logs: default_logger_name: "main"
     }
-    main_https: {
+    https: {
       listen: [":443"]
       routes: [{
         match: [{ host: ["{$TLS_DOMAIN}"] }]
@@ -82,7 +82,7 @@ apps: {
     }
   }
   layer4: servers: {
-    main_dot: {
+    dot: {
       listen: [":853"]
       routes: [{
         // DNS-over-TLS endpoint
@@ -90,6 +90,7 @@ apps: {
         handle: [{
           handler: "tls"
           connection_policies: [{
+            alpn: ["dot"]
             match: sni: ["{$TLS_DOMAIN}", ""]
             default_sni: "{$TLS_DOMAIN}"
           }]
