@@ -44,17 +44,12 @@ Hostname of the DNS-over-TLS server to which the queries will be forwarded
 Certificate hash of the DNS-over-TLS server to which the queries will be forwarded
 ([key-pinned authentication docs](https://knot-resolver.readthedocs.io/en/stable/modules-policy.html#key-pinned-authentication)).
 
-#### `KRESD_WATCHDOG_QNAME` (default: `cloudflare.com.`)
-Query name to check the health status of kresd.
+#### `KRESD_INSTANCE_NUMBER` (default: `1`)
+Number of instances to launch.
 
-#### `KRESD_WATCHDOG_QTYPE` (default: `A`)
-Query type to check the health status of kresd.
-
-#### `KRESD_WATCHDOG_INTERVAL` (default: `10`)
-Interval in seconds to check the health status of kresd.
-
-#### `KRESD_STATS_BLOCKED_COUNT` (default: `100`)
-Number of recently blocked domains to expose in stats.
+#### `KRESD_RECENTLY_BLOCKED_NUMBER` (default: `100`)
+Number of recently blocked domains to store in memory for each instance.
+The `/recently_blocked` endpoint returns an aggregated list of all instances.
 
 #### `KRESD_CERT_MANAGED` (default: `true`)
 If equals `true`, a self-signed certificate will be generated. You can provide your own certificate with these options:
@@ -65,6 +60,15 @@ If equals `true`, a self-signed certificate will be generated. You can provide y
 ```
 > **Note:** for a more advanced setup, look at the [following example](examples/caddy) with [Let's Encrypt](https://letsencrypt.org) and
 [Caddy](https://caddyserver.com/).
+
+#### `KRESD_WATCHDOG_QNAME` (default: `cloudflare.com.`)
+Query name to check the health status of kresd.
+
+#### `KRESD_WATCHDOG_QTYPE` (default: `A`)
+Query type to check the health status of kresd.
+
+#### `KRESD_WATCHDOG_INTERVAL` (default: `10`)
+Interval in seconds to check the health status of kresd.
 
 #### `KRESD_NIC` (default: empty)
 If defined, kresd will only listen on the specified interface. Some users observed a considerable, close to 100%, performance gain in Docker

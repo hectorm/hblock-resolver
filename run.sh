@@ -45,6 +45,7 @@ printf '%s\n' "Creating \"${CONTAINER_NAME:?}\" container..."
 	--publish '127.0.0.153:8453:8453/tcp' \
 	--mount type=volume,src="${CONTAINER_NAME:?}-data",dst='/var/lib/knot-resolver/' \
 	--mount type=volume,src="${CONTAINER_NAME:?}-cache",dst='/var/cache/knot-resolver/' \
+	--env KRESD_INSTANCE_NUMBER=4 \
 	"${IMAGE_NAME:?}" "$@" >/dev/null
 
 printf '%s\n\n' 'Done!'

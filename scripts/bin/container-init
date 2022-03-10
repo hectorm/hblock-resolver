@@ -21,5 +21,15 @@ if [ ! -e "${KRESD_DATA_DIR:?}"/hblock/blocklist.rpz ]; then
 	hblock
 fi
 
+# Create a service for each kresd instance
+if [ "${KRESD_INSTANCE_NUMBER:?}" -gt 1 ]; then
+	id=1; while [ "${id:?}" -lt "${KRESD_INSTANCE_NUMBER:?}" ]; do
+		if [ ! -d "${SVDIR:?}"/kresd"${id:?}"/ ]; then
+			cp -a "${SVDIR:?}"/kresd0/ "${SVDIR:?}"/kresd"${id:?}"/
+		fi
+		id=$((id + 1))
+	done
+fi
+
 # Start all services
 exec tini -- runsvdir -P "${SVDIR:?}"

@@ -3,11 +3,14 @@
 set -eu
 umask 0002
 
-# kresd service must be running
-if ! is-sv-status kresd run; then
-	>&2 printf '%s\n' 'kresd service is not running'
-	exit 1
-fi
+# kresd services must be running
+id=0; while [ "${id:?}" -lt "${KRESD_INSTANCE_NUMBER:?}" ]; do
+	if ! is-sv-status "kresd${id:?}" run; then
+		>&2 printf '%s\n' "kresd${id:?} service is not running"
+		exit 1
+	fi
+	id=$((id + 1))
+done
 
 # kres-cache-gc service must be running
 if ! is-sv-status kres-cache-gc run; then

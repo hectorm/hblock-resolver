@@ -3,11 +3,14 @@
 set -eu
 umask 0002
 
-if is-sv-status kresd run; then
-	KRESD_PID=$(cat "${SVDIR:?}"/kresd/supervise/pid)
-	KRESD_SOCKET=${KRESD_CACHE_DIR:?}/control/${KRESD_PID:?}
-	kresc "${KRESD_SOCKET:?}"
-else
-	>&2 printf '%s\n' 'kresd is not running'
-	exit 1
-fi
+id=0; while [ "${id:?}" -lt "${KRESD_INSTANCE_NUMBER:?}" ]; do
+	if is-sv-status "kresd${id:?}" run; then
+		KRESD_PID=$(cat "${SVDIR:?}"/"kresd${id:?}"/supervise/pid)
+		KRESD_SOCKET=${KRESD_CACHE_DIR:?}/control/${KRESD_PID:?}
+		exec kresc "${KRESD_SOCKET:?}"
+	fi
+	id=$((id + 1))
+done
+
+>&2 printf '%s\n' 'kresd is not running'
+exit 1
