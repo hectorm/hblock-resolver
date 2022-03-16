@@ -39,7 +39,7 @@ apps: {
           handler: "subroute"
           routes: [{
             // DNS-over-HTTPS endpoint
-            match: [{ path: ["/dns-query*"] }]
+            match: [{ path: ["/dns-query"] }]
             handle: [{
               handler: "reverse_proxy"
               upstreams: [{ dial: "hblock-resolver:443" }]
