@@ -320,7 +320,6 @@ FROM base AS test
 
 # Perform a test run
 RUN printf '%s\n' 'Starting services...' \
-	&& export TINI_SUBREAPER=1 \
 	&& export KRESD_INSTANCE_NUMBER=2 \
 	&& (nohup container-init &) \
 	&& TIMEOUT_DURATION=240s \
