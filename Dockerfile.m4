@@ -84,7 +84,7 @@ RUN file /usr/bin/luajit
 RUN luajit -v
 
 # Build LuaRocks
-ARG LUAROCKS_TREEISH=v3.8.0
+ARG LUAROCKS_TREEISH=v3.9.0
 ARG LUAROCKS_REMOTE=https://github.com/luarocks/luarocks.git
 RUN mkdir /tmp/luarocks/
 WORKDIR /tmp/luarocks/
