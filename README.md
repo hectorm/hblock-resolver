@@ -1,10 +1,3 @@
-[![Docker pulls](https://img.shields.io/docker/pulls/hectormolinero/hblock-resolver?label=Docker%20pulls)](https://hub.docker.com/r/hectormolinero/hblock-resolver)
-[![GitHub CI](https://img.shields.io/github/workflow/status/hectorm/hblock-resolver/Development%20build?label=GitHub%20CI)](https://github.com/hectorm/hblock-resolver/commits)
-[![GitLab CI](https://img.shields.io/gitlab/pipeline/hectorm/hblock-resolver/master?label=GitLab%20CI)](https://gitlab.com/hectorm/hblock-resolver/pipelines)
-[![License](https://img.shields.io/github/license/hectorm/hblock-resolver?label=License)](LICENSE.md)
-
-***
-
 # hBlock Resolver
 
 A Docker image of [Knot Resolver](https://www.knot-resolver.cz) configured to automatically block ads, tracking and malware domains with
@@ -21,7 +14,7 @@ docker run --detach \
   --publish 127.0.0.153:853:853/tcp \
   --publish 127.0.0.153:8453:8453/tcp \
   --mount type=volume,src=hblock-resolver-data,dst=/var/lib/knot-resolver/ \
-  docker.io/hectormolinero/hblock-resolver:latest
+  docker.io/hectorm/hblock-resolver:latest
 ```
 
 > **Warning:** do not expose this service to the open internet. An open DNS resolver represents a significant threat and it can be used in a number of

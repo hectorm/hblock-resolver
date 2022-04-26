@@ -23,7 +23,7 @@ services:
     command: ["run", "--config", "/etc/caddy/Caddyfile.cue", "--adapter", "cue"]
 
   hblock-resolver:
-    image: "docker.io/hectormolinero/hblock-resolver:latest"
+    image: "docker.io/hectorm/hblock-resolver:latest"
     restart: "on-failure:3"
     hostname: "hblock-resolver"
     networks:
