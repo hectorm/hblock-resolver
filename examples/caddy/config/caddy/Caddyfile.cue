@@ -8,8 +8,9 @@ logging: logs: {
     include: ["http.log.access.main"]
     writer: output: "stdout"
     encoder: {
-      format: "formatted"
-      template: #"{common_log} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}""#
+      format: "transform"
+      template: #"{request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}""#
+      time_format: "02/Jan/2006:15:04:05 -0700"
     }
   }
 }
