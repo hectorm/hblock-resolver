@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   caddy:
-    image: "docker.io/hectormolinero/caddy2:latest"
+    image: "docker.io/hectorm/caddy:latest"
     restart: "on-failure:3"
     hostname: "caddy"
     networks:
