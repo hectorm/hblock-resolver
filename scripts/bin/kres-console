@@ -7,7 +7,11 @@ id=0; while [ "${id:?}" -lt "${KRESD_INSTANCE_NUMBER:?}" ]; do
 	if is-sv-status "kresd${id:?}" run; then
 		KRESD_PID=$(cat "${SVDIR:?}"/"kresd${id:?}"/supervise/pid)
 		KRESD_SOCKET=${KRESD_CACHE_DIR:?}/control/${KRESD_PID:?}
-		exec kresc "${KRESD_SOCKET:?}"
+		if [ -t 0 ] || [ -t 1 ]; then
+			sleep 0.1 && exec rlwrap -s -1 nc -U "${KRESD_SOCKET:?}"
+		else
+			exec nc -U "${KRESD_SOCKET:?}"
+		fi
 	fi
 	id=$((id + 1))
 done

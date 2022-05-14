@@ -207,7 +207,9 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libunistring2 \
 		liburcu6 \
 		libuv1 \
+		netcat-openbsd \
 		openssl \
+		rlwrap \
 		runit \
 		snooze \
 		tini \
