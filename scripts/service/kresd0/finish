@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -eu
+
+# Remove unused sockets
+for s in "${KRESD_CACHE_DIR:?}"/control/*; do
+	[ -S "${s:?}" ] && { nc -zU "${s:?}" 2>/dev/null || rm -f "${s:?}"; }
+done
