@@ -54,15 +54,6 @@ If equals `true`, a self-signed certificate will be generated. You can provide y
 > **Note:** for a more advanced setup, look at the [following example](examples/caddy) with [Let's Encrypt](https://letsencrypt.org) and
 [Caddy](https://caddyserver.com/).
 
-#### `KRESD_WATCHDOG_QNAME` (default: `cloudflare.com.`)
-Query name to check the health status of kresd.
-
-#### `KRESD_WATCHDOG_QTYPE` (default: `A`)
-Query type to check the health status of kresd.
-
-#### `KRESD_WATCHDOG_INTERVAL` (default: `10`)
-Interval in seconds to check the health status of kresd.
-
 #### `KRESD_NIC` (default: empty)
 If defined, kresd will only listen on the specified interface. Some users observed a considerable, close to 100%, performance gain in Docker
 containers when they bound the daemon to a single interface:ip address pair
