@@ -4,7 +4,7 @@ m4_changequote([[, ]])
 ## "build" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:20.04]], [[FROM docker.io/ubuntu:20.04]]) AS build
+m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:22.04]], [[FROM docker.io/ubuntu:22.04]]) AS build
 m4_ifdef([[CROSS_QEMU]], [[COPY --from=docker.io/hectorm/qemu-user-static:latest CROSS_QEMU CROSS_QEMU]])
 
 # Install system packages
@@ -123,7 +123,7 @@ RUN ROCKS=$(printf '["%s"]="%s",' \
 		lua           5.1-1 \
 		lua-lru       1.0-1 \
 		luafilesystem 1.8.0-1 \
-		luaossl       20200709-0 \
+		luaossl       20220711-0 \
 		mmdblua       0.2-0 \
 		psl           0.3-0 \
 	) \
@@ -141,6 +141,8 @@ WORKDIR /tmp/knot-resolver/
 RUN git clone "${KNOT_RESOLVER_REMOTE:?}" ./
 RUN git checkout "${KNOT_RESOLVER_TREEISH:?}"
 RUN git submodule update --init --recursive
+# Backport Meson fix until the next version of Knot Resolver is released
+RUN git cherry-pick -n 6e573099e4b5594eda31ab6266a2b1d4262994f9
 RUN meson ./build/ \
 		--prefix=/usr \
 		--libdir=/usr/lib \
@@ -157,9 +159,7 @@ RUN meson ./build/ \
 		-D extra_tests=disabled
 RUN ninja -C ./build/
 RUN ninja -C ./build/ install
-RUN meson test -C ./build/ --print-errorlogs --suite unit
-# Ignore failures in QEMU 32-bit ARM
-RUN meson test -C ./build/ --print-errorlogs --suite config --no-suite snowflake || [ "$(uname -m)" = armv7l ]
+RUN meson test -C ./build/ --print-errorlogs --suite unit --suite config --no-suite snowflake
 RUN file /usr/sbin/kresd
 RUN file /usr/sbin/kresc
 RUN /usr/sbin/kresd --version
@@ -179,7 +179,7 @@ RUN /usr/bin/hblock --version
 ## "base" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:20.04]], [[FROM docker.io/ubuntu:20.04]]) AS base
+m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:22.04]], [[FROM docker.io/ubuntu:22.04]]) AS base
 m4_ifdef([[CROSS_QEMU]], [[COPY --from=docker.io/hectorm/qemu-user-static:latest CROSS_QEMU CROSS_QEMU]])
 
 # Install system packages
@@ -201,11 +201,11 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		liblmdb0 \
 		libnghttp2-14 \
 		libpsl5 \
-		libssl1.1 \
+		libssl3 \
 		libstdc++6 \
 		libsystemd0 \
 		libunistring2 \
-		liburcu6 \
+		liburcu8 \
 		libuv1 \
 		netcat-openbsd \
 		openssl \
