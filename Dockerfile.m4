@@ -134,15 +134,13 @@ RUN ROCKS=$(printf '["%s"]="%s",' \
 	&& luarocks install --tree=system --only-deps ./*.rockspec ${LIBDIRS:?}
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_TREEISH=v5.5.1
+ARG KNOT_RESOLVER_TREEISH=v5.5.2
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.nic.cz/knot/knot-resolver.git
 RUN mkdir /tmp/knot-resolver/
 WORKDIR /tmp/knot-resolver/
 RUN git clone "${KNOT_RESOLVER_REMOTE:?}" ./
 RUN git checkout "${KNOT_RESOLVER_TREEISH:?}"
 RUN git submodule update --init --recursive
-# Backport Meson fix until the next version of Knot Resolver is released
-RUN git cherry-pick -n 6e573099e4b5594eda31ab6266a2b1d4262994f9
 RUN meson ./build/ \
 		--prefix=/usr \
 		--libdir=/usr/lib \
