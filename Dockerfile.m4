@@ -307,7 +307,7 @@ EXPOSE 853/tcp
 EXPOSE 8453/tcp
 
 HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=1 CMD ["/usr/local/bin/container-healthcheck"]
-ENTRYPOINT ["/usr/local/bin/container-init"]
+ENTRYPOINT ["/usr/bin/catatonit", "--", "/usr/local/bin/container-init"]
 
 ##################################################
 ## "test" stage
