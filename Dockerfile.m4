@@ -185,6 +185,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		ca-certificates \
+		catatonit \
 		curl \
 		dns-root-data \
 		gzip \
@@ -210,7 +211,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		rlwrap \
 		runit \
 		snooze \
-		tini \
 		tzdata \
 	&& apt-get clean \
 	&& rm -rf \

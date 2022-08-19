@@ -32,4 +32,4 @@ if [ "${KRESD_INSTANCE_NUMBER:?}" -gt 1 ]; then
 fi
 
 # Start all services
-exec tini -- runsvdir -P "${SVDIR:?}"
+exec catatonit -- runsvdir -P "${SVDIR:?}"
