@@ -46,7 +46,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Build Knot DNS (only libknot and utilities)
-ARG KNOT_DNS_TREEISH=v3.1.9
+ARG KNOT_DNS_TREEISH=v3.2.0
 ARG KNOT_DNS_REMOTE=https://gitlab.nic.cz/knot/knot-dns.git
 RUN mkdir /tmp/knot-dns/
 WORKDIR /tmp/knot-dns/
@@ -58,6 +58,7 @@ RUN ./configure \
 		--prefix=/usr \
 		--enable-utilities \
 		--enable-fastparser \
+		--enable-quic \
 		--disable-daemon \
 		--disable-modules \
 		--disable-dnstap \
