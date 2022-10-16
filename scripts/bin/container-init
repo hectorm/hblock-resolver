@@ -12,9 +12,7 @@ for s in "${KRESD_CACHE_DIR:?}"/control/*; do
 done
 
 # Generate certificate if it does not exist
-if [ ! -e "${KRESD_DATA_DIR:?}"/ssl/server.crt ]; then
-	kres-cert-updater
-fi
+kres-cert-updater
 
 # Generate blocklist zone if it does not exist
 if [ ! -e "${KRESD_DATA_DIR:?}"/hblock/blocklist.rpz ]; then
