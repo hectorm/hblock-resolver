@@ -22,6 +22,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		git \
 		libaugeas-dev \
 		libcap-ng-dev \
+		libcap2-bin \
 		libcmocka-dev \
 		libedit-dev \
 		libffi-dev \
@@ -159,6 +160,7 @@ RUN meson ./build/ \
 RUN ninja -C ./build/
 RUN ninja -C ./build/ install
 RUN meson test -C ./build/ --print-errorlogs --suite unit --suite config --no-suite snowflake
+RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
 RUN file /usr/sbin/kresd
 RUN file /usr/sbin/kresc
 RUN /usr/sbin/kresd --version
@@ -191,7 +193,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		dns-root-data \
 		gzip \
 		libcap-ng0 \
-		libcap2-bin \
 		libedit2 \
 		libgcc1 \
 		libgeoip1 \
@@ -265,10 +266,6 @@ COPY --from=build --chown=root:root /usr/sbin/kres-cache-gc /usr/sbin/kres-cache
 
 # Copy hBlock build
 COPY --from=build --chown=root:root /usr/bin/hblock /usr/bin/hblock
-
-# Add capabilities to the kresd binary
-m4_ifdef([[CROSS_QEMU]], [[RUN setcap cap_net_bind_service=+ep CROSS_QEMU]])
-RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
 
 # Create data and cache directories
 RUN mkdir "${KRESD_DATA_DIR:?}" "${KRESD_CACHE_DIR:?}"
