@@ -210,7 +210,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libuv1 \
 		netcat-openbsd \
 		openssl \
-		rlwrap \
+		rlfe \
 		runit \
 		snooze \
 		tzdata \

@@ -8,7 +8,7 @@ id=0; while [ "${id:?}" -lt "${KRESD_INSTANCE_NUMBER:?}" ]; do
 		KRESD_PID=$(cat "${SVDIR:?}"/"kresd${id:?}"/supervise/pid)
 		KRESD_SOCKET=${KRESD_CACHE_DIR:?}/control/${KRESD_PID:?}
 		if [ -t 0 ] || [ -t 1 ]; then
-			sleep 0.1 && exec rlwrap -s -1 nc -U "${KRESD_SOCKET:?}"
+			sleep 0.1 && exec rlfe nc -U "${KRESD_SOCKET:?}"
 		else
 			exec nc -U "${KRESD_SOCKET:?}"
 		fi
