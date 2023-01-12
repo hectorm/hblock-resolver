@@ -1,29 +1,35 @@
 #!/bin/sh
 
 set -eu
-umask 0002
+umask 0007
 
 # Do nothing if the certificate is not managed
 if [ "${KRESD_CERT_MANAGED:?}" != 'true' ]; then
 	exit 0
 fi
 
-CA_KEY="${KRESD_DATA_DIR:?}"/ssl/ca.key
-CA_CRT="${KRESD_DATA_DIR:?}"/ssl/ca.crt
+CERTS_DIR="${KRESD_DATA_DIR:?}"/ssl/
+
+CA_KEY="${CERTS_DIR:?}"/ca.key
+CA_CRT="${CERTS_DIR:?}"/ca.crt
 CA_CRT_CN="$(hostname --fqdn)"
 CA_CRT_VALIDITY_DAYS='7300'
 CA_CRT_RENOVATION_DAYS='365'
+CA_CRT_RENEW_PREHOOK=''
+CA_CRT_RENEW_POSTHOOK=''
 
-SERVER_KEY="${KRESD_DATA_DIR:?}"/ssl/server.key
-SERVER_CSR="${KRESD_DATA_DIR:?}"/ssl/server.csr
-SERVER_CRT="${KRESD_DATA_DIR:?}"/ssl/server.crt
-SERVER_CRT_OPENSSL_CNF="${KRESD_DATA_DIR:?}"/ssl/openssl.cnf
+SERVER_KEY="${CERTS_DIR:?}"/server.key
+SERVER_CSR="${CERTS_DIR:?}"/server.csr
+SERVER_CRT="${CERTS_DIR:?}"/server.crt
+SERVER_CRT_OPENSSL_CNF="${CERTS_DIR:?}"/openssl.cnf
 SERVER_CRT_CN="$(hostname --fqdn)"
 SERVER_CRT_VALIDITY_DAYS='90'
 SERVER_CRT_RENOVATION_DAYS='30'
+SERVER_CRT_RENEW_PREHOOK=''
+SERVER_CRT_RENEW_POSTHOOK=''
 
-if [ ! -e "${KRESD_DATA_DIR:?}"/ssl/ ]; then
-	mkdir "${KRESD_DATA_DIR:?}"/ssl/
+if [ ! -e "${CERTS_DIR:?}" ]; then
+	mkdir "${CERTS_DIR:?}"
 fi
 
 # Generate CA private key if it does not exist
@@ -31,7 +37,7 @@ if [ ! -e "${CA_KEY:?}" ] \
 	|| ! openssl ecparam -check -in "${CA_KEY:?}" -noout >/dev/null 2>&1
 then
 	printf '%s\n' 'Generating CA private key...'
-	openssl ecparam -genkey -name prime256v1 -out "${CA_KEY:?}"
+	openssl ecparam -genkey -name prime256v1 > "${CA_KEY:?}"
 	rm -f "${CA_CRT:?}"
 fi
 
@@ -39,6 +45,10 @@ fi
 if [ ! -e "${CA_CRT:?}" ] \
 	|| ! openssl x509 -checkend "$((60*60*24*CA_CRT_RENOVATION_DAYS))" -in "${CA_CRT:?}" -noout >/dev/null 2>&1
 then
+	if [ -n "${CA_CRT_RENEW_PREHOOK?}" ]; then
+		sh -euc "${CA_CRT_RENEW_PREHOOK:?}"
+	fi
+
 	printf '%s\n' 'Generating CA certificate...'
 	openssl req -new \
 		-key "${CA_KEY:?}" \
@@ -47,6 +57,10 @@ then
 		-x509 \
 		-days "${CA_CRT_VALIDITY_DAYS:?}"
 	rm -f "${SERVER_CRT:?}"
+
+	if [ -n "${CA_CRT_RENEW_POSTHOOK?}" ]; then
+		sh -euc "${CA_CRT_RENEW_POSTHOOK:?}"
+	fi
 fi
 
 # Generate server private key if it does not exist
@@ -54,7 +68,7 @@ if [ ! -e "${SERVER_KEY:?}" ] \
 	|| ! openssl ecparam -check -in "${SERVER_KEY:?}" -noout >/dev/null 2>&1
 then
 	printf '%s\n' 'Generating server private key...'
-	openssl ecparam -genkey -name prime256v1 -out "${SERVER_KEY:?}"
+	openssl ecparam -genkey -name prime256v1 > "${SERVER_KEY:?}"
 	rm -f "${SERVER_CRT:?}"
 fi
 
@@ -63,6 +77,10 @@ if [ ! -e "${SERVER_CRT:?}" ] \
 	|| ! openssl verify -CAfile "${CA_CRT:?}" "${SERVER_CRT:?}" >/dev/null 2>&1 \
 	|| ! openssl x509 -checkend "$((60*60*24*SERVER_CRT_RENOVATION_DAYS))" -in "${SERVER_CRT:?}" -noout >/dev/null 2>&1
 then
+	if [ -n "${SERVER_CRT_RENEW_PREHOOK?}" ]; then
+		sh -euc "${SERVER_CRT_RENEW_PREHOOK:?}"
+	fi
+
 	printf '%s\n' 'Generating server certificate...'
 	openssl req -new \
 		-key "${SERVER_KEY:?}" \
@@ -84,4 +102,8 @@ then
 		2>/dev/null
 	cat "${CA_CRT:?}" >> "${SERVER_CRT:?}"
 	openssl x509 -in "${SERVER_CRT:?}" -fingerprint -noout
+
+	if [ -n "${SERVER_CRT_RENEW_POSTHOOK?}" ]; then
+		sh -euc "${SERVER_CRT_RENEW_POSTHOOK:?}"
+	fi
 fi
