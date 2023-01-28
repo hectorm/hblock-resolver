@@ -30,6 +30,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libgnutls28-dev \
 		libidn2-dev \
 		libjansson-dev \
+		libjemalloc-dev \
 		liblmdb-dev \
 		libnghttp2-dev \
 		libpsl-dev \
@@ -136,7 +137,7 @@ RUN ROCKS=$(printf '["%s"]="%s",' \
 	&& luarocks install --tree=system --only-deps ./*.rockspec ${LIBDIRS:?}
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_TREEISH=v5.5.3
+ARG KNOT_RESOLVER_TREEISH=v5.6.0
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.nic.cz/knot/knot-resolver.git
 RUN mkdir /tmp/knot-resolver/
 WORKDIR /tmp/knot-resolver/
@@ -152,6 +153,7 @@ RUN meson ./build/ \
 		-D dnstap=disabled \
 		-D doc=disabled \
 		-D managed_ta=disabled \
+		-D malloc=jemalloc \
 		-D root_hints=/usr/share/dns/root.hints \
 		-D keyfile_default=/usr/share/dns/root.key \
 		-D unit_tests=enabled \
@@ -199,6 +201,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libgnutls30 \
 		libidn2-0 \
 		libjansson4 \
+		libjemalloc2 \
 		liblmdb0 \
 		libnghttp2-14 \
 		libpsl5 \
