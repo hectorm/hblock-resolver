@@ -73,7 +73,7 @@ RUN /usr/bin/kdig --version
 RUN /usr/bin/khost --version
 
 # Build LuaJIT
-ARG LUAJIT_TREEISH=d0e88930ddde28ff662503f9f20facf34f7265aa
+ARG LUAJIT_TREEISH=505e2c03de35e2718eef0d2d3660712e06dadf1f
 ARG LUAJIT_REMOTE=https://github.com/LuaJIT/LuaJIT.git
 RUN mkdir /tmp/luajit/
 WORKDIR /tmp/luajit/
