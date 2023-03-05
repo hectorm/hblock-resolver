@@ -8,25 +8,31 @@ if [ "${KRESD_CERT_MANAGED:?}" != 'true' ]; then
 	exit 0
 fi
 
-CERTS_DIR="${KRESD_DATA_DIR:?}"/ssl/
+{
+	set -a
+	CERTS_DIR="${KRESD_DATA_DIR:?}"/ssl/
 
-CA_KEY="${CERTS_DIR:?}"/ca.key
-CA_CRT="${CERTS_DIR:?}"/ca.crt
-CA_CRT_CN="$(hostname --fqdn)"
-CA_CRT_VALIDITY_DAYS='7300'
-CA_CRT_RENOVATION_DAYS='365'
-CA_CRT_RENEW_PREHOOK=''
-CA_CRT_RENEW_POSTHOOK=''
+	CA_KEY="${CERTS_DIR:?}"/ca.key
+	CA_SRL="${CERTS_DIR:?}"/ca.srl
+	CA_CRT="${CERTS_DIR:?}"/ca.crt
+	CA_CRT_CN="$(hostname -f)"
+	CA_CRT_VALIDITY_DAYS='7300'
+	CA_CRT_RENOVATION_DAYS='365'
+	CA_CRT_RENEW_PREHOOK=''
+	CA_CRT_RENEW_POSTHOOK=''
 
-SERVER_KEY="${CERTS_DIR:?}"/server.key
-SERVER_CSR="${CERTS_DIR:?}"/server.csr
-SERVER_CRT="${CERTS_DIR:?}"/server.crt
-SERVER_CRT_OPENSSL_CNF="${CERTS_DIR:?}"/openssl.cnf
-SERVER_CRT_CN="$(hostname --fqdn)"
-SERVER_CRT_VALIDITY_DAYS='90'
-SERVER_CRT_RENOVATION_DAYS='30'
-SERVER_CRT_RENEW_PREHOOK=''
-SERVER_CRT_RENEW_POSTHOOK=''
+	SERVER_KEY="${CERTS_DIR:?}"/server.key
+	SERVER_CSR="${CERTS_DIR:?}"/server.csr
+	SERVER_CRT="${CERTS_DIR:?}"/server.crt
+	SERVER_CRT_OPENSSL_CNF="${CERTS_DIR:?}"/openssl.cnf
+	SERVER_CRT_CN="$(hostname -f)"
+	SERVER_CRT_SAN="DNS:${SERVER_CRT_CN:?},DNS:localhost,IP:127.0.0.1,IP:::1"
+	SERVER_CRT_VALIDITY_DAYS='90'
+	SERVER_CRT_RENOVATION_DAYS='30'
+	SERVER_CRT_RENEW_PREHOOK=''
+	SERVER_CRT_RENEW_POSTHOOK=''
+	set +a
+}
 
 if [ ! -e "${CERTS_DIR:?}" ]; then
 	mkdir "${CERTS_DIR:?}"
@@ -38,11 +44,11 @@ if [ ! -e "${CA_KEY:?}" ] \
 then
 	printf '%s\n' 'Generating CA private key...'
 	openssl ecparam -genkey -name prime256v1 > "${CA_KEY:?}"
-	rm -f "${CA_CRT:?}"
 fi
 
 # Generate CA certificate if it does not exist or will expire soon
 if [ ! -e "${CA_CRT:?}" ] \
+	|| [ "$(openssl x509 -pubkey -in "${CA_CRT:?}" -noout 2>/dev/null)" != "$(openssl pkey -pubout -in "${CA_KEY:?}" -outform PEM 2>/dev/null)" ] \
 	|| ! openssl x509 -checkend "$((60*60*24*CA_CRT_RENOVATION_DAYS))" -in "${CA_CRT:?}" -noout >/dev/null 2>&1
 then
 	if [ -n "${CA_CRT_RENEW_PREHOOK?}" ]; then
@@ -53,10 +59,9 @@ then
 	openssl req -new \
 		-key "${CA_KEY:?}" \
 		-out "${CA_CRT:?}" \
-		-subj "/CN=${CA_CRT_CN:?}:CA" \
+		-subj "/CN=${CA_CRT_CN:?}" \
 		-x509 \
 		-days "${CA_CRT_VALIDITY_DAYS:?}"
-	rm -f "${SERVER_CRT:?}"
 
 	if [ -n "${CA_CRT_RENEW_POSTHOOK?}" ]; then
 		sh -euc "${CA_CRT_RENEW_POSTHOOK:?}"
@@ -69,11 +74,11 @@ if [ ! -e "${SERVER_KEY:?}" ] \
 then
 	printf '%s\n' 'Generating server private key...'
 	openssl ecparam -genkey -name prime256v1 > "${SERVER_KEY:?}"
-	rm -f "${SERVER_CRT:?}"
 fi
 
 # Generate server certificate if it does not exist or will expire soon
 if [ ! -e "${SERVER_CRT:?}" ] \
+	|| [ "$(openssl x509 -pubkey -in "${SERVER_CRT:?}" -noout 2>/dev/null)" != "$(openssl pkey -pubout -in "${SERVER_KEY:?}" -outform PEM 2>/dev/null)" ] \
 	|| ! openssl verify -CAfile "${CA_CRT:?}" "${SERVER_CRT:?}" >/dev/null 2>&1 \
 	|| ! openssl x509 -checkend "$((60*60*24*SERVER_CRT_RENOVATION_DAYS))" -in "${SERVER_CRT:?}" -noout >/dev/null 2>&1
 then
@@ -85,21 +90,20 @@ then
 	openssl req -new \
 		-key "${SERVER_KEY:?}" \
 		-out "${SERVER_CSR:?}" \
-		-subj "/CN=${SERVER_CRT_CN:?}:Server"
+		-subj "/CN=${SERVER_CRT_CN:?}"
 	cat > "${SERVER_CRT_OPENSSL_CNF:?}" <<-EOF
 		[ x509_exts ]
-		subjectAltName = DNS:${SERVER_CRT_CN:?},DNS:localhost,IP:127.0.0.1,IP:::1
+		subjectAltName = ${SERVER_CRT_SAN:?}
 	EOF
 	openssl x509 -req \
 		-in "${SERVER_CSR:?}" \
 		-out "${SERVER_CRT:?}" \
 		-CA "${CA_CRT:?}" \
 		-CAkey "${CA_KEY:?}" \
-		-CAcreateserial \
+		-CAserial "${CA_SRL:?}" -CAcreateserial \
 		-days "${SERVER_CRT_VALIDITY_DAYS:?}" \
 		-extfile "${SERVER_CRT_OPENSSL_CNF:?}" \
-		-extensions x509_exts \
-		2>/dev/null
+		-extensions x509_exts
 	cat "${CA_CRT:?}" >> "${SERVER_CRT:?}"
 	openssl x509 -in "${SERVER_CRT:?}" -fingerprint -noout
 
