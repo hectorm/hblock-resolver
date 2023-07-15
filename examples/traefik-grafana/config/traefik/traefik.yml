@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v2.json
+experimental:
+  http3: true
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+entryPoints:
+  http:
+    address: ":80/tcp"
+  https:
+    address: ":443/tcp"
+    http3: { }
+  dot:
+    address: ":853/tcp"
+providers:
+  file:
+    directory: "/etc/traefik/dynamic/"
+certificatesResolvers:
+  acme-staging-http-01:
+    acme:
+      storage: "/etc/traefik/acme/acme.json"
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      httpChallenge: { entryPoint: "http" }
+  acme-production-http-01:
+    acme:
+      storage: "/etc/traefik/acme/acme.json"
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      httpChallenge: { entryPoint: "http" }
+  acme-staging-tls-alpn-01:
+    acme:
+      storage: "/etc/traefik/acme/acme.json"
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      tlsChallenge: { }
+  acme-production-tls-alpn-01:
+    acme:
+      storage: "/etc/traefik/acme/acme.json"
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      tlsChallenge: { }
+  acme-staging-dns-01-cloudflare:
+    acme:
+      storage: "/etc/traefik/acme/acme.json"
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      dnsChallenge: { provider: "cloudflare" }
+  acme-production-dns-01-cloudflare:
+    acme:
+      storage: "/etc/traefik/acme/acme.json"
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      dnsChallenge: { provider: "cloudflare" }
+ping: { }

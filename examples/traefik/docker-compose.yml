@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+name: "hblock-resolver"
+
+# https://hub.docker.com/_/traefik
+x-traefik-image: &traefik-image "docker.io/traefik:3.0"
+# https://hub.docker.com/r/hectorm/hblock-resolver
+x-hblock-resolver-image: &hblock-resolver-image "docker.io/hectorm/hblock-resolver:latest"
+
+services:
+
+  traefik:
+    image: *traefik-image
+    restart: "on-failure:3"
+    hostname: "traefik"
+    networks:
+      - "hblock-resolver"
+    ports:
+      - "80:80/tcp" # HTTP.
+      - "443:443/tcp" # HTTPS.
+      - "443:443/udp" # HTTPS (QUIC).
+      - "853:853/tcp" # DNS over TLS.
+    volumes:
+      - "./config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "./config/traefik/dynamic/:/etc/traefik/dynamic/:ro"
+      - "traefik-acme:/etc/traefik/acme/"
+    environment:
+      TRAEFIK_BASIC_AUTH: "${TRAEFIK_BASIC_AUTH:-}"
+      TRAEFIK_TLS_RESOLVER: "${TRAEFIK_TLS_RESOLVER:-}"
+      DOMAIN: "${DOMAIN:?}"
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      start_period: "60s"
+      interval: "10s"
+      timeout: "5s"
+      retries: 2
+
+  hblock-resolver:
+    image: *hblock-resolver-image
+    restart: "on-failure:3"
+    hostname: "hblock-resolver"
+    networks:
+      - "hblock-resolver"
+    ports:
+      - "127.0.0.153:53:53/udp" # DNS over UDP.
+      - "127.0.0.153:53:53/tcp" # DNS over TCP.
+    volumes:
+      - "hblock-resolver-data:/var/lib/knot-resolver/"
+    environment:
+      KRESD_INSTANCE_NUMBER: "${KRESD_INSTANCE_NUMBER:-4}"
+
+volumes:
+
+  traefik-acme:
+
+  hblock-resolver-data:
+
+networks:
+
+  hblock-resolver:

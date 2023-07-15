@@ -1,0 +1,123 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v2-file-provider.json
+tls:
+  options:
+    default:
+      minVersion: "VersionTLS13"
+    hblock-resolver-dot:
+      alpnProtocols: ["dot"]
+http:
+  routers:
+    https-redirect:
+      rule: 'PathPrefix(`/`)'
+      entryPoints: ["http"]
+      middlewares: ["https-redirect"]
+      service: "noop@internal"
+    hblock-resolver-doh:
+      rule: 'Host(`{{ env "DOMAIN" }}`) && Path(`/dns-query`)'
+      entryPoints: ["https"]
+      middlewares: ["security-headers"]
+      service: "hblock-resolver-doh"
+      tls:
+        certResolver: '{{ env "TRAEFIK_TLS_RESOLVER" }}'
+    # {{ if env "TRAEFIK_BASIC_AUTH" }}
+    hblock-resolver-webmgmt:
+      rule: 'Host(`{{ env "DOMAIN" }}`)'
+      entryPoints: ["https"]
+      middlewares: ["security-headers", "basic-auth"]
+      service: "hblock-resolver-webmgmt"
+      tls:
+        certResolver: '{{ env "TRAEFIK_TLS_RESOLVER" }}'
+    grafana:
+      rule: 'Host(`{{ env "DOMAIN" }}`) && PathPrefix(`/grafana`)'
+      entryPoints: ["https"]
+      middlewares: ["security-headers", "basic-auth"]
+      service: "grafana"
+      tls:
+        certResolver: '{{ env "TRAEFIK_TLS_RESOLVER" }}'
+    prometheus:
+      rule: 'Host(`{{ env "DOMAIN" }}`) && PathPrefix(`/prometheus`)'
+      entryPoints: ["https"]
+      middlewares: ["security-headers", "basic-auth"]
+      service: "prometheus"
+      tls:
+        certResolver: '{{ env "TRAEFIK_TLS_RESOLVER" }}'
+    # {{ end }}
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: "https"
+        permanent: true
+    security-headers:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        referrerPolicy: "strict-origin"
+        contentTypeNosniff: true
+        contentSecurityPolicy: >-
+          default-src 'self';
+          script-src 'self' 'unsafe-inline' 'unsafe-eval';
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' blob: data: https://grafana.com;
+        permissionsPolicy: >-
+          accelerometer=(),
+          camera=(),
+          geolocation=(),
+          gyroscope=(),
+          magnetometer=(),
+          microphone=(),
+          midi=(),
+          payment=(),
+          usb=()
+        customResponseHeaders:
+          Server: ""
+          X-Powered-By: ""
+    # {{ if env "TRAEFIK_BASIC_AUTH" }}
+    basic-auth:
+      basicAuth:
+        users: ['{{ env "TRAEFIK_BASIC_AUTH" }}']
+    # {{ end }}
+  services:
+    hblock-resolver-doh:
+      loadBalancer:
+        serversTransport: "hblock-resolver"
+        servers:
+          - url: "https://hblock-resolver:443"
+    # {{ if env "TRAEFIK_BASIC_AUTH" }}
+    hblock-resolver-webmgmt:
+      loadBalancer:
+        serversTransport: "hblock-resolver"
+        servers:
+          - url: "https://hblock-resolver:8453"
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
+    prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://prometheus:9090"
+    # {{ end }}
+  serversTransports:
+    hblock-resolver:
+      insecureSkipVerify: true
+tcp:
+  routers:
+    hblock-resolver-dot:
+      rule: 'HostSNI(`{{ env "DOMAIN" }}`)'
+      entryPoints: ["dot"]
+      service: "hblock-resolver-dot"
+      tls:
+        certResolver: '{{ env "TRAEFIK_TLS_RESOLVER" }}'
+        options: "hblock-resolver-dot"
+  services:
+    hblock-resolver-dot:
+      loadBalancer:
+        serversTransport: "hblock-resolver-dot"
+        servers:
+          - address: "hblock-resolver:853"
+            tls: true
+  serversTransports:
+    hblock-resolver-dot:
+      tls:
+        insecureSkipVerify: true
