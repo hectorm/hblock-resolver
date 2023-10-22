@@ -73,7 +73,7 @@ RUN /usr/bin/kdig --version
 RUN /usr/bin/khost --version
 
 # Build LuaJIT
-ARG LUAJIT_TREEISH=2090842410e0ba6f81fad310a77bf5432488249a # v2.1.ROLLING
+ARG LUAJIT_TREEISH=e826d0c101d750fac8334d71e221c50d8dbe236c
 ARG LUAJIT_REMOTE=https://github.com/LuaJIT/LuaJIT.git
 RUN mkdir /tmp/luajit/
 WORKDIR /tmp/luajit/
@@ -82,8 +82,8 @@ RUN git checkout "${LUAJIT_TREEISH:?}"
 RUN git submodule update --init --recursive
 RUN [ "$(getconf LONG_BIT)" != 32 ] || XCFLAGS='-DLUAJIT_USE_SYSMALLOC'; \
 	make -j"$(nproc)" amalg XCFLAGS="${XCFLAGS-}"
-RUN make install PREFIX=/usr INSTALL_TNAME=luajit
-RUN file /usr/bin/luajit
+RUN make install PREFIX=/usr
+RUN file /usr/bin/luajit-2.1.*
 RUN luajit -v
 
 # Build LuaRocks
