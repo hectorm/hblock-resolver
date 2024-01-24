@@ -6,9 +6,9 @@ x-traefik-image: &traefik-image "docker.io/traefik:3.0"
 # https://hub.docker.com/r/hectorm/hblock-resolver
 x-hblock-resolver-image: &hblock-resolver-image "docker.io/hectorm/hblock-resolver:latest"
 # https://hub.docker.com/r/grafana/grafana
-x-grafana-image: &grafana-image "docker.io/grafana/grafana:10.0.2"
+x-grafana-image: &grafana-image "docker.io/grafana/grafana:10.3.1"
 # https://hub.docker.com/r/prom/prometheus
-x-prometheus-image: &prometheus-image "docker.io/prom/prometheus:v2.45.0"
+x-prometheus-image: &prometheus-image "docker.io/prom/prometheus:v2.49.1"
 
 services:
 
