@@ -1,6 +1,4 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v2.json
-experimental:
-  http3: true
 global:
   checkNewVersion: false
   sendAnonymousUsage: false
