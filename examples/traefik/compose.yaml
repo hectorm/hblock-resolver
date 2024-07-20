@@ -2,7 +2,7 @@
 name: "hblock-resolver"
 
 # https://hub.docker.com/_/traefik
-x-traefik-image: &traefik-image "docker.io/traefik:3.0"
+x-traefik-image: &traefik-image "docker.io/traefik:3.1"
 # https://hub.docker.com/r/hectorm/hblock-resolver
 x-hblock-resolver-image: &hblock-resolver-image "docker.io/hectorm/hblock-resolver:latest"
 
