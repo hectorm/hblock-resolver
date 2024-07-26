@@ -4,7 +4,7 @@ m4_changequote([[, ]])
 ## "build" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:22.04]], [[FROM docker.io/ubuntu:22.04]]) AS build
+m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:24.04]], [[FROM docker.io/ubuntu:24.04]]) AS build
 
 # Install system packages
 RUN export DEBIAN_FRONTEND=noninteractive \
@@ -181,7 +181,7 @@ RUN /usr/bin/hblock --version
 ## "base" stage
 ##################################################
 
-m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:22.04]], [[FROM docker.io/ubuntu:22.04]]) AS base
+m4_ifdef([[CROSS_ARCH]], [[FROM docker.io/CROSS_ARCH/ubuntu:24.04]], [[FROM docker.io/ubuntu:24.04]]) AS base
 
 # Install system packages
 RUN export DEBIAN_FRONTEND=noninteractive \
@@ -195,20 +195,20 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 		libcap-ng0 \
 		libedit2 \
 		libgcc1 \
-		libgeoip1 \
-		libgnutls30 \
+		libgeoip1t64 \
+		libgnutls30t64 \
 		libidn2-0 \
 		libjansson4 \
 		libjemalloc2 \
 		liblmdb0 \
 		libnghttp2-14 \
-		libpsl5 \
-		libssl3 \
+		libpsl5t64 \
+		libssl3t64 \
 		libstdc++6 \
 		libsystemd0 \
-		libunistring2 \
-		liburcu8 \
-		libuv1 \
+		libunistring5 \
+		liburcu8t64 \
+		libuv1t64 \
 		netcat-openbsd \
 		openssl \
 		rlfe \
@@ -226,7 +226,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 
 # Environment
 ENV SVDIR=/service/
-ENV KRESD_UID=1000
 ENV KRESD_CONF_DIR=/etc/knot-resolver/
 ENV KRESD_DATA_DIR=/var/lib/knot-resolver/
 ENV KRESD_CACHE_DIR=/var/cache/knot-resolver/
@@ -242,7 +241,7 @@ ENV KRESD_NIC=
 ENV KRESD_LOG_LEVEL=notice
 
 # Create unprivileged user
-RUN useradd -u "${KRESD_UID:?}" -g 0 -s "$(command -v bash)" -Md "${KRESD_CACHE_DIR:?}" knot-resolver
+RUN userdel -rf "$(id -nu 1000)" && useradd -u 1000 -g 0 -s "$(command -v bash)" -Md "${KRESD_CACHE_DIR:?}" knot-resolver
 
 # Copy LuaJIT build
 COPY --from=build --chown=root:root /usr/lib/libluajit-* /usr/lib/
