@@ -120,7 +120,7 @@ RUN ROCKS=$(printf '["%s"]="%s",' \
 		cqueues       20200726.51-0 \
 		fifo          0.2-0 \
 		http          0.4-0 \
-		lpeg          1.1.0-1 \
+		lpeg          1.1.0-2 \
 		lpeg_patterns 0.5-0 \
 		lua           5.1-1 \
 		lua-lru       1.0-1 \
