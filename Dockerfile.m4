@@ -316,8 +316,9 @@ FROM base AS test
 # Perform a test run
 RUN printf '%s\n' 'Starting services...' \
 	&& export KRESD_INSTANCE_NUMBER=2 \
+	&& export HBLOCK_PARALLEL=1 \
 	&& (nohup container-init &) \
-	&& TIMEOUT_DURATION=240s \
+	&& TIMEOUT_DURATION=600s \
 	&& TIMEOUT_COMMAND='until container-healthcheck; do sleep 1; done' \
 	&& timeout "${TIMEOUT_DURATION:?}" sh -euc "${TIMEOUT_COMMAND:?}"
 
