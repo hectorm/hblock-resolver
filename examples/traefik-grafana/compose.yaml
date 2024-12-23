@@ -33,9 +33,10 @@ services:
       DOMAIN: "${DOMAIN:?}"
     healthcheck:
       test: ["CMD", "traefik", "healthcheck"]
-      start_period: "60s"
-      interval: "10s"
-      timeout: "5s"
+      start_period: "120s"
+      start_interval: "5s"
+      interval: "30s"
+      timeout: "10s"
       retries: 2
 
   hblock-resolver:
@@ -76,9 +77,10 @@ services:
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
     healthcheck:
       test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:3000/api/health"]
-      start_period: "60s"
-      interval: "10s"
-      timeout: "5s"
+      start_period: "120s"
+      start_interval: "5s"
+      interval: "30s"
+      timeout: "10s"
       retries: 2
 
   prometheus:
@@ -99,9 +101,10 @@ services:
       - "--web.console.templates=/usr/share/prometheus/consoles/"
     healthcheck:
       test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:9090/prometheus/-/healthy"]
-      start_period: "60s"
-      interval: "10s"
-      timeout: "5s"
+      start_period: "120s"
+      start_interval: "5s"
+      interval: "30s"
+      timeout: "10s"
       retries: 2
 
 volumes:
