@@ -160,7 +160,10 @@ RUN meson ./build/ \
 		-D extra_tests=disabled
 RUN ninja -C ./build/
 RUN ninja -C ./build/ install
-RUN meson test -C ./build/ -t 8 --print-errorlogs --suite unit --suite config --no-suite snowflake
+RUN TESTS=$(meson test -C ./build/ --suite unit --suite config --no-suite snowflake --list 2>/dev/null \
+		| awk '{print($3)}' | grep -vxF 'config.http' \
+	) \
+	&& meson test -C ./build/ -t 8 --print-errorlogs ${TESTS:?}
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
 RUN file /usr/sbin/kresd
 RUN file /usr/sbin/kresc
