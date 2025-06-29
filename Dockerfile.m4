@@ -86,7 +86,7 @@ RUN file /usr/bin/luajit-2.1.*
 RUN luajit -v
 
 # Build LuaRocks
-ARG LUAROCKS_TREEISH=v3.11.1
+ARG LUAROCKS_TREEISH=v3.12.2
 ARG LUAROCKS_REMOTE=https://github.com/luarocks/luarocks.git
 RUN mkdir /tmp/luarocks/
 WORKDIR /tmp/luarocks/
@@ -111,29 +111,21 @@ RUN luarocks --version
 # Install LuaRocks packages
 RUN mkdir /tmp/rocks/
 WORKDIR /tmp/rocks/
-RUN luarocks init --lua-versions=5.1 metapackage
-RUN ROCKS=$(printf '["%s"]="%s",' \
-		basexx        0.4.1-1 \
-		binaryheap    0.4-1 \
-		bit32         5.3.5.1-1 \
-		compat53      0.14.4-1 \
-		cqueues       20200726.51-0 \
-		fifo          0.2-0 \
-		http          0.4-0 \
-		lpeg          1.1.0-2 \
-		lpeg_patterns 0.5-0 \
-		lua           5.1-1 \
-		lua-lru       1.0-1 \
-		luafilesystem 1.8.0-1 \
-		luaossl       20220711-0 \
-		mmdblua       0.2-0 \
-		psl           0.3-0 \
-	) \
-	&& printf 'return {dependencies = {%s}}' "${ROCKS:?}" > ./luarocks.lock \
-	&& HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) \
-	&& LIBDIRS="${LIBDIRS-} CRYPTO_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
-	&& LIBDIRS="${LIBDIRS-} OPENSSL_LIBDIR=/usr/lib/${HOST_MULTIARCH:?}" \
-	&& luarocks install --tree=system --only-deps ./*.rockspec ${LIBDIRS:?}
+RUN set -x -- --tree=system --no-doc \
+	&& luarocks install "${@}" basexx 0.4.1-1 \
+	&& luarocks install "${@}" binaryheap 0.4-1 \
+	&& luarocks install "${@}" bit32 5.3.5.1-1 \
+	&& luarocks install "${@}" compat53 0.14.4-1 \
+	&& luarocks install "${@}" cqueues 20200726.51-0 \
+	&& luarocks install "${@}" fifo 0.2-0 \
+	&& luarocks install "${@}" http 0.4-0 \
+	&& luarocks install "${@}" lpeg 1.1.0-2 \
+	&& luarocks install "${@}" lpeg_patterns 0.5-0 \
+	&& luarocks install "${@}" lua-lru 1.0-1 \
+	&& luarocks install "${@}" luafilesystem 1.8.0-1 \
+	&& luarocks install "${@}" luaossl 20220711-0 \
+	&& luarocks install "${@}" mmdblua 0.2-0 \
+	&& luarocks install "${@}" psl 0.3-0
 
 # Build Knot Resolver
 ARG KNOT_RESOLVER_TREEISH=v5.7.4
