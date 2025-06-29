@@ -128,7 +128,7 @@ RUN set -x -- --tree=system --no-doc \
 	&& luarocks install "${@}" psl 0.3-0
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_TREEISH=v5.7.4
+ARG KNOT_RESOLVER_TREEISH=v5.7.5
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.nic.cz/knot/knot-resolver.git
 RUN mkdir /tmp/knot-resolver/
 WORKDIR /tmp/knot-resolver/
@@ -153,7 +153,7 @@ RUN meson ./build/ \
 RUN ninja -C ./build/
 RUN ninja -C ./build/ install
 RUN TESTS=$(meson test -C ./build/ --suite unit --suite config --no-suite snowflake --list 2>/dev/null \
-		| awk '{print($3)}' | grep -vE '^config\.(http|ta_bootstrap)$' \
+		| awk '{print($3)}' | grep -vE '^config\.ta_bootstrap$' \
 	) \
 	&& meson test -C ./build/ -t 8 --print-errorlogs ${TESTS:?}
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
