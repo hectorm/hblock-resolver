@@ -7,11 +7,11 @@ deleteDatasources:
 datasources:
   - name: "prometheus"
     type: "prometheus"
-    access: "proxy"
     orgId: 1
-    url: "http://prometheus:9090/prometheus/"
     isDefault: true
+    editable: false
+    access: "proxy"
+    url: "http://prometheus:9090/prometheus/"
     jsonData:
       timeInterval: "15s"
       queryTimeout: "15s"
-    editable: false

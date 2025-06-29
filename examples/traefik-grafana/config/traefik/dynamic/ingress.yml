@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://json.schemastore.org/traefik-v2-file-provider.json
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3-file-provider.json
 tls:
   options:
     default:
@@ -54,21 +54,6 @@ http:
         stsPreload: true
         referrerPolicy: "strict-origin"
         contentTypeNosniff: true
-        contentSecurityPolicy: >-
-          default-src 'self';
-          script-src 'self' 'unsafe-inline' 'unsafe-eval';
-          style-src 'self' 'unsafe-inline';
-          img-src 'self' blob: data: https://grafana.com;
-        permissionsPolicy: >-
-          accelerometer=(),
-          camera=(),
-          geolocation=(),
-          gyroscope=(),
-          magnetometer=(),
-          microphone=(),
-          midi=(),
-          payment=(),
-          usb=()
         customResponseHeaders:
           Server: ""
           X-Powered-By: ""

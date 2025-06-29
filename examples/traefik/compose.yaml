@@ -2,7 +2,7 @@
 name: "hblock-resolver"
 
 # https://hub.docker.com/_/traefik
-x-traefik-image: &traefik-image "docker.io/traefik:3.1"
+x-traefik-image: &traefik-image "docker.io/traefik:3.4"
 # https://hub.docker.com/r/hectorm/hblock-resolver
 x-hblock-resolver-image: &hblock-resolver-image "docker.io/hectorm/hblock-resolver:latest"
 
@@ -20,13 +20,13 @@ services:
       - "443:443/udp" # HTTPS (QUIC).
       - "853:853/tcp" # DNS over TLS.
     volumes:
-      - "./config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
-      - "./config/traefik/dynamic/:/etc/traefik/dynamic/:ro"
-      - "traefik-acme:/etc/traefik/acme/"
+      - { type: "bind", source: "./config/traefik/traefik.yml", target: "/etc/traefik/traefik.yml", read_only: true }
+      - { type: "bind", source: "./config/traefik/dynamic/", target: "/etc/traefik/dynamic/", read_only: true }
+      - { type: "volume", source: "traefik-acme", target: "/etc/traefik/acme/" }
     environment:
+      DOMAIN: "${DOMAIN:?}"
       TRAEFIK_BASIC_AUTH: "${TRAEFIK_BASIC_AUTH:-}"
       TRAEFIK_TLS_RESOLVER: "${TRAEFIK_TLS_RESOLVER:-}"
-      DOMAIN: "${DOMAIN:?}"
     healthcheck:
       test: ["CMD", "traefik", "healthcheck"]
       start_period: "120s"
@@ -45,7 +45,7 @@ services:
       - "127.0.0.153:53:53/udp" # DNS over UDP.
       - "127.0.0.153:53:53/tcp" # DNS over TCP.
     volumes:
-      - "hblock-resolver-data:/var/lib/knot-resolver/"
+      - { type: "volume", source: "hblock-resolver-data", target: "/var/lib/knot-resolver/" }
     environment:
       KRESD_INSTANCE_NUMBER: "${KRESD_INSTANCE_NUMBER:-4}"
 

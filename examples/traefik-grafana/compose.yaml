@@ -2,13 +2,13 @@
 name: "hblock-resolver"
 
 # https://hub.docker.com/_/traefik
-x-traefik-image: &traefik-image "docker.io/traefik:3.1"
+x-traefik-image: &traefik-image "docker.io/traefik:3.4"
 # https://hub.docker.com/r/hectorm/hblock-resolver
 x-hblock-resolver-image: &hblock-resolver-image "docker.io/hectorm/hblock-resolver:latest"
 # https://hub.docker.com/r/grafana/grafana
-x-grafana-image: &grafana-image "docker.io/grafana/grafana:11.0.1"
+x-grafana-image: &grafana-image "docker.io/grafana/grafana:12.0.2"
 # https://hub.docker.com/r/prom/prometheus
-x-prometheus-image: &prometheus-image "docker.io/prom/prometheus:v2.53.1"
+x-prometheus-image: &prometheus-image "docker.io/prom/prometheus:v3.4.2"
 
 services:
 
@@ -24,13 +24,13 @@ services:
       - "443:443/udp" # HTTPS (QUIC).
       - "853:853/tcp" # DNS over TLS.
     volumes:
-      - "./config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
-      - "./config/traefik/dynamic/:/etc/traefik/dynamic/:ro"
-      - "traefik-acme:/etc/traefik/acme/"
+      - { type: "bind", source: "./config/traefik/traefik.yml", target: "/etc/traefik/traefik.yml", read_only: true }
+      - { type: "bind", source: "./config/traefik/dynamic/", target: "/etc/traefik/dynamic/", read_only: true }
+      - { type: "volume", source: "traefik-acme", target: "/etc/traefik/acme/" }
     environment:
+      DOMAIN: "${DOMAIN:?}"
       TRAEFIK_BASIC_AUTH: "${TRAEFIK_BASIC_AUTH:-}"
       TRAEFIK_TLS_RESOLVER: "${TRAEFIK_TLS_RESOLVER:-}"
-      DOMAIN: "${DOMAIN:?}"
     healthcheck:
       test: ["CMD", "traefik", "healthcheck"]
       start_period: "120s"
@@ -49,7 +49,7 @@ services:
       - "127.0.0.153:53:53/udp" # DNS over UDP.
       - "127.0.0.153:53:53/tcp" # DNS over TCP.
     volumes:
-      - "hblock-resolver-data:/var/lib/knot-resolver/"
+      - { type: "volume", source: "hblock-resolver-data", target: "/var/lib/knot-resolver/" }
     environment:
       KRESD_INSTANCE_NUMBER: "${KRESD_INSTANCE_NUMBER:-4}"
 
@@ -60,8 +60,8 @@ services:
     networks:
       - "hblock-resolver"
     volumes:
-      - "./config/grafana/provisioning/:/etc/grafana/provisioning/:ro"
-      - "grafana-data:/var/lib/grafana/"
+      - { type: "bind", source: "./config/grafana/provisioning/", target: "/etc/grafana/provisioning/", read_only: true }
+      - { type: "volume", source: "grafana-data", target: "/var/lib/grafana/" }
     environment:
       GF_SERVER_ROOT_URL: "https://${DOMAIN:?}/grafana/"
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
@@ -73,8 +73,18 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_USERS_ALLOW_ORG_CREATE: "false"
       GF_AUTH_BASIC_ENABLED: "false"
+      GF_PLUGINS_PLUGIN_ADMIN_ENABLED: "false"
+      GF_PLUGINS_PREINSTALL: ""
+      GF_PLUGINS_DISABLE_PLUGINS: >-
+        grafana-lokiexplore-app,
+        grafana-pyroscope-app,
+        grafana-exploretraces-app,
+        grafana-metricsdrilldown-app
+      GF_ANALYTICS_ENABLED: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_ANALYTICS_FEEDBACK_LINKS_ENABLED: "false"
     healthcheck:
       test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:3000/api/health"]
       start_period: "120s"
@@ -90,8 +100,8 @@ services:
     networks:
       - "hblock-resolver"
     volumes:
-      - "./config/prometheus/:/etc/prometheus/:ro"
-      - "prometheus-data:/prometheus/"
+      - { type: "bind", source: "./config/prometheus/", target: "/etc/prometheus/", read_only: true }
+      - { type: "volume", source: "prometheus-data", target: "/prometheus/" }
     command:
       - "--web.external-url=https://${DOMAIN:?}/prometheus/"
       - "--web.route-prefix=/prometheus/"

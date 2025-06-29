@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://json.schemastore.org/traefik-v2.json
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
 global:
   checkNewVersion: false
   sendAnonymousUsage: false
@@ -13,6 +13,7 @@ entryPoints:
 providers:
   file:
     directory: "/etc/traefik/dynamic/"
+    watch: false
 certificatesResolvers:
   acme-staging-http-01:
     acme:
@@ -45,3 +46,4 @@ certificatesResolvers:
       caServer: "https://acme-v02.api.letsencrypt.org/directory"
       dnsChallenge: { provider: "cloudflare" }
 ping: { }
+accessLog: { }
