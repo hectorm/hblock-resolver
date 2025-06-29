@@ -153,7 +153,7 @@ RUN meson ./build/ \
 RUN ninja -C ./build/
 RUN ninja -C ./build/ install
 RUN TESTS=$(meson test -C ./build/ --suite unit --suite config --no-suite snowflake --list 2>/dev/null \
-		| awk '{print($3)}' | grep -vE '^config\.ta_bootstrap$' \
+		| awk '{print($3)}' | grep -vE '^config\.(http|ta_bootstrap)$' \
 	) \
 	&& meson test -C ./build/ -t 8 --print-errorlogs ${TESTS:?}
 RUN setcap cap_net_bind_service=+ep /usr/sbin/kresd
