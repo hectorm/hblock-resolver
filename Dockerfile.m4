@@ -128,7 +128,7 @@ RUN set -x -- --tree=system --no-doc \
 	&& luarocks install "${@}" psl 0.3-0
 
 # Build Knot Resolver
-ARG KNOT_RESOLVER_TREEISH=v5.7.5
+ARG KNOT_RESOLVER_TREEISH=v5.7.6
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.nic.cz/knot/knot-resolver.git
 RUN mkdir /tmp/knot-resolver/
 WORKDIR /tmp/knot-resolver/
