@@ -49,7 +49,7 @@ if [ "${KRESD_DOH_ENABLED:?}" = 'true' ] && [ "$(kdig @127.0.0.1 -p 443 +https +
 fi
 
 # HTTP server must return "OK"
-if [ "$(curl -kfs https://localhost:8453/health)" != 'OK' ]; then
+if [ "${KRESD_WEB_ENABLED:?}" = 'true' ] && [ "$(curl -kfs https://localhost:8453/health)" != 'OK' ]; then
 	>&2 printf '%s\n' 'HTTP server returned an unexpected result'
 	exit 1
 fi
