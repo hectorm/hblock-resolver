@@ -116,7 +116,7 @@ RUN set -x -- --tree=system --no-doc \
 	&& luarocks install "${@}" binaryheap 0.4-1 \
 	&& luarocks install "${@}" bit32 5.3.5.1-1 \
 	&& luarocks install "${@}" compat53 0.15.1-1 \
-	&& luarocks install "${@}" cqueues 20200726.51-0 \
+	&& luarocks install "${@}" cqueues 20261006.51-0 \
 	&& luarocks install "${@}" fifo 0.2-0 \
 	&& luarocks install "${@}" http 0.4-0 \
 	&& luarocks install "${@}" lpeg 1.1.0-2 \
