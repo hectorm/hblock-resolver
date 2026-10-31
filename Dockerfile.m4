@@ -272,6 +272,7 @@ COPY --chown=root:root --chmod=a+rX,u+w,go-w ./config/hblock/ /etc/hblock/
 COPY --chown=root:root --chmod=0755 ./scripts/bin/ /usr/local/bin/
 
 # Copy services
+RUN mkdir -m 0775 /service/
 COPY --chown=root:root --chmod=0775 ./scripts/service/ /service/
 
 # Drop root privileges
