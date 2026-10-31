@@ -1,3 +1,5 @@
+# syntax=docker.io/docker/dockerfile:1
+
 m4_changequote([[, ]])
 
 ##################################################
@@ -51,10 +53,8 @@ ARG KNOT_DNS_TREEISH=v3.6.2
 ARG KNOT_DNS_REMOTE=https://gitlab.nic.cz/knot/knot-dns.git
 RUN mkdir /tmp/knot-dns/
 WORKDIR /tmp/knot-dns/
-RUN git clone "${KNOT_DNS_REMOTE:?}" ./
-RUN git checkout "${KNOT_DNS_TREEISH:?}"
-RUN git submodule update --init --recursive
-RUN ./autogen.sh
+RUN git clone --depth 1 --revision="${KNOT_DNS_TREEISH:?}" --recurse-submodules --shallow-submodules "${KNOT_DNS_REMOTE:?}" ./
+RUN KNOT_VERSION_FORMAT=release ./autogen.sh
 RUN ./configure \
 		--prefix=/usr \
 		--enable-utilities \
@@ -76,9 +76,7 @@ ARG LUAJIT_TREEISH=ea9eb7edb5eac4a9d175d74523db34fac0fa5180
 ARG LUAJIT_REMOTE=https://github.com/LuaJIT/LuaJIT.git
 RUN mkdir /tmp/luajit/
 WORKDIR /tmp/luajit/
-RUN git clone "${LUAJIT_REMOTE:?}" ./
-RUN git checkout "${LUAJIT_TREEISH:?}"
-RUN git submodule update --init --recursive
+RUN git clone --depth 1 --revision="${LUAJIT_TREEISH:?}" --recurse-submodules --shallow-submodules "${LUAJIT_REMOTE:?}" ./
 RUN [ "$(getconf LONG_BIT)" != 32 ] || XCFLAGS='-DLUAJIT_USE_SYSMALLOC'; \
 	make -j"$(nproc)" amalg XCFLAGS="${XCFLAGS-}"
 RUN make install PREFIX=/usr
@@ -90,9 +88,7 @@ ARG LUAROCKS_TREEISH=v3.13.0
 ARG LUAROCKS_REMOTE=https://github.com/luarocks/luarocks.git
 RUN mkdir /tmp/luarocks/
 WORKDIR /tmp/luarocks/
-RUN git clone "${LUAROCKS_REMOTE:?}" ./
-RUN git checkout "${LUAROCKS_TREEISH:?}"
-RUN git submodule update --init --recursive
+RUN git clone --depth 1 --revision="${LUAROCKS_TREEISH:?}" --recurse-submodules --shallow-submodules "${LUAROCKS_REMOTE:?}" ./
 RUN ./configure \
 		--prefix=/usr \
 		--sysconfdir=/etc \
@@ -132,9 +128,7 @@ ARG KNOT_RESOLVER_TREEISH=v5.7.9
 ARG KNOT_RESOLVER_REMOTE=https://gitlab.nic.cz/knot/knot-resolver.git
 RUN mkdir /tmp/knot-resolver/
 WORKDIR /tmp/knot-resolver/
-RUN git clone "${KNOT_RESOLVER_REMOTE:?}" ./
-RUN git checkout "${KNOT_RESOLVER_TREEISH:?}"
-RUN git submodule update --init --recursive
+RUN git clone --depth 1 --revision="${KNOT_RESOLVER_TREEISH:?}" --recurse-submodules --shallow-submodules "${KNOT_RESOLVER_REMOTE:?}" ./
 RUN meson ./build/ \
 		--prefix=/usr \
 		--libdir=/usr/lib \
@@ -166,9 +160,7 @@ ARG HBLOCK_TREEISH=v3.5.2
 ARG HBLOCK_REMOTE=https://github.com/hectorm/hblock.git
 RUN mkdir /tmp/hblock/
 WORKDIR /tmp/hblock/
-RUN git clone "${HBLOCK_REMOTE:?}" ./
-RUN git checkout "${HBLOCK_TREEISH:?}"
-RUN git submodule update --init --recursive
+RUN git clone --depth 1 --revision="${HBLOCK_TREEISH:?}" --recurse-submodules --shallow-submodules "${HBLOCK_REMOTE:?}" ./
 RUN make install prefix=/usr
 RUN /usr/bin/hblock --version
 
@@ -271,24 +263,16 @@ RUN chown knot-resolver:root "${KRESD_DATA_DIR:?}" "${KRESD_CACHE_DIR:?}"
 RUN chmod 0775 "${KRESD_DATA_DIR:?}" "${KRESD_CACHE_DIR:?}"
 
 # Copy kresd config
-COPY --chown=root:root ./config/knot-resolver/ /etc/knot-resolver/
-RUN find /etc/knot-resolver/ -type d -not -perm 0755 -exec chmod 0755 '{}' ';'
-RUN find /etc/knot-resolver/ -type f -not -perm 0644 -exec chmod 0644 '{}' ';'
+COPY --chown=root:root --chmod=a+rX,u+w,go-w ./config/knot-resolver/ /etc/knot-resolver/
 
 # Copy hBlock config
-COPY --chown=root:root ./config/hblock/ /etc/hblock/
-RUN find /etc/hblock/ -type d -not -perm 0755 -exec chmod 0755 '{}' ';'
-RUN find /etc/hblock/ -type f -not -perm 0644 -exec chmod 0644 '{}' ';'
+COPY --chown=root:root --chmod=a+rX,u+w,go-w ./config/hblock/ /etc/hblock/
 
 # Copy scripts
-COPY --chown=root:root ./scripts/bin/ /usr/local/bin/
-RUN find /usr/local/bin/ -type d -not -perm 0755 -exec chmod 0755 '{}' ';'
-RUN find /usr/local/bin/ -type f -not -perm 0755 -exec chmod 0755 '{}' ';'
+COPY --chown=root:root --chmod=0755 ./scripts/bin/ /usr/local/bin/
 
 # Copy services
-COPY --chown=root:root ./scripts/service/ /service/
-RUN find /service/ -type d -not -perm 0775 -exec chmod 0775 '{}' ';'
-RUN find /service/ -type f -not -perm 0775 -exec chmod 0775 '{}' ';'
+COPY --chown=root:root --chmod=0775 ./scripts/service/ /service/
 
 # Drop root privileges
 USER knot-resolver:root
