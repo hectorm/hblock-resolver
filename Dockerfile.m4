@@ -122,7 +122,7 @@ RUN set -x -- --tree=system --no-doc \
 	&& luarocks install "${@}" lpeg 1.1.0-2 \
 	&& luarocks install "${@}" lpeg_patterns 0.5-0 \
 	&& luarocks install "${@}" lua-lru 1.0-1 \
-	&& luarocks install "${@}" luafilesystem 1.8.0-1 \
+	&& luarocks install "${@}" luafilesystem 1.9.0-1 \
 	&& luarocks install "${@}" luaossl 20220711-0 \
 	&& luarocks install "${@}" mmdblua 0.2-0 \
 	&& luarocks install "${@}" psl 0.3-0
