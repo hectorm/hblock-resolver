@@ -2,13 +2,13 @@
 name: "hblock-resolver"
 
 # https://hub.docker.com/_/traefik
-x-traefik-image: &traefik-image "docker.io/traefik:3.4"
+x-traefik-image: &traefik-image "docker.io/traefik:3.7"
 # https://hub.docker.com/r/hectorm/hblock-resolver
 x-hblock-resolver-image: &hblock-resolver-image "docker.io/hectorm/hblock-resolver:latest"
 # https://hub.docker.com/r/grafana/grafana
-x-grafana-image: &grafana-image "docker.io/grafana/grafana:12.0.2"
+x-grafana-image: &grafana-image "docker.io/grafana/grafana:13.3.0"
 # https://hub.docker.com/r/prom/prometheus
-x-prometheus-image: &prometheus-image "docker.io/prom/prometheus:v3.4.2"
+x-prometheus-image: &prometheus-image "docker.io/prom/prometheus:v3.15.1"
 
 services:
 
