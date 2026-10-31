@@ -47,7 +47,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Build Knot DNS (only libknot and utilities)
-ARG KNOT_DNS_TREEISH=v3.4.8
+ARG KNOT_DNS_TREEISH=v3.6.2
 ARG KNOT_DNS_REMOTE=https://gitlab.nic.cz/knot/knot-dns.git
 RUN mkdir /tmp/knot-dns/
 WORKDIR /tmp/knot-dns/
@@ -250,7 +250,6 @@ COPY --from=build --chown=root:root /usr/local/lib/lua/ /usr/local/lib/lua/
 COPY --from=build --chown=root:root /usr/local/share/lua/ /usr/local/share/lua/
 
 # Copy Knot DNS build
-COPY --from=build --chown=root:root /usr/lib/libdnssec.* /usr/lib/
 COPY --from=build --chown=root:root /usr/lib/libknot.* /usr/lib/
 COPY --from=build --chown=root:root /usr/lib/libzscanner.* /usr/lib/
 COPY --from=build --chown=root:root /usr/bin/kdig /usr/bin/kdig
